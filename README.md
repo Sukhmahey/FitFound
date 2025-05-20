@@ -43,5 +43,66 @@ FitFound/
 cd frontend
 npm install
 npm run dev  # or npm start if using Create React App
+```
 
+### Frontend Setup
+
+```bash
+cd backend
+npm install
+node index.js
+```
+
+> ⚠️ **Create a `.env` file** in the `backend/` folder with the following:
+
+
+MONGO_URI=your_mongo_db_connection_string  
+PORT=5000
+
+
+---
+
+## 🛠 Team Setup & Contribution Workflow
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/FitFound.git
+cd FitFound
+```
+
+2. Install All Dependencies
+```bash
+cd frontend && npm install  
+cd ../backend && npm install
+```
+
+4. Create a Branch Before You Work
+```bash
+git checkout -b your-name/feature-name
+```
+Example: git checkout -b vipul/login-page  
+
+Always create a branch before making changes  
+Never commit directly to main
+
+6. Commit & Push Your Changes
+
+```bash
+git add .  
+git commit -m "Add: login functionality"  
+git push origin your-name/feature-name
+```
+
+8. Open a Pull Request
+- Go to the GitHub repo  
+- Click “Compare & Pull Request”  
+- Assign reviewers if needed
+
+6. Stay Up to Date  
+Before starting new work, always pull the latest changes:
+```bash 
+git checkout main  
+git pull origin main
+```
 
