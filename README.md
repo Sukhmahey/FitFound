@@ -42,7 +42,7 @@ FitFound/
 ```bash
 cd frontend
 npm install
-npm run dev  # or npm start if using Create React App
+npm start
 ```
 
 ### Frontend Setup
