@@ -10,7 +10,7 @@ const dbURI = `mongodb+srv://${bdUser}:${bdPass}@fitfound-cluster.xsmcnc8.mongod
 mongoose.connect(dbURI);
 
 mongoose.connection.on('connected', () => {
-    console.log(`Mongoose connected to ${dbURI}`); 
+    console.log('Mongoose connection successfull'); 
 });
 
 mongoose.connection.on('error', err => {
