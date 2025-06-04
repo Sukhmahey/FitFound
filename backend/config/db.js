@@ -5,7 +5,7 @@ mongoose.set('strictQuery', true);
 const bdUser = process.env.MONGO_DB_USER;
 const bdPass = process.env.MONGO_DB_PASS;
 
-const dbURI = `mongodb+srv://${bdUser}:${bdPass}@fitfound-cluster.xsmcnc8.mongodb.net/?retryWrites=true&w=majority&appName=FitFound-Cluster`;
+const dbURI = `mongodb+srv://${bdUser}:${bdPass}@fitfound-cluster.xsmcnc8.mongodb.net/fit_found?retryWrites=true&w=majority&appName=FitFound-Cluster`;
 
 mongoose.connect(dbURI);
 
