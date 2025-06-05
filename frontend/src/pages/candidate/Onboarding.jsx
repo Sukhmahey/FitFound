@@ -3,6 +3,7 @@ import { useState } from 'react';
 import PersonalInfoStep from './onboardingSteps/PersonalInfoStep';
 import EducationSkillsStep from './onboardingSteps/EducationSkillsStep';
 import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
+import '../../styles/onboarding_candidate.css';
 
 export default function CandidateOnboarding() {
 
@@ -66,12 +67,15 @@ export default function CandidateOnboarding() {
 
 
     return (
-        <div>
-            <div>Onboarding ({stepIndex+1}/3)</div>
-            {renderStep()}
-            <div>
-                {stepIndex>0 && <button onClick={handlePrevBtn}>Back</button>}
-                <button onClick={handleNextBtn}>{stepIndex===2?'Finish':'Next'}</button>
+        <div className='onboarding-container'>
+            <div className="step-indicator">Onboarding ({stepIndex+1}/3)</div>
+            <div className="form-section">
+                {renderStep()}
+            </div>
+            
+            <div className="step-buttons">
+                {stepIndex>0 && <button className="back-button" onClick={handlePrevBtn}>Back</button>}
+                <button className="next-button" onClick={handleNextBtn}>{stepIndex===2?'Finish':'Next'}</button>
             </div>
 
             
