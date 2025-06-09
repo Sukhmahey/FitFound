@@ -3,7 +3,9 @@ import { useState } from 'react';
 import PersonalInfoStep from './onboardingSteps/PersonalInfoStep';
 import EducationSkillsStep from './onboardingSteps/EducationSkillsStep';
 import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
-import '../../styles/onboarding_candidate.css';
+import ProfileSetupOption from './onboardingSteps/ProfileSetupOption';
+import ResumeParsing from './onboardingSteps/ResumeParsing';
+
 
 export default function CandidateOnboarding() {
 
@@ -14,6 +16,17 @@ export default function CandidateOnboarding() {
         educationSkills: {}
     });
 
+    const handleManual = () => {
+    console.log("Manual form selected");
+    setStepIndex(1);
+    
+  };
+
+  const handleUpload = () => {
+    console.log("Resume upload selected");
+    setStepIndex(4);
+   
+  };
     const handleNextBtn = () => {
         if (stepIndex === 0) {
             setStepIndex(1);
@@ -53,20 +66,33 @@ export default function CandidateOnboarding() {
     };
     const renderStep = () => {
     switch (stepIndex) {
-      case 0:
-        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
-      case 1:
-        return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
-      case 2:
-        return <EducationSkillsStep data={formData.educationSkills} onUpdate={(data) => updateFormData('educationSkills', data)} />;
-      default:
-        return null;
+
+        case 0:
+            return <ProfileSetupOption onManualClick={handleManual} onUploadClick={handleUpload} />;
+        case 1:
+            return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
+        case 2:
+            return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
+        case 3:
+            return <EducationSkillsStep data={formData.educationSkills} onUpdate={(data) => updateFormData('educationSkills', data)} />;
+        case 4:
+            return<ResumeParsing setStep={setStepIndex}></ResumeParsing>
+        default:
+            return null;
     }
 };
 
 
 
     return (
+        <div>
+            <div>Onboarding ({stepIndex+1}/4)</div>
+            {renderStep()}
+            {stepIndex>0 && stepIndex!==4 &&<div>
+                {stepIndex>0 && <button onClick={handlePrevBtn}>Back</button>}
+                <button onClick={handleNextBtn}>{stepIndex===3?'Finish':'Next'}</button>
+            </div>}
+
         <div className='onboarding-container'>
             <div className="step-indicator">Onboarding ({stepIndex+1}/3)</div>
             <div className="form-section">
@@ -82,6 +108,7 @@ export default function CandidateOnboarding() {
 
 
         </div>
+              </div>
     )
 
 }
