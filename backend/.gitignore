@@ -1,0 +1,3 @@
+# Ingnore config files and Node modules
+.env
+node_modules/

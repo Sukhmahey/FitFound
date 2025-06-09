@@ -6,6 +6,7 @@ import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
 import ProfileSetupOption from './onboardingSteps/ProfileSetupOption';
 import ResumeParsing from './onboardingSteps/ResumeParsing';
 
+
 export default function CandidateOnboarding() {
 
     const [stepIndex, setStepIndex] = useState(0);
@@ -92,10 +93,22 @@ export default function CandidateOnboarding() {
                 <button onClick={handleNextBtn}>{stepIndex===3?'Finish':'Next'}</button>
             </div>}
 
+        <div className='onboarding-container'>
+            <div className="step-indicator">Onboarding ({stepIndex+1}/3)</div>
+            <div className="form-section">
+                {renderStep()}
+            </div>
+            
+            <div className="step-buttons">
+                {stepIndex>0 && <button className="back-button" onClick={handlePrevBtn}>Back</button>}
+                <button className="next-button" onClick={handleNextBtn}>{stepIndex===2?'Finish':'Next'}</button>
+            </div>
+
             
 
 
         </div>
+              </div>
     )
 
 }
