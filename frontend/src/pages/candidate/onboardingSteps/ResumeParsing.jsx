@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState } from 'react';
-const apiKey = process.env.OCR_API_KEY;
+
 
 function ResumeParsing({setStep}) {
 
