@@ -1,4 +1,13 @@
+import { signInWithEmailAndPassword, auth } from 'firebase/auth';
+
 const Login = () => {
+
+    const handleLogin = () => {
+    
+     
+    };
+
+
     return <div>
         <h1>Login</h1>
 
@@ -8,16 +17,17 @@ const Login = () => {
                 <button>Continue with Google</button>
             </div>
             <span>or Continue with Email</span>
-            <div>
-                <input type="email" name="" id="" placeholder="Email"/>
-                <input type="password" name="" id="" placeholder="Password"></input>
+            <form>
                 <div>
-                    <button>Login</button>
-                    <button>Sign in</button>
-                    <a href="">I forgot my password</a>              
+                    <input type="email" name="" id="" placeholder="Email"/>
+                    <input type="password" name="" id="" placeholder="Password"></input>
+                    <div>
+                        <button>Login</button>
+                        <button>Sign in</button>
+                        <a href="">I forgot my password</a>              
+                    </div>
                 </div>
-            </div>
-           
+            </form>
         </div>
     </div>
 };
