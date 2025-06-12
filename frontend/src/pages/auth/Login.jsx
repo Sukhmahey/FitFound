@@ -59,8 +59,23 @@ const Login = () => {
         })
         .then((res) => {
             console.log('User registered in Firestore', res.data);
+            const email = res.data.decodedidToken.email;
 
             //TODO: validate if the userId exists in MongoDB
+            axios.get('http://localhost:3001/api/user/byemail', { params: { email: `${email}`} })
+            .then( result => {
+                console.log(result);
+            })
+            .catch( error => {
+                if (error.status == 404) {
+                    console.error("User no found");
+
+                    //TODO: add user to MongoDB
+                }
+                else {
+                    console.error(error);
+                }
+            });
         })
         .catch((error) => {
             console.error(error);

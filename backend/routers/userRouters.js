@@ -6,6 +6,7 @@ const userController = require('../controllers/UserController');
 
 // POST: /user
 router.post("/", userController.saveUser);
+router.get("/byemail", userController.getUserByEmail);
 
 // Export the router
 module.exports = router; 
