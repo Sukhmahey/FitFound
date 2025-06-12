@@ -1,6 +1,8 @@
+import process from 'process';
 import React from 'react'
 import { useState } from 'react';
 
+const ResumeParserKey = process.env.ResumeParserKey
 
 function ResumeParsing({setStep}) {
 
@@ -22,7 +24,7 @@ function ResumeParsing({setStep}) {
     try {
       const res = await fetch('https://api.ocr.space/parse/image', {
         method: 'POST',
-        headers: { apikey: 'K82799203288957' },
+        headers: { apikey: ResumeParserKey },
         body: formData
       });
 
