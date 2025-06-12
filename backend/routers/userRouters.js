@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// import the controller, make sure it is exported
+// import the controller
 const userController = require('../controllers/UserController');
 
 // POST: /user

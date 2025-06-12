@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth } from '../../services/firebase';
 
 const Login = () => {
@@ -10,26 +10,36 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLoginSubmit = () => {
+    const handleLoginSubmit = (e) => {
+        e.preventDefault();
 
-        signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            return userCredential.user.getIdToken();
-        })
-        .then((idToken) => {
-            return axios.post('http://localhost:3001/api/login', {}, {
-                headers: {
-                    Authorization: `Bearer ${idToken}`,
-                },
+        setPersistence(auth, browserLocalPersistence)
+        .then( () => {
+            
+            signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                //console.log(userCredential);
+                return userCredential.user.getIdToken();
+            })
+            .then((idToken) => {
+                //console.log("this is the token", idToken)
+                
+                return axios.post('http://localhost:3001/api/login', { idToken })
+                .then( result => {
+                    //console.log(result);
+                    return result;
+                })
+                .catch( error => {
+                    console.log(error);
+                })
+            })
+            .then((response) => {
+                console.log('User logged in', response);
+            })
+            .catch((error) => {
+                console.error('Error in login', error.message);
             });
-        })
-        .then((response) => {
-            console.log('User logged in', response.data);
-        })
-        .catch((error) => {
-            console.error('Error in login', error.message);
         });
-
      
     };
 
@@ -47,13 +57,14 @@ const Login = () => {
                 <button>Continue with Google</button>
             </div>
             <span>or Continue with Email</span>
+
             <form onSubmit={ handleLoginSubmit }>
                 <div>
-                    <input type="email" name="" id="" placeholder="Email" required
+                    <input type="email" name="email" id="email" placeholder="Email" required
                         value={ email } 
                         onChange={(e) => setEmail(e.target.value)} />
 
-                    <input type="password" name="" id="" placeholder="Password" required
+                    <input type="password" name="password" id="password" placeholder="Password" required
                         value={ password }
                         onChange={(e) => setPassword(e.target.value)} />
                     <div>
