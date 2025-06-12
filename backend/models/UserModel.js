@@ -5,18 +5,23 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+/;
 const pohneRegex = /^\+1\s\(\d{3}\)\s\d{3}-\d{4}/; //format: +1 (601) 351-4587
 
 const UserSchema = new Schema( {
-    name: { type: String, required: true, minLength: 5, maxLength: 60 },
+    idFirebaseUser: {
+        type: String, // recording the Firebase user id
+        required: true
+    },
     email: {
         type: String,
         required: [true, 'User email is required'],
-        match: [emailRegex, 'Please provide a valid email address']
+        match: [emailRegex, 'Please provide a valid email address'],
+        unique: true
     },
+    name: { type: String, minLength: 5, maxLength: 60 },
     phone: {
         type: String,
         match: [pohneRegex, 'Please provide a valid phone number']
     },
     role: { 
-        type: String, required: true,
+        type: String,
         enum: ['candidate', 'employer']
     },
     isEligibleToWork:  { type: Boolean, default: false },

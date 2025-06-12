@@ -5,7 +5,7 @@ const router = express.Router();
 const userController = require('../controllers/UserController');
 
 // POST: /user
-router.post("/user", userController.saveUser);
+router.post("/", userController.saveUser);
 
 // Export the router
 module.exports = router; 
