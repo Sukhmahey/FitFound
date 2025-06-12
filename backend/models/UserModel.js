@@ -7,7 +7,8 @@ const pohneRegex = /^\+1\s\(\d{3}\)\s\d{3}-\d{4}/; //format: +1 (601) 351-4587
 const UserSchema = new Schema( {
     idFirebaseUser: {
         type: String, // recording the Firebase user id
-        required: true
+        required: true,
+        unique: true
     },
     email: {
         type: String,

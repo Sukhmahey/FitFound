@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { auth } from '../../services/firebase';
+import { auth, provider, signInWithPopup } from '../../services/firebase';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -10,16 +10,15 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLoginSubmit = (e) => {
+    const handleEmailLogin = (e) => {
         e.preventDefault();
 
         setPersistence(auth, browserLocalPersistence)
         .then( () => {
-            
             signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                //console.log(userCredential);
-                return userCredential.user.getIdToken();
+            .then((result) => {
+                //console.log(result);
+                return result.user.getIdToken();
             })
             .then((idToken) => {
                 //console.log("this is the token", idToken)
@@ -43,6 +42,31 @@ const Login = () => {
      
     };
 
+    const handleGoogleLogin = () => {
+        
+        signInWithPopup(auth, provider)
+        .then((result) => result.user.getIdToken())
+        .then((idToken) => {
+            //console.log("this is the token", idToken)
+            return axios.post('http://localhost:3001/api/login', { idToken })
+            .then( result => {
+                //console.log(result);
+                return result;
+            })
+            .catch( error => {
+                    console.log(error);
+            })
+        })
+        .then((res) => {
+            console.log('User registered in Firestore', res.data);
+
+            //TODO: validate if the userId exists in MongoDB
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    };
+
     const handleSignupClick = () => {
         navigate("/signup");
     };
@@ -54,11 +78,11 @@ const Login = () => {
         <div>
             <div>
                 <button>Continue with LinkedIn</button>
-                <button>Continue with Google</button>
+                <button onClick={ handleGoogleLogin }>Continue with Google</button>
             </div>
             <span>or Continue with Email</span>
 
-            <form onSubmit={ handleLoginSubmit }>
+            <form onSubmit={ handleEmailLogin }>
                 <div>
                     <input type="email" name="email" id="email" placeholder="Email" required
                         value={ email } 
