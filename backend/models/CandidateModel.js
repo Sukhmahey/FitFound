@@ -82,7 +82,22 @@ const CandidateSchema = new Schema( {
         achievements: [{ type: String, minLength: 6, maxLength: 60 }]
     }],
     education: [{
-
+        institution: { type: String, minLength: 6, maxLength: 60 },
+        educationLevel: {
+            type: String,
+            enum: ['High School Diploma', 'GED', 'Vocational Training', 'Associate Degree', 'Bachelors Degree', 'Postgraduate Certificate', 'Masters Degree', 'Professional Degree', 'Doctoral Degree', 'Continuing Education']
+        },
+        degreeObtained: { type: String, minLength: 6, maxLength: 60 },
+        country: { type: String, minLength: 2, maxLength: 60 },
+        graduationYear: { 
+            type: Number,
+            min: 0,
+            alidate: Number.isInteger
+        },
+        educationStatus: {
+            type: String,
+            enum: ['Completed', 'In Progress', 'Incomplete']
+        }
     }],
     createdAt: {
         type: Date,
