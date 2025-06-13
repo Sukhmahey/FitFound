@@ -111,7 +111,7 @@ const CandidateSchema = new Schema( {
 
 },  { collection: 'candidates' } );
 
-UserSchema.pre('save', function(next) {
+CandidateSchema.pre('save', function(next) {
   if (!this.isNew) {
     this.createdAt = this.createdAt;
   }
