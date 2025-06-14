@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState } from 'react';
 
+const ResumeParserKey = process.env.REACT_APP_ResumeParserKey;
 
 function ResumeParsing({setStep}) {
 
@@ -20,9 +21,10 @@ function ResumeParsing({setStep}) {
     formData.append('isOverlayRequired', 'false');
 
     try {
+      console.log("AppKey",ResumeParserKey)
       const res = await fetch('https://api.ocr.space/parse/image', {
         method: 'POST',
-        headers: { apikey: 'K82799203288957' },
+        headers: { apikey: ResumeParserKey },
         body: formData
       });
 
