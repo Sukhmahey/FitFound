@@ -1,3 +1,4 @@
 # Ingnore config files and Node modules
 .env
 node_modules/
+config/fit-found-5448f95255d7.json
