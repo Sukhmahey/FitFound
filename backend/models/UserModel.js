@@ -23,7 +23,8 @@ const UserSchema = new Schema( {
     },
     role: { 
         type: String,
-        enum: ['candidate', 'employer']
+        enum: ['candidate', 'employer'],
+        required: [true, 'User role is required'],
     },
     isEligibleToWork:  { type: Boolean, default: false },
     personalSummary: { type: String, minLength: 50, maxLength: 600 },

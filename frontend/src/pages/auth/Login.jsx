@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth, provider, signInWithPopup } from '../../services/firebase';
+import { userApi, loginApi } from '../../services/api';
 
 const Login = () => {
     const navigate = useNavigate();
-
+    const [role, setRole] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [user, setUser] = useState({});
+    const [responseMessage, setResponseMessage] = useState('');
 
     const handleEmailLogin = (e) => {
         e.preventDefault();
@@ -23,17 +26,31 @@ const Login = () => {
             .then((idToken) => {
                 //console.log("this is the token", idToken)
                 
-                return axios.post('http://localhost:3001/api/login', { idToken })
-                .then( result => {
-                    //console.log(result);
-                    return result;
+                // Login the user in Firestore
+                loginApi.loginUser({ idToken })
+                .then( res  => {
+                    console.log('User authenticated in Firestore', res);
+
+                    // Validate if the userId exists in MongoDB
+                    return userApi.getUserByEmail( { email: res.data.decodedidToken.email } )
+                    .then( result => {
+                        console.log(result);
+
+                        if (result.data.userId) {
+                            setUser(result.data);
+                            setResponseMessage('User loged in successful');
+                            console.log('User loged in successful');
+                        }
+                        else {
+                           setUser({});
+                           setResponseMessage('User login failed');
+                        }
+
+                    })
                 })
                 .catch( error => {
                     console.log(error);
                 })
-            })
-            .then((response) => {
-                console.log('User logged in', response);
             })
             .catch((error) => {
                 console.error('Error in login', error.message);
@@ -45,36 +62,41 @@ const Login = () => {
     const handleGoogleLogin = () => {
         
         signInWithPopup(auth, provider)
-        .then((result) => result.user.getIdToken())
-        .then((idToken) => {
-            //console.log("this is the token", idToken)
-            return axios.post('http://localhost:3001/api/login', { idToken })
-            .then( result => {
-                //console.log(result);
-                return result;
-            })
-            .catch( error => {
-                    console.log(error);
-            })
+        .then( result => result.user.getIdToken())
+        .then( idToken => {
+            return loginApi.loginUser({ idToken });
         })
         .then((res) => {
-            console.log('User registered in Firestore', res.data);
-            const email = res.data.decodedidToken.email;
+            console.log('User ok in Firestore', res.data);
 
-            //TODO: validate if the userId exists in MongoDB
-            axios.get('http://localhost:3001/api/user/byemail', { params: { email: `${email}`} })
+            // Validate if the userId exists in MongoDB
+            userApi.getUserByEmail( { email: res.data.decodedidToken.email } )
             .then( result => {
-                console.log(result);
-            })
-            .catch( error => {
-                if (error.status == 404) {
-                    console.error("User no found");
+                if (!result.data.userId) {
 
-                    //TODO: add user to MongoDB
+                    const newUser = {
+                        role: role,
+                        email: res.data.decodedidToken.email,
+                        idFirebaseUser: res.data.decodedidToken.uid
+                    };
+
+                    // Create the user in MongoDB
+                    userApi.addUser( newUser )
+                    .then( resultNewUser => {
+                        setUser(resultNewUser.data); // TODO: send the user role
+                        setResponseMessage('User registered successful');
+                        console.log('User registered successful', resultNewUser.data);
+                    });
                 }
                 else {
-                    console.error(error);
+                    setUser(result.data);
+                    setResponseMessage('User loged in successful');
+                    console.log('User loged in successful', result.data);
                 }
+
+            })
+            .catch( error => {
+                console.error(error);
             });
         })
         .catch((error) => {
@@ -91,6 +113,14 @@ const Login = () => {
         <h1>Login</h1>
 
         <div>
+            <label>
+                    Role:
+                    <select value={ role } onChange={ (e) => setRole(e.target.value) } required>
+                        <option value="" disabled>Select one</option>
+                        <option value="candidate">Candidate</option>
+                        <option value="employer">Employer</option>
+                    </select>
+                    </label>
             <div>
                 <button>Continue with LinkedIn</button>
                 <button onClick={ handleGoogleLogin }>Continue with Google</button>
@@ -121,9 +151,6 @@ export default Login;
 
 /*
 TODO: 
-
-2. Google implementation
-3. check data in BD
-4. Redirect to the user page
+1. Redirect to the fill profile page
 
 */

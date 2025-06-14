@@ -4,8 +4,8 @@ const saveUser = (req, res) => {
     let newUser = new User(req.body);
     
     newUser.save()
-    .then(results => {
-        res.status(201).json(results);
+    .then( user => {
+        res.status(201).json({ userId: user._id, email: user.email, role: user.role });
     })
     .catch(error => {
         res.status(500).json(error);
@@ -18,9 +18,9 @@ const getUserByEmail = (req, res) => {
     User.findOne({ email })
     .then( user => {
         if (!user) {
-            return res.status(404).json({ message: 'User no found' });
+            return res.status(200).json({ userId: null, message: 'User no found' });
         }
-        res.status(200).json(user);
+        res.status(200).json({ userId: user._id, email: user.email, role: user.role });
     })
     .catch(error => {
         res.status(500).json(error);
