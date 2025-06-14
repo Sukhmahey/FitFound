@@ -99,11 +99,11 @@ const Login = () => {
 
             <form onSubmit={ handleEmailLogin }>
                 <div>
-                    <input type="email" name="email" id="email" placeholder="Email" required
+                    <input type="email" name="email" id="email" placeholder="Email" required autoComplete="email"
                         value={ email } 
                         onChange={(e) => setEmail(e.target.value)} />
 
-                    <input type="password" name="password" id="password" placeholder="Password" required
+                    <input type="password" name="password" id="password" placeholder="Password" required autoComplete="current-password"
                         value={ password }
                         onChange={(e) => setPassword(e.target.value)} />
                     <div>

@@ -10,7 +10,8 @@ const Signup = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const navigate = useNavigate();
     
-    const handleSignUpClick = () => {
+    const handleSignUpClick = (e) => {
+        e.preventDefault();
         createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
@@ -33,23 +34,25 @@ const Signup = () => {
         <h1>Sign in</h1>
 
         <div>
-            <div>
-                <input type="email" name="" id="" placeholder="Email" 
-                    value={ email } 
-                    onChange={(e) => setEmail(e.target.value)} />
+            <form onSubmit={ handleSignUpClick }>
+                <div>
+                    <input type="email" name="email" id="email" placeholder="Email" autoComplete="email"
+                        value={ email } 
+                        onChange={(e) => setEmail(e.target.value)} />
 
-                <input type="password" name="" id="" placeholder="Password" 
-                    value={ password }
-                    onChange={(e) => setPassword(e.target.value)} />
+                    <input type="password" name="password" id="password" placeholder="Password" autoComplete="current-password"
+                        value={ password }
+                        onChange={(e) => setPassword(e.target.value)} />
 
-                <input type="password" name="" id="" placeholder="Confirm password" 
-                    value={ confirmPassword }
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-            </div>
-            <div>
-                <button onClick={ handleSignUpClick }>Sign up</button>
-            </div>
+                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm password" autoComplete="current-password"
+                        value={ confirmPassword }
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+
+                    <input type="submit" value="Sign up" />
+                </div>
+            </form>
+            
         </div>
     </div>
 };
