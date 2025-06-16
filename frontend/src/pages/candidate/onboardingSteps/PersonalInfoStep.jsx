@@ -4,9 +4,9 @@ import { useState } from 'react';
 
 export default function PersonalInfoStep({ data, onUpdate }) {
 
-  const [prefWork, setPrefWork] = React.useState(data.prefWork);
-  const [workMode, setWorkMode] = useState("");
-    const [jobType, setJobType] = useState("");
+
+  const [workMode, setWorkMode] = useState(data.workMode || "");
+  const [jobType, setJobType] = useState(data.jobType || "");
 
 
   const handleChange = (e) => {
@@ -32,7 +32,7 @@ export default function PersonalInfoStep({ data, onUpdate }) {
           <label>Experience Level:</label>
           <input
             type="text"
-            name="ExperienceLevel"
+            name="experienceLevel"
             value={data.experienceLevel || ''}
             onChange={handleChange}
           />
@@ -41,55 +41,64 @@ export default function PersonalInfoStep({ data, onUpdate }) {
           <label>Years of Experience:</label>
           <input
             type="number"
-            name="YearsofExperience"
+            name="yearsOfExperience"
             value={data.yearsOfExperience || ''}
             onChange={handleChange}
           />
         </div>
-       <div>
-      <label>Job Type</label>
-      <label>
-        <input
-          type="radio"
-          name="jobType"
-          value="part-time"
-          checked={jobType === "part-time"}
-          onChange={(e) => setJobType(e.target.value)}
-        />
-        Part-time
-      </label>
+        <div>
+          <label>Job Type</label>
+          <label>
+            <input
+              type="radio"
+              name="jobType"
+              value="part-time"
+              checked={jobType === "part-time"}
+              onChange={(e) => {
+                setJobType(e.target.value);
+                onUpdate({ jobType: e.target.value });
+              }}
+            />
+            Part-time
+          </label>
 
-      <label>
-        <input
-          type="radio"
-          name="jobType"
-          value="full-time"
-          checked={jobType === "full-time"}
-          onChange={(e) => setJobType(e.target.value)}
-        />
-        Full-time
-      </label>
+          <label>
+            <input
+              type="radio"
+              name="jobType"
+              value="full-time"
+              checked={jobType === "full-time"}
+              onChange={(e) => {
+                setJobType(e.target.value);
+                onUpdate({ jobType: e.target.value });
+              }}
+            />
+            Full-time
+          </label>
 
-      <label>
-        <input
-          type="radio"
-          name="jobType"
-          value="contract"
-          checked={jobType === "contract"}
-          onChange={(e) => setJobType(e.target.value)}
-        />
-        Contract
-      </label>
+          <label>
+            <input
+              type="radio"
+              name="jobType"
+              value="contract"
+              checked={jobType === "contract"}
+              onChange={(e) => {
+                setJobType(e.target.value);
+                onUpdate({ jobType: e.target.value });
+              }}
+            />
+            Contract
+          </label>
 
-     
-    </div>
+
+        </div>
 
         <div>
           <label>Work Preference</label>
           <input
-            type="number"
-            name="salary"
-            value={data.salary || ''}
+            type="text"
+            name="prefferedRole"
+            value={data.prefferedRole || ''}
             onChange={handleChange}
           />
         </div>
@@ -104,45 +113,54 @@ export default function PersonalInfoStep({ data, onUpdate }) {
           />
         </div>
 
-<div>
-      <label>Preferred Work Mode:</label>
-      <div>
-        <label>
-          <input
-            type="radio"
-            name="workMode"
-            value="On-site"
-            checked={workMode === "On-site"}
-            onChange={(e) => setWorkMode(e.target.value)}
-          />
-          On-site
-        </label>
+        <div>
+          <label>Preferred Work Mode:</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="workMode"
+                value="On-site"
+                checked={workMode === "On-site"}
+                onChange={(e) => {
+                  setWorkMode(e.target.value);
+                  onUpdate({ workMode: e.target.value });
+                }}
+              />
+              On-site
+            </label>
 
-        <label>
-          <input
-            type="radio"
-            name="workMode"
-            value="Remote"
-            checked={workMode === "Remote"}
-            onChange={(e) => setWorkMode(e.target.value)}
-          />
-          Remote
-        </label>
+            <label>
+              <input
+                type="radio"
+                name="workMode"
+                value="Remote"
+                checked={workMode === "Remote"}
+                onChange={(e) => {
+                  setWorkMode(e.target.value);
+                  onUpdate({ workMode: e.target.value });
+                }}
+              />
+              Remote
+            </label>
 
-        <label>
-          <input
-            type="radio"
-            name="workMode"
-            value="Hybrid"
-            checked={workMode === "Hybrid"}
-            onChange={(e) => setWorkMode(e.target.value)}
-          />
-          Hybrid
-        </label>
-      </div>
+            <label>
+              <input
+                type="radio"
+                name="workMode"
+                value="Hybrid"
+                checked={workMode === "Hybrid"}
+                onChange={(e) => {
+                  setWorkMode(e.target.value);
+                  onUpdate({ workMode: e.target.value });
+                }}
+              />
+              Hybrid
+            </label>
+          </div>
 
-      
-    </div>
+
+        </div>
 
       </form>
     </div>
