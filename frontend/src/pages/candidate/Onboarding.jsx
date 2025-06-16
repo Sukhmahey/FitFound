@@ -11,21 +11,21 @@ export default function CandidateOnboarding() {
     const [stepIndex, setStepIndex] = useState(0);
     const [formData, setFormData] = useState({
         personalInfo: {},
-        workExperience: {},
+        workExperience: [],
         educationSkills: {}
     });
 
     const handleManual = () => {
-    console.log("Manual form selected");
-    setStepIndex(1);
-    
-  };
+        console.log("Manual form selected");
+        setStepIndex(1);
 
-  const handleUpload = () => {
-    console.log("Resume upload selected");
-    setStepIndex(4);
-   
-  };
+    };
+
+    const handleUpload = () => {
+        console.log("Resume upload selected");
+        setStepIndex(4);
+
+    };
     const handleNextBtn = () => {
         if (stepIndex === 0) {
             setStepIndex(1);
@@ -54,45 +54,46 @@ export default function CandidateOnboarding() {
         }
     }
 
+
     const updateFormData = (section, data) => {
         setFormData(prev => ({
             ...prev,
-            [section]: {
+            [section]: Array.isArray(prev[section]) ? data : {
                 ...prev[section],
                 ...data
             }
         }));
     };
     const renderStep = () => {
-    switch (stepIndex) {
+        switch (stepIndex) {
 
-        case 0:
-            return <ProfileSetupOption onManualClick={handleManual} onUploadClick={handleUpload} />;
-        case 1:
-            return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
-        case 2:
-            return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
-        case 3:
-            return <EducationSkillsStep data={formData.educationSkills} onUpdate={(data) => updateFormData('educationSkills', data)} />;
-        case 4:
-            return<ResumeParsing setStep={setStepIndex}></ResumeParsing>
-        default:
-            return null;
-    }
-};
+            case 0:
+                return <ProfileSetupOption onManualClick={handleManual} onUploadClick={handleUpload} />;
+            case 1:
+                return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
+            case 2:
+                return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
+            case 3:
+                return <EducationSkillsStep data={formData.educationSkills} onUpdate={(data) => updateFormData('educationSkills', data)} />;
+            case 4:
+                return <ResumeParsing setStep={setStepIndex}></ResumeParsing>
+            default:
+                return null;
+        }
+    };
 
 
 
     return (
         <div>
-            <div>Onboarding ({stepIndex+1}/4)</div>
+            <div>Onboarding ({stepIndex + 1}/4)</div>
             {renderStep()}
-            {stepIndex>0 && stepIndex!==4 &&<div>
-                {stepIndex>0 && <button onClick={handlePrevBtn}>Back</button>}
-                <button onClick={handleNextBtn}>{stepIndex===3?'Finish':'Next'}</button>
+            {stepIndex > 0 && stepIndex !== 4 && <div>
+                {stepIndex > 0 && <button onClick={handlePrevBtn}>Back</button>}
+                <button onClick={handleNextBtn}>{stepIndex === 3 ? 'Finish' : 'Next'}</button>
             </div>}
 
-            
+
 
 
         </div>
