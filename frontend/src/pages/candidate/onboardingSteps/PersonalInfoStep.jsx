@@ -1,43 +1,149 @@
 import React from 'react';
+import { useState } from 'react';
 
 
 export default function PersonalInfoStep({ data, onUpdate }) {
+
+  const [prefWork, setPrefWork] = React.useState(data.prefWork);
+  const [workMode, setWorkMode] = useState("");
+    const [jobType, setJobType] = useState("");
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     onUpdate({ [name]: value });
   };
+
 
   return (
     <div>
       <h3>Personal Information</h3>
       <form>
         <div>
-          <label>Name:</label>
+          <label>Main Role:</label>
           <input
             type="text"
-            name="name"
-            value={data.name || ''}
+            name="mainRole"
+            value={data.mainRole || ''}
             onChange={handleChange}
           />
         </div>
         <div>
-          <label>Email:</label>
+          <label>Experience Level:</label>
           <input
-            type="email"
-            name="email"
-            value={data.email || ''}
+            type="text"
+            name="ExperienceLevel"
+            value={data.experienceLevel || ''}
             onChange={handleChange}
           />
         </div>
         <div>
-          <label>Phone:</label>
+          <label>Years of Experience:</label>
           <input
-            type="text"
-            name="phone"
-            value={data.phone || ''}
+            type="number"
+            name="YearsofExperience"
+            value={data.yearsOfExperience || ''}
             onChange={handleChange}
           />
         </div>
+       <div>
+      <label>Job Type</label>
+      <label>
+        <input
+          type="radio"
+          name="jobType"
+          value="part-time"
+          checked={jobType === "part-time"}
+          onChange={(e) => setJobType(e.target.value)}
+        />
+        Part-time
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          name="jobType"
+          value="full-time"
+          checked={jobType === "full-time"}
+          onChange={(e) => setJobType(e.target.value)}
+        />
+        Full-time
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          name="jobType"
+          value="contract"
+          checked={jobType === "contract"}
+          onChange={(e) => setJobType(e.target.value)}
+        />
+        Contract
+      </label>
+
+     
+    </div>
+
+        <div>
+          <label>Work Preference</label>
+          <input
+            type="number"
+            name="salary"
+            value={data.salary || ''}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label>Salary Expectation:</label>
+          <input
+            type="number"
+            name="salary"
+            value={data.salary || ''}
+            onChange={handleChange}
+          />
+        </div>
+
+<div>
+      <label>Preferred Work Mode:</label>
+      <div>
+        <label>
+          <input
+            type="radio"
+            name="workMode"
+            value="On-site"
+            checked={workMode === "On-site"}
+            onChange={(e) => setWorkMode(e.target.value)}
+          />
+          On-site
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="workMode"
+            value="Remote"
+            checked={workMode === "Remote"}
+            onChange={(e) => setWorkMode(e.target.value)}
+          />
+          Remote
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="workMode"
+            value="Hybrid"
+            checked={workMode === "Hybrid"}
+            onChange={(e) => setWorkMode(e.target.value)}
+          />
+          Hybrid
+        </label>
+      </div>
+
+      
+    </div>
+
       </form>
     </div>
   );
