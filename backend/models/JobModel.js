@@ -22,11 +22,11 @@ const JobSchema = new Schema({
         min: { 
             type: Number,
             min: 0,
-            alidate: Number.isInteger},
+            validate: Number.isInteger},
         max: { 
             type: Number,
             min: 0,
-            alidate: Number.isInteger},
+            validate: Number.isInteger},
         perHour: { type: Boolean, default: false },
         perYear: { type: Boolean, default: false }
     },
