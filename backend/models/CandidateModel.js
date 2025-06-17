@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const CandidateSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'users' },
     skills: [
       {
         skill: { type: String, minLength: 2, maxLength: 60 },
