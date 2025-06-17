@@ -3,6 +3,9 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const router = require('./routers');
 
+// MONGO_DB_USER = fitfoundapp;
+// MONGO_DB_PASS = sMzebN8Szn8CW1HF;
+
 // Init 1. for MongoDb connection
 const dotenv = require('dotenv');
 dotenv.config();
