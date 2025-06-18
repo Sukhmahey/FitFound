@@ -34,6 +34,7 @@ const UserContactInfo = () => {
                 </label>
 
                 <div>
+                    <input type="reset" value="Cancel" />
                     <input type="submit" value="save" />
                 </div>
             </form>

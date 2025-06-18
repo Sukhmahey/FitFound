@@ -62,6 +62,7 @@ const CompanyInfo = () => {
                 </label>
 
                 <div>
+                    <input type="reset" value="Cancel" />
                     <input type="submit" value="save" />
                 </div>
             </form>
