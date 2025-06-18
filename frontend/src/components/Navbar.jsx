@@ -11,14 +11,14 @@ const Navbar = () => {
         <div>
             <span>FitFound</span>
         </div>
-        <div>
+        <nav>
             <ul>
                 <li>Overview</li>
                 <li>Features</li>
                 <li>Team</li>
                 <li>Contact</li>
             </ul>
-        </div>
+        </nav>
         <div>
             <button onClick={ handleLoginClick }>Login</button>
         </div>
