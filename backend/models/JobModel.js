@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const JobSchema = new Schema(
   {
-    employerId: { type: Schema.Types.ObjectId, ref: "users", required: true },
+    employerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     jobTitle: { type: String, minLength: 6, maxLength: 60 },
     jobDescription: { type: String, minLength: 12, maxLength: 300 },
     requiredSkills: [
