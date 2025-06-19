@@ -9,7 +9,7 @@ const CompanyInfo = () => {
                 <div className="row">
 
                     {/* LEFT COLUMN */}
-                    <div className="col">
+                    <div className="col-md-6">
                         <div className="mb-3">
                             <label for="company-name" className="form-label">Company Name</label>
                             <input type="text" className="form-control form-control-sm" name="company-name" id="company-name" maxLength="60" minLength="5"/>
@@ -52,7 +52,7 @@ const CompanyInfo = () => {
                     </div>
 
                     {/* RIGHT COLUMN */}
-                    <div className="col">
+                    <div className="col-md-6">
                         <div className="mb-3">
                             <label for="location" className="form-label">Location</label>
                             <input type="text" className="form-control form-control-sm" name="location" id="location" />
