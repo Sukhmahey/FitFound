@@ -18,6 +18,16 @@ export const loginApi = {
   loginUser: (data) => api.post('/login', data )
  };
 
+// candidate endpoints
+export const candidateApi = {
+  updateProfile: (userId, data) => api.patch(`/candidates/${userId}`, data),
+updateSkills: (userId, data) => api.patch(`/candidates/${userId}/skills`, data),
+updateWorkHistory: (userId, data) => api.patch(`/candidates/${userId}/work-history`, data),
+updateEducation: (userId, data) => api.patch(`/candidates/${userId}/education`, data),
+
+};
+
+
 export { api };
 
 

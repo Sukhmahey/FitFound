@@ -54,7 +54,7 @@ export default function WorkExperienceStep({ data = [], onUpdate }) {
           <div>
             <label>Start Date:</label>
             <input
-              type="date"
+              type="month"
               value={exp.startDate}
               onChange={(e) => handleChange(index, 'startDate', e.target.value)}
             />
@@ -63,7 +63,7 @@ export default function WorkExperienceStep({ data = [], onUpdate }) {
           <div>
             <label>End Date:</label>
             <input
-              type="date"
+              type="month"
               value={exp.endDate}
               onChange={(e) => handleChange(index, 'endDate', e.target.value)}
             />
