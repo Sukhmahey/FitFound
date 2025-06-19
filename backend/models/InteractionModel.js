@@ -5,12 +5,12 @@ const InteractionSchema = new Schema(
   {
     candidateId: {
       type: Schema.Types.ObjectId,
-      ref: "candidates",
+      ref: "Candidate",
       required: true,
     },
-    employerId: { type: Schema.Types.ObjectId, ref: "users", required: true },
-    jobId: { type: Schema.Types.ObjectId, ref: "jobs", required: true },
-    sourceJobFormId: { type: Schema.Types.ObjectId, ref: "jobs" },
+    employerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    jobId: { type: Schema.Types.ObjectId, ref: "Job", required: true },
+    sourceJobFormId: { type: Schema.Types.ObjectId, ref: "Job" },
 
     shortlisted: { type: Boolean, default: false },
     outreachMessage: { type: String, minLength: 12, maxLength: 300 },

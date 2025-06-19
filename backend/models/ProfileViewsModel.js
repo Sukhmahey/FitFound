@@ -5,10 +5,10 @@ const ProfileViewsSchema = new Schema(
   {
     candidateId: {
       type: Schema.Types.ObjectId,
-      ref: "candidates",
+      ref: "Candidate",
       required: true,
     },
-    employerId: { type: Schema.Types.ObjectId, ref: "users", required: true },
+    employerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     lastViewedAt: { type: Date, default: Date.now },
   },
   { timestamps: true, collection: "profile_views" }
