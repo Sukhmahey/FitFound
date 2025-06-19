@@ -5,40 +5,41 @@ const saveUser = async (req, res) => {
   const { email, idFirebaseUser, role, companyName, companyDescription } =
     req.body;
 
-  try {
-    const newUser = new User({
-      email,
-      idFirebaseUser,
-      role,
-      ...(role === "employer" && {
-        companyName,
-        companyDescription,
-      }),
-    });
+    try {
+      const newUser = new User({
+        email,
+        idFirebaseUser,
+        role,
+        ...(role === "employer" && {
+          companyName,
+          companyDescription,
+        }),
+      });
 
-    console.log("body of the user in the backend", req.body);
+      console.log("body of the user in the backend", req.body);
 
-    const savedUser = await newUser.save();
+      const savedUser = await newUser.save();
 
-    if (role === "candidate") {
-      const newCandidate = new Candidate(); // empty doc
-      await newCandidate.save();
+      if (role === "candidate") {
+        const newCandidate = new Candidate({ userId: savedUser._id });
+        await newCandidate.save();
+      }
+
+      return res.status(201).json({
+        userId: savedUser._id,
+        email: savedUser.email,
+        role: savedUser.role,
+        ...(role === "employer"
+          ? {
+              companyName: savedUser.companyName,
+              companyDescription: savedUser.companyDescription,
+            }
+          : {}),
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message || "Server Error" });
     }
-
-    res.status(201).json({
-      userId: savedUser._id,
-      email: savedUser.email,
-      role: savedUser.role,
-      ...(role === "employer"
-        ? {
-            companyName: savedUser.companyName,
-            companyDescription: savedUser.companyDescription,
-          }
-        : {}),
-    });
-  } catch (error) {
-    res.status(500).json(error);
-  }
+    
 };
 
 const getUserByEmail = async (req, res) => {
