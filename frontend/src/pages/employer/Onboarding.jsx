@@ -1,7 +1,11 @@
+import CompanyInfo from './onboardingSteps/CompanyInfo';
+import UserContactInfo from '../../components/UserContactInfo';
+
 const EmployerOnboarding = () => {
   return (
     <div>
-      <h1>Employer Onboarding Page</h1>
+      <CompanyInfo />
+      <UserContactInfo />
     </div>
   );
 };

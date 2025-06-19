@@ -3,7 +3,9 @@ const Schema = mongoose.Schema;
 
 const CandidateSchema = new Schema(
   {
+
     userId: { type: Schema.Types.ObjectId, ref: "users", required: true },
+
 
     skills: [
       {
