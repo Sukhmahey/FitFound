@@ -117,7 +117,7 @@ const Login = () => {
       <div className="row p-3">
 
         {/* FitFount texts */}
-        <div className="col d-flex justify-content-center align-items-center">
+        <div className="col-md-6 d-flex justify-content-center align-items-center">
             <div className="text-center">
                 <h1>FitFound</h1>
                 <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
@@ -125,7 +125,7 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <div className="col">
+        <div className="col-md-6">
           <div className="text-center">
             <span className="text-muted">Login as</span>
           </div>

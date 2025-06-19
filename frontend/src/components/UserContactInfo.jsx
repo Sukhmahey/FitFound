@@ -8,7 +8,7 @@ const UserContactInfo = () => {
                 <div class="row">
 
                     {/* LEFT COLUMN */}
-                    <div class="col">
+                    <div class="col-md-6">
 
                         <div class="mb-3">
                             <label for="full-name" class="form-label">Full Name</label>
@@ -28,7 +28,7 @@ const UserContactInfo = () => {
                     </div>
 
                     {/* RIGTH COLUMN */}
-                    <div class="col">
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label for="job-title" class="form-label">Designation / Job Title</label>
                             <input type="text" class="form-control form-control-sm" name="job-title" id="job-title" maxLength="60" minLength="5"/>
