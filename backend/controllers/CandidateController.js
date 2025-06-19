@@ -156,7 +156,7 @@ exports.addWorkHistoryEntry = async (req, res) => {
   const { userId } = req.params;
   const newWorkEntry = req.body; // Expects a single work history object
 
-  // Optional: Add more specific validation for the newWorkEntry structure here if needed
+
   if (!newWorkEntry || Object.keys(newWorkEntry).length === 0) {
     console.log(
       `[addWorkHistoryEntry] Invalid request: Empty body for new work entry.`
@@ -227,7 +227,7 @@ exports.updateWorkEntryById = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId: userId }, // Find the main candidate document
-      { $set: updateOperation }, // Apply the constructed updates
+      { $set: updateOperation }, // Apply the now updates
       {
         new: true,
         runValidators: true,
@@ -244,8 +244,6 @@ exports.updateWorkEntryById = async (req, res) => {
         .json({ message: "Candidate profile or work experience not found." });
     }
     // Check if the arrayFilters actually matched and updated an element
-    // This isn't strictly necessary as findOneAndUpdate returns the whole doc,
-    // but useful if you need to know if the subdoc was definitely found within the array.
     const updatedEntry = updatedCandidate.workHistory.id(workExpId);
     if (!updatedEntry) {
       console.log(
@@ -296,7 +294,6 @@ exports.deleteWorkEntryById = async (req, res) => {
         .json({ message: "Candidate profile or work experience not found." });
     }
     // You could check if the length of the array changed to confirm deletion,
-    // but the successful pull operation generally means it was removed if found.
 
     console.log(
       `[deleteWorkEntryById] Work history entry deleted for userId: ${userId}, workExpId: ${workExpId}`

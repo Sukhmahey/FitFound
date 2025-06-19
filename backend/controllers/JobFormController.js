@@ -1,7 +1,7 @@
-// controllers/JobFormController.js (assuming this is the correct filename)
-const Job = require("../models/JobModel"); // Correct model name is typically 'Job' based on your schema: 'const Job = mongoose.model("Job", JobSchema);'
 
-// Helper function for consistent error handling and logging
+const Job = require("../models/JobModel"); 
+
+
 const handleError = (res, error, message, status = 500) => {
   console.error(`[JobFormController] ${message}:`, error);
   res.status(status).json({
@@ -11,14 +11,10 @@ const handleError = (res, error, message, status = 500) => {
   });
 };
 
-/**
- * @route POST /api/jobs
- * @desc Create a new job posting
- * @access Private (Employer Only - will need auth middleware)
- */
+
 exports.createJob = async (req, res) => {
   // In a real app, employerId should come from auth middleware (e.g., req.user.id)
-  // For now, we'll assume it's sent in the body for testing, but recommend against this in production.
+
   const {
     employerId,
     jobTitle,
@@ -62,11 +58,7 @@ exports.createJob = async (req, res) => {
   }
 };
 
-/**
- * @route GET /api/jobs
- * @desc Fetch all job postings (supports optional employerId query filter)
- * @access Public (or Private, depending on app logic)
- */
+
 exports.getAllJobs = async (req, res) => {
   const { employerId } = req.query; // Get employerId from query parameters
 
@@ -91,11 +83,7 @@ exports.getAllJobs = async (req, res) => {
   }
 };
 
-/**
- * @route GET /api/jobs/:jobId
- * @desc Fetch a single job posting by its jobId
- * @access Public (or Private)
- */
+
 exports.getJobById = async (req, res) => {
   const { jobId } = req.params;
   try {
@@ -114,11 +102,7 @@ exports.getJobById = async (req, res) => {
   }
 };
 
-/**
- * @route PATCH /api/jobs/:jobId
- * @desc Partially update fields in a job posting
- * @access Private (Employer Only - will need auth middleware to check ownership)
- */
+
 exports.updateJobById = async (req, res) => {
   const { jobId } = req.params;
   const updates = req.body; // Contains the fields to update
@@ -160,11 +144,7 @@ exports.updateJobById = async (req, res) => {
   }
 };
 
-/**
- * @route DELETE /api/jobs/:jobId
- * @desc Delete a job posting by its jobId
- * @access Private (Employer Only - will need auth middleware to check ownership)
- */
+
 exports.deleteJobById = async (req, res) => {
   const { jobId } = req.params;
 
@@ -178,7 +158,7 @@ exports.deleteJobById = async (req, res) => {
     }
 
     console.log(`[deleteJobById] Job deleted successfully for ID: ${jobId}`);
-    // You can send 200 OK with a message, or 204 No Content for a successful deletion.
+
     res.status(200).json({ message: "Job posting deleted successfully." });
     // Alternative for DELETE with no content: res.status(204).send();
   } catch (error) {
