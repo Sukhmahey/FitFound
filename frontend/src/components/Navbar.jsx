@@ -9,21 +9,21 @@ const Navbar = () => {
 
     return <div>
         
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
-            <div class="container-fluid">
+        <nav className="navbar navbar-expand-lg bg-body-tertiary">
+            <div className="container-fluid">
                 <div>
                     <span>FitFound</span>
                 </div>
 
-                <ul class="navbar-nav mb-2 mb-lg-0 gap-4">
-                    <li class="nav-item"><a href="#" class="nav-link">Overview</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link">Features</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link">Team</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+                <ul className="navbar-nav mb-2 mb-lg-0 gap-4">
+                    <li className="nav-item"><a href="#" className="nav-link">Overview</a></li>
+                    <li className="nav-item"><a href="#" className="nav-link">Features</a></li>
+                    <li className="nav-item"><a href="#" className="nav-link">Team</a></li>
+                    <li className="nav-item"><a href="#" className="nav-link">Contact</a></li>
                 </ul>
 
                 <div>
-                    <button class="btn btn-primary btn-sm" onClick={ handleLoginClick }>Login</button>
+                    <button className="btn btn-primary btn-sm" onClick={ handleLoginClick }>Login</button>
                 </div>
             </div>
             
