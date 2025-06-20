@@ -4,8 +4,6 @@ const CompanyInfo = () => {
 
     return (
         <div className="container">
-            <h4>Company Info</h4>
-            <form>
                 <div className="row">
 
                     {/* LEFT COLUMN */}
@@ -29,10 +27,7 @@ const CompanyInfo = () => {
                             <label for="industry-sector" className="form-label">Industry Sector</label>
                                 <select id="industry-sector" name="industry-sector" className="form-control form-control-sm">
                                     <option value="">-- Select Industry Sector --</option>
-                                    <option value="software_consulting">Software Consulting</option>
-                                    <option value="manufacturing">Manufacturing</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="finance">Finance</option>
+                                    <option value="Information Technology">Information Technology</option>
                                 </select>
                         </div>
 
@@ -74,12 +69,7 @@ const CompanyInfo = () => {
                     </div>
 
                 </div>
-                
-                <div className="d-flex justify-content-end gap-4">
-                    <input type="reset" value="Cancel" className="btn btn-secondary btn-sm mb-3" />
-                    <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" />
-                </div>
-            </form>
+
         </div>
     );
 };
