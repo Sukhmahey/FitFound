@@ -7,12 +7,14 @@ import EducationSkillsStep from './onboardingSteps/EducationSkillsStep';
 import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
 import ProfileSetupOption from './onboardingSteps/ProfileSetupOption';
 import ResumeParsing from './onboardingSteps/ResumeParsing';
+import InfoConfirmationPage from './onboardingSteps/InfoConfirmationPage';
 
 export default function CandidateOnboarding() {
   const { user } = useAuth();
   const userId = user?.userId;
 
   const [stepIndex, setStepIndex] = useState(0);
+  const [confirmedData, setConfirmedData] = useState(null);
   const [formData, setFormData] = useState({
     personalInfo: {},
     workExperience: [],
@@ -87,6 +89,7 @@ const cleanedWorkExperience = formData.workExperience.map(item => ({
         
         setStepIndex(1);
       }
+      
     } catch (err) {
       console.error("Failed to submit:", err);
       alert("Submission failed.");
@@ -120,7 +123,9 @@ const cleanedWorkExperience = formData.workExperience.map(item => ({
       case 3:
         return <EducationSkillsStep data={formData.educationSkills} onUpdate={(data) => updateFormData('educationSkills', data)} />;
       case 4:
-        return <ResumeParsing setStep={setStepIndex} />;
+        return <ResumeParsing setStep={setStepIndex} setConfirmedData={setConfirmedData}/>;
+      case 99:
+        return <InfoConfirmationPage data={confirmedData}></InfoConfirmationPage>
       default:
         return null;
     }
