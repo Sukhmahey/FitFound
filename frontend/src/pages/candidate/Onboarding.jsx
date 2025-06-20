@@ -133,9 +133,11 @@ const cleanedWorkExperience = formData.workExperience.map(item => ({
 
   return (
     <div>
-      <div>Onboarding ({stepIndex + 1}/4)</div>
+      <div>Onboarding</div>
+      {stepIndex <90 && stepIndex !== 4 && ( <h2>({stepIndex + 1}/4)</h2>)}
+
       {renderStep()}
-      {stepIndex > 0 && stepIndex !== 4 && (
+      {stepIndex <90 && stepIndex > 0 && stepIndex !== 4 && (
         <div>
           <button onClick={handlePrevBtn}>Back</button>
           <button onClick={handleNextBtn}>{stepIndex === 3 ? 'Finish' : 'Next'}</button>
