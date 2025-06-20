@@ -1,4 +1,4 @@
-// import React from 'react'
+import React from 'react'
 // import { useState } from 'react';
 
 // const ResumeParserKey = process.env.REACT_APP_ResumeParserKey;
@@ -72,11 +72,17 @@
 
 import { useState } from 'react';
 
+
 const ResumeParserKey = process.env.REACT_APP_ResumeParserKey;
 
-function ResumeParsing({ setStep }) {
+console.log("ResumeParserKey:", ResumeParserKey); 
+
+function ResumeParsing({ setStep, setConfirmedData }) {
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [finalData , setFinalData] = useState({});
+  // const [confirmedData, setConfirmedData] = useState({});
+
 
   const extractSkills = (text) => {
   const start = text.toLowerCase().indexOf('skills');
@@ -133,38 +139,42 @@ function ResumeParsing({ setStep }) {
   };
 
   
-  const extractEducation = (text) => {
+
+const extractEducation = (text) => {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   const educationEntries = [];
 
+  let startIndex = -1;
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].toLowerCase();
-
-    const isEducationLine =
-      line.includes('university') ||
-      line.includes('college') ||
-      line.includes('bca') ||
-      line.includes('b.sc') ||
-      line.includes('bachelor') ||
-      line.includes('mca') ||
-      line.includes('m.sc');
-
-    if (isEducationLine) {
-      
-      const entryLines = lines.slice(i, i + 3);
-      educationEntries.push({
-        institution: entryLines[0] || '',
-        degree: entryLines[1] || null,
-        fieldOfStudy: entryLines[2] || null,
-        graduationDate: null,
-        gpa: null
-      });
-      i += 2; 
+    if (lines[i].toLowerCase().startsWith('education')) {
+      startIndex = i;
+      break;
     }
   }
 
+  if (startIndex === -1 || lines.length < startIndex + 2) {
+    return [];
+  }
+
+  const entryLines = lines.slice(startIndex + 1, startIndex + 4);
+
+  educationEntries.push({
+    institution: entryLines[0] || '',
+    degree: entryLines[1] || '',
+    graduationDate: entryLines.find(line => line.toLowerCase().includes('year')) || null,
+    gpa: null,
+    fieldOfStudy: entryLines[1]?.includes('(')
+      ? entryLines[1].split('(')[1].replace(')', '')
+      : null
+  });
+
   return educationEntries;
 };
+
+ const confirmNow = () => {
+    setConfirmedData(finalData);  
+    setStep(99);           
+  };
 
 
 
@@ -188,6 +198,7 @@ function ResumeParsing({ setStep }) {
       });
 
       const data = await res.json();
+      console.log("FULL OCR RESPONSE:", data);
       
 
       if (data.IsErroredOnProcessing) {
@@ -215,6 +226,7 @@ function ResumeParsing({ setStep }) {
       };
 
       setOutput(JSON.stringify(structuredData, null, 2));
+      setFinalData(structuredData);
     } catch (err) {
       setOutput(`Error: ${err.message}`);
     } finally {
@@ -231,7 +243,7 @@ function ResumeParsing({ setStep }) {
       </button>
 
       <pre>{output}</pre>
-
+      <button onClick={confirmNow}>CONFIRM</button>
       <button onClick={() => setStep(0)}>Back to Home</button>
     </div>
   );
