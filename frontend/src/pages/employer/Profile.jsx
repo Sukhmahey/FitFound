@@ -2,7 +2,7 @@ import { useState } from "react";
 import CompanyInfo from './onboardingSteps/CompanyInfo';
 import UserContactInfo from './onboardingSteps/UserContactInfo';
 
-const EmployerOnboarding = () => {
+const EmployerProfile = () => {
   const [formSection, setFormSection] = useState("details"); // the other is contact
 
   const handleFormSectionClick = (e) => {
@@ -18,16 +18,30 @@ const EmployerOnboarding = () => {
       </div>
       
       <form>
-        { formSection === "details" && <CompanyInfo /> }
-        { formSection === "contact" && <UserContactInfo /> }
+        { formSection === "details" && (<>
+          <div className="container">
+            <div className="row">
+              <CompanyInfo />
+              <div class="d-flex justify-content-end gap-4">
+                <input type="submit" value="save" class="btn btn-primary btn-sm mb-3" />
+              </div>
+            </div>
+          </div>
+        </>) }
 
-        <div class="d-flex justify-content-end gap-4">
-          <input type="reset" value="Cancel" class="btn btn-secondary btn-sm mb-3" />
-          <input type="submit" value="save" class="btn btn-primary btn-sm mb-3" />
-        </div>
+        { formSection === "contact" && (<>
+          <div className="container">
+            <div className="row">
+              <UserContactInfo />
+              <div class="d-flex justify-content-end gap-4">
+                <input type="submit" value="save" class="btn btn-primary btn-sm mb-3" />
+              </div>
+            </div>
+          </div>
+        </>) }
       </form>
     </div>
   );
 };
 
-export default EmployerOnboarding;
+export default EmployerProfile;

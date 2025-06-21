@@ -5,6 +5,15 @@ const CompanyInfo = () => {
     return (
         <div className="container">
                 <div className="row">
+                    <div lassName="col-md-6">
+                        <div className="mb-3">
+                            <label for="company-logo" className="form-label">Company Logo</label>
+                            <input type="file" className="form-control form-control-sm" name="company-logo" id="company-logo" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
 
                     {/* LEFT COLUMN */}
                     <div className="col-md-6">

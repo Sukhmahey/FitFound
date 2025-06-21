@@ -39,8 +39,6 @@ const EmployerOnboarding = () => {
             </div>
           </div>
         </>) }
-
-        
       </form>
     </div>
   );

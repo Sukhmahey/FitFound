@@ -8,6 +8,7 @@ import CandidateDashboard from "./pages/candidate/Dashboard";
 import EmployerOnboarding from "./pages/employer/Onboarding";
 import EmployerJobForm from "./pages/employer/JobForm";
 import EmployerDashboard from "./pages/employer/Dashboard";
+import EmployerProfile from "./pages/employer/Profile";
 import Unauthorized from "./pages/Unauthorized";
 
 function App() {
@@ -34,6 +35,11 @@ function App() {
       <Route path="/employer/onboarding" element={
         <ProtectedRoute role="employer">
           <EmployerOnboarding />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/profile" element={
+        <ProtectedRoute role="employer">
+          <EmployerProfile />
         </ProtectedRoute>
       } />
       <Route path="/employer/create-form" element={
