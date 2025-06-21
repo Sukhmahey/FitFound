@@ -290,7 +290,13 @@ function ResumeParsing({ setStep, setConfirmedData }) {
     const companyMatch = block.match(/Company:\s*(.*)/i);
     const roleMatch = block.match(/Role:\s*(.*)/i);
     const durationMatch = block.match(/Duration:\s*(.*)/i);
-    const achievements = [...block.matchAll(/-\s*(.+)/g)].map(m => m[1]);
+    const achievements = [...block.matchAll(/-\s*(.+)/g)]
+  .map(m => m[1].trim())
+  .filter(line =>
+    !/^\d{4}/.test(line) &&                    
+    !/\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/i.test(line) && // skip lines with months
+    !/to\s+\d{4}/i.test(line)                  
+  );
 
     if (companyMatch) {
       jobs.push({
