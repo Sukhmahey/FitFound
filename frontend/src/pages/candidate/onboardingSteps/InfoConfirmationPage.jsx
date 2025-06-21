@@ -19,8 +19,14 @@
 // export default InfoConfirmationPage
 
 import React, { useState } from 'react';
+import { candidateApi } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+
 
 export default function InfoConfirmationPage({data}) {
+  const { user } = useAuth();
+const userId = user?.userId;
+
    const [form, setForm] = useState(() => ({
     fullName: data.fullName || '',
     email: data.email || '',
@@ -62,6 +68,14 @@ export default function InfoConfirmationPage({data}) {
 
   };
 
+// const convertToBackendDate = (date) => {
+//   if (!date || !date.includes("-")) return date;
+//   const [year, month] = date.split("-");
+//   return `${month}-${year}`; 
+// };
+
+
+
   const handleNestedChange = (section, field, value) => {
     setForm({ ...form, [section]: { ...form[section], [field]: value } });
   };
@@ -92,9 +106,60 @@ export default function InfoConfirmationPage({data}) {
     setForm({ ...form, workHistory: updated });
   };
 
-  const submitForm = ()=>{
-    console.log(form);
+  // const submitForm = ()=>{
+  //   console.log(form);
+  // }
+  const submitForm = async () => {
+  const cleanedProfile = {
+    fullName: form.fullName,
+    email: form.email,
+    phone: form.phone,
+    preferredRole: form.preferredRole,
+    salary: Number(form.salaryExpectation),
+    bio: form.bio,
+    languages: form.languages,
+    specialization: form.specialization,
+    isEligibleToWork: form.eligibleToWork,
+    experienceLevel: 'junior',
+    jobType: 'full-time',
+    mainRole: form.preferredRole,
+    yearsOfExperience: 2
+  };
+
+  const skills = form.skills.map(skill => ({ skill }));
+
+  const education = [
+    {
+      degree: form.education.degree,
+      field: form.education.fieldOfStudy,
+      gpa: form.education.gpa,
+      graduationDate: form.education.graduationDate,
+      institution: form.education.institution,
+    }
+  ];
+
+  const workHistory = form.workHistory.map(w => ({
+    company: w.companyName,
+    role: w.role,
+    startDate: w.startDate,
+    endDate: w.endDate,
+    current: false,
+    achievements: w.achievements,
+  }));
+
+  try {
+    await candidateApi.updateProfile(userId, cleanedProfile);
+    await candidateApi.updateWorkHistory(userId, { workHistory });
+    await candidateApi.updateEducation(userId, { education });
+    await candidateApi.updateSkills(userId, { skills });
+
+    alert("Confirmation data saved successfully!");
+  } catch (err) {
+    console.error("Failed to submit confirmation data:", err);
+    alert("Submission failed.");
   }
+};
+
 
   return (
     <div>
@@ -235,7 +300,8 @@ export default function InfoConfirmationPage({data}) {
         </label>
       </fieldset>
 
-      <button onClick={()=>{submitForm()}}>Submit</button>
+      <button onClick={submitForm}>Submit</button>
+
     </div>
   );
 }
