@@ -25,6 +25,24 @@ const JobSchema = new Schema(
       type: String,
       enum: ["full-time", "part-time", "contract", "internship"],
     },
+    workEnvironment: {
+
+      type: String,
+      enum: ["on-site", "remote", "hybrid"],
+      trim: true,
+    },
+
+    requiredWorkAuthorization: {
+      type: [String], // Array of strings
+      enum: [
+        "Work Permit",
+        "Study Permit",
+        "PR Citizen",
+
+      ],
+
+      required: true, // Making this required for clarity on job postings
+    },
   },
   { timestamps: true, collection: "jobs" }
 );
