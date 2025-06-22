@@ -3,9 +3,7 @@ const Schema = mongoose.Schema;
 
 const CandidateSchema = new Schema(
   {
-
     userId: { type: Schema.Types.ObjectId, ref: "users", required: true },
-
 
     skills: [
       {
@@ -16,7 +14,22 @@ const CandidateSchema = new Schema(
     ],
     isEligibleToWork: { type: Boolean, default: false },
     ableToRelocate: { type: Boolean, default: false },
-    mainRole: { type: String, minLength: 2, maxLength: 60 },
+    mainRole: {
+      // New field added here
+      type: String,
+      required: true, // You might want this to be required for categorization
+      minLength: 2,
+      maxLength: 60,
+      enum: [
+        // Restrict to these 5 specific values
+        "Frontend Developer",
+        "Backend Developer",
+        "Full Stack Developer",
+        "UI/UX Designer",
+        "Project Manager",
+      ],
+      trim: true,
+    },
     experienceLevel: { type: String, enum: ["junior", "middle", "senior"] },
     yearsOfExperience: { type: Number, min: 0, validate: Number.isInteger },
     preferredRoles: [{ type: String, minLength: 2, maxLength: 60 }],

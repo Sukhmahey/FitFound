@@ -53,8 +53,8 @@ const Signup = () => {
 
             navigate(
               role === "candidate"
-                ? "/candidate/dashboard"
-                : "/employer/dashboard"
+                ? "/candidate/onboarding"
+                : "/employer/onboarding"
             );
           })
           .catch(async (error) => {
