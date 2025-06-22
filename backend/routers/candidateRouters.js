@@ -32,4 +32,9 @@ router.delete(
 router.patch("/:userId/visibility", controller.incrementVisibility);
 router.patch("/:userId/verified", controller.markVerified);
 
+
+
+router.get("/main-role-counts", controller.getDashboardMainRoleCounts);
+
+
 module.exports = router;

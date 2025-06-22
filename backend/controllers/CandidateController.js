@@ -1,11 +1,10 @@
-const Candidate = require("../models/CandidateModel"); 
+const Candidate = require("../models/CandidateModel");
 
 const handleError = (res, error, message, status = 500) => {
   console.error(`${message}:`, error);
   res.status(status).json({
     error: message,
     details: error.message || "Server Error",
-
     ...(error.name === "ValidationError" && { validationErrors: error.errors }),
   });
 };
@@ -16,7 +15,7 @@ exports.getCandidateByUserId = async (req, res) => {
     console.log(
       `[getCandidateByUserId] Request initiated for userId: ${userId}`
     );
-    const candidate = await Candidate.findOne({ userId }); // Find by the userId field
+    const candidate = await Candidate.findOne({ userId });
     if (!candidate) {
       console.log(
         `[getCandidateByUserId] Candidate not found for userId: ${userId}`
@@ -41,8 +40,8 @@ exports.updateCandidateProfile = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: updates }, // Use $set to update only the fields provided in req.body
-      { new: true, runValidators: true } // Return the updated document and run schema validators
+      { $set: updates },
+      { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
@@ -68,7 +67,7 @@ exports.updateCandidateProfile = async (req, res) => {
 
 exports.updateSkills = async (req, res) => {
   const { userId } = req.params;
-  const { skills } = req.body; // Expects an array of skill objects
+  const { skills } = req.body;
 
   if (!Array.isArray(skills)) {
     console.log(`[updateSkills] Invalid request: 'skills' must be an array.`);
@@ -83,7 +82,7 @@ exports.updateSkills = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { skills: skills } }, // Replace the entire skills array
+      { $set: { skills: skills } },
       { new: true, runValidators: true }
     );
 
@@ -108,7 +107,7 @@ exports.updateSkills = async (req, res) => {
 
 exports.updateWorkHistory = async (req, res) => {
   const { userId } = req.params;
-  const { workHistory } = req.body; // Expects an array of work history objects
+  const { workHistory } = req.body;
 
   if (!Array.isArray(workHistory)) {
     console.log(
@@ -127,7 +126,7 @@ exports.updateWorkHistory = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { workHistory: workHistory } }, // Replace the entire workHistory array
+      { $set: { workHistory: workHistory } },
       { new: true, runValidators: true }
     );
 
@@ -154,8 +153,7 @@ exports.updateWorkHistory = async (req, res) => {
 
 exports.addWorkHistoryEntry = async (req, res) => {
   const { userId } = req.params;
-  const newWorkEntry = req.body; // Expects a single work history object
-
+  const newWorkEntry = req.body;
 
   if (!newWorkEntry || Object.keys(newWorkEntry).length === 0) {
     console.log(
@@ -174,7 +172,7 @@ exports.addWorkHistoryEntry = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $push: { workHistory: newWorkEntry } }, // Add the new entry to the array
+      { $push: { workHistory: newWorkEntry } },
       { new: true, runValidators: true }
     );
 
@@ -188,7 +186,7 @@ exports.addWorkHistoryEntry = async (req, res) => {
     console.log(
       `[addWorkHistoryEntry] New work history entry added for userId: ${userId}`
     );
-    res.status(201).json(updatedCandidate); // 201 Created for a new resource
+    res.status(201).json(updatedCandidate);
   } catch (error) {
     handleError(
       res,
@@ -201,7 +199,7 @@ exports.addWorkHistoryEntry = async (req, res) => {
 
 exports.updateWorkEntryById = async (req, res) => {
   const { userId, workExpId } = req.params;
-  const updates = req.body; // Contains fields to update for that specific entry
+  const updates = req.body;
 
   if (!updates || Object.keys(updates).length === 0) {
     console.log(
@@ -226,12 +224,12 @@ exports.updateWorkEntryById = async (req, res) => {
     }
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
-      { userId: userId }, // Find the main candidate document
-      { $set: updateOperation }, // Apply the now updates
+      { userId: userId },
+      { $set: updateOperation },
       {
         new: true,
         runValidators: true,
-        arrayFilters: [{ "elem._id": workExpId }], // Target the specific subdocument by its _id
+        arrayFilters: [{ "elem._id": workExpId }],
       }
     );
 
@@ -243,18 +241,15 @@ exports.updateWorkEntryById = async (req, res) => {
         .status(404)
         .json({ message: "Candidate profile or work experience not found." });
     }
-    // Check if the arrayFilters actually matched and updated an element
     const updatedEntry = updatedCandidate.workHistory.id(workExpId);
     if (!updatedEntry) {
       console.log(
         `[updateWorkEntryById] Work experience with ID ${workExpId} not found within candidate ${userId}'s profile.`
       );
-      return res
-        .status(404)
-        .json({
-          message:
-            "Work experience entry not found within the candidate's profile.",
-        });
+      return res.status(404).json({
+        message:
+          "Work experience entry not found within the candidate's profile.",
+      });
     }
 
     console.log(
@@ -281,8 +276,8 @@ exports.deleteWorkEntryById = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId: userId },
-      { $pull: { workHistory: { _id: workExpId } } }, // Remove elements matching the condition
-      { new: true } // Return the updated document
+      { $pull: { workHistory: { _id: workExpId } } },
+      { new: true }
     );
 
     if (!updatedCandidate) {
@@ -293,18 +288,14 @@ exports.deleteWorkEntryById = async (req, res) => {
         .status(404)
         .json({ message: "Candidate profile or work experience not found." });
     }
-    // You could check if the length of the array changed to confirm deletion,
 
     console.log(
       `[deleteWorkEntryById] Work history entry deleted for userId: ${userId}, workExpId: ${workExpId}`
     );
-    res
-      .status(200)
-      .json({
-        message: "Work experience entry deleted successfully.",
-        candidate: updatedCandidate,
-      });
-    // Or res.status(204).send() for no content response
+    res.status(200).json({
+      message: "Work experience entry deleted successfully.",
+      candidate: updatedCandidate,
+    });
   } catch (error) {
     handleError(res, error, "Failed to delete work history entry", 500);
   }
@@ -312,7 +303,7 @@ exports.deleteWorkEntryById = async (req, res) => {
 
 exports.updateEducation = async (req, res) => {
   const { userId } = req.params;
-  const { education } = req.body; // Expects an array of education objects
+  const { education } = req.body;
 
   if (!Array.isArray(education)) {
     console.log(
@@ -331,7 +322,7 @@ exports.updateEducation = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { education: education } }, // Replace the entire education array
+      { $set: { education: education } },
       { new: true, runValidators: true }
     );
 
@@ -356,7 +347,7 @@ exports.updateEducation = async (req, res) => {
 
 exports.addEducationEntry = async (req, res) => {
   const { userId } = req.params;
-  const newEducationEntry = req.body; // Expects a single education object
+  const newEducationEntry = req.body;
 
   if (!newEducationEntry || Object.keys(newEducationEntry).length === 0) {
     console.log(
@@ -378,7 +369,7 @@ exports.addEducationEntry = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $push: { education: newEducationEntry } }, // Add the new entry to the array
+      { $push: { education: newEducationEntry } },
       { new: true, runValidators: true }
     );
 
@@ -405,7 +396,7 @@ exports.addEducationEntry = async (req, res) => {
 
 exports.updateEducationById = async (req, res) => {
   const { userId, educationId } = req.params;
-  const updates = req.body; // Contains fields to update for that specific entry
+  const updates = req.body;
 
   if (!updates || Object.keys(updates).length === 0) {
     console.log(
@@ -453,11 +444,9 @@ exports.updateEducationById = async (req, res) => {
       console.log(
         `[updateEducationById] Education entry with ID ${educationId} not found within candidate ${userId}'s profile.`
       );
-      return res
-        .status(404)
-        .json({
-          message: "Education entry not found within the candidate's profile.",
-        });
+      return res.status(404).json({
+        message: "Education entry not found within the candidate's profile.",
+      });
     }
 
     console.log(
@@ -500,13 +489,10 @@ exports.deleteEducationById = async (req, res) => {
     console.log(
       `[deleteEducationById] Education entry deleted for userId: ${userId}, educationId: ${educationId}`
     );
-    res
-      .status(200)
-      .json({
-        message: "Education entry deleted successfully.",
-        candidate: updatedCandidate,
-      });
-    // Or res.status(204).send() for no content
+    res.status(200).json({
+      message: "Education entry deleted successfully.",
+      candidate: updatedCandidate,
+    });
   } catch (error) {
     handleError(res, error, "Failed to delete education entry", 500);
   }
@@ -522,7 +508,7 @@ exports.incrementVisibility = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $inc: { visibilityCount: 1 } }, // Increment visibilityCount by 1
+      { $inc: { visibilityCount: 1 } },
       { new: true, runValidators: true }
     );
 
@@ -536,12 +522,10 @@ exports.incrementVisibility = async (req, res) => {
     console.log(
       `[incrementVisibility] Visibility count incremented for userId: ${userId}. New count: ${updatedCandidate.visibilityCount}`
     );
-    res
-      .status(200)
-      .json({
-        message: "Visibility count incremented successfully.",
-        candidate: updatedCandidate,
-      });
+    res.status(200).json({
+      message: "Visibility count incremented successfully.",
+      candidate: updatedCandidate,
+    });
   } catch (error) {
     handleError(res, error, "Failed to increment visibility count", 500);
   }
@@ -555,7 +539,7 @@ exports.markVerified = async (req, res) => {
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { verifiedBadge: true } }, // Set verifiedBadge to true
+      { $set: { verifiedBadge: true } },
       { new: true, runValidators: true }
     );
 
@@ -569,13 +553,70 @@ exports.markVerified = async (req, res) => {
     console.log(
       `[markVerified] Candidate profile marked as verified for userId: ${userId}`
     );
-    res
-      .status(200)
-      .json({
-        message: "Candidate profile marked as verified.",
-        candidate: updatedCandidate,
-      });
+    res.status(200).json({
+      message: "Candidate profile marked as verified.",
+      candidate: updatedCandidate,
+    });
   } catch (error) {
     handleError(res, error, "Failed to mark profile as verified", 500);
+  }
+};
+
+// New API to get counts of candidates by mainRole for the employer dashboard
+exports.getDashboardMainRoleCounts = async (req, res) => {
+  try {
+    const counts = await Candidate.aggregate([
+      {
+        $match: {
+          mainRole: {
+            $in: [
+              "Frontend Developer",
+              "Backend Developer",
+              "Full Stack Developer",
+              "UI/UX Designer",
+              "Project Manager",
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$mainRole",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          role: "$_id",
+          count: 1,
+        },
+      },
+      {
+        $sort: { role: 1 },
+      },
+    ]);
+
+    const allRoles = [
+      "Frontend Developer",
+      "Backend Developer",
+      "Full Stack Developer",
+      "UI/UX Designer",
+      "Project Manager",
+    ];
+
+    const finalCounts = allRoles.map((role) => {
+      const found = counts.find((item) => item.role === role);
+      return { role, count: found ? found.count : 0 };
+    });
+
+    res.status(200).json(finalCounts);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to retrieve candidate main role counts",
+      500
+    );
   }
 };
