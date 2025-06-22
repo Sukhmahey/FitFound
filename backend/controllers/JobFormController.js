@@ -1,6 +1,4 @@
-
-const Job = require("../models/JobModel"); 
-
+const Job = require("../models/JobModel");
 
 const handleError = (res, error, message, status = 500) => {
   console.error(`[JobFormController] ${message}:`, error);
@@ -11,10 +9,7 @@ const handleError = (res, error, message, status = 500) => {
   });
 };
 
-
 exports.createJob = async (req, res) => {
-  // In a real app, employerId should come from auth middleware (e.g., req.user.id)
-
   const {
     employerId,
     jobTitle,
@@ -24,6 +19,8 @@ exports.createJob = async (req, res) => {
     salaryRange,
     location,
     jobType,
+    workEnvironment,
+    requiredWorkAuthorization, // Added new field
   } = req.body;
 
   try {
@@ -41,13 +38,15 @@ exports.createJob = async (req, res) => {
       salaryRange,
       location,
       jobType,
+      workEnvironment,
+      requiredWorkAuthorization, // Added new field
     });
 
     const savedJob = await newJob.save();
     console.log(
       `[createJob] New job created with ID: ${savedJob._id} for employerId: ${employerId}`
     );
-    res.status(201).json(savedJob); // 201 Created for successful resource creation
+    res.status(201).json(savedJob);
   } catch (error) {
     handleError(
       res,
@@ -58,81 +57,96 @@ exports.createJob = async (req, res) => {
   }
 };
 
-
 exports.getAllJobs = async (req, res) => {
-  const { employerId } = req.query; // Get employerId from query parameters
+  const {
+    employerId,
+    jobType,
+    location,
+    workEnvironment,
+    minSalary,
+    maxSalary,
+    skill,
+    requiredWorkAuthorization, 
+  } = req.query;
 
   let filter = {};
   if (employerId) {
     filter.employerId = employerId;
-    console.log(
-      `[getAllJobs] Fetching jobs filtered by employerId: ${employerId}`
-    );
-  } else {
-    console.log(
-      "[getAllJobs] Fetching all job postings (no employerId filter)."
-    );
+  }
+  if (jobType) {
+    filter.jobType = jobType;
+  }
+  if (location) {
+    filter.location = { $regex: location, $options: "i" };
+  }
+  if (workEnvironment) {
+    filter.workEnvironment = workEnvironment;
+  }
+  if (minSalary) {
+    filter["salaryRange.min"] = { $gte: parseInt(minSalary) };
+  }
+  if (maxSalary) {
+    filter["salaryRange.max"] = { $lte: parseInt(maxSalary) };
+  }
+  if (skill) {
+    filter["requiredSkills.skill"] = { $regex: skill, $options: "i" };
+  }
+  // NEW: Filter jobs based on their required work authorization.
+  // This helps candidates find jobs they are eligible for.
+  if (requiredWorkAuthorization) {
+    // If the query parameter is a single string, we search if that string is in the job's array
+    // If multiple are sent (e.g., ?requiredWorkAuthorization=PR%20Citizen&requiredWorkAuthorization=Work%20Permit),
+    // Express will typically parse it as an array.
+    const searchAuths = Array.isArray(requiredWorkAuthorization)
+      ? requiredWorkAuthorization
+      : [requiredWorkAuthorization];
+    filter.requiredWorkAuthorization = { $in: searchAuths };
   }
 
   try {
-    const jobs = await Job.find(filter); // Apply the filter if present
-    console.log(`[getAllJobs] Found ${jobs.length} job(s).`);
+    const jobs = await Job.find(filter);
     res.status(200).json(jobs);
   } catch (error) {
     handleError(res, error, "Failed to fetch job postings", 500);
   }
 };
 
-
 exports.getJobById = async (req, res) => {
   const { jobId } = req.params;
   try {
-    console.log(`[getJobById] Fetching job with ID: ${jobId}`);
-    const job = await Job.findById(jobId); // Find by the document's _id
+    const job = await Job.findById(jobId);
 
     if (!job) {
-      console.log(`[getJobById] Job not found for ID: ${jobId}`);
       return res.status(404).json({ message: "Job posting not found" });
     }
 
-    console.log(`[getJobById] Job found with ID: ${jobId}`);
     res.status(200).json(job);
   } catch (error) {
     handleError(res, error, "Failed to fetch job posting", 500);
   }
 };
 
-
 exports.updateJobById = async (req, res) => {
   const { jobId } = req.params;
-  const updates = req.body; // Contains the fields to update
+  const updates = req.body;
 
-  // Optional: Check if updates object is empty
   if (!updates || Object.keys(updates).length === 0) {
-    console.log(
-      `[updateJobById] Invalid request: Empty body for job update on ID: ${jobId}`
-    );
     return res
       .status(400)
       .json({ message: "Request body must contain fields to update." });
   }
 
   try {
-    console.log(`[updateJobById] PATCH request received for jobId: ${jobId}`);
-    console.log(`[updateJobById] Updates for job:`, updates);
-
     const updatedJob = await Job.findByIdAndUpdate(
       jobId,
-      { $set: updates }, // Use $set to update only the provided fields
-      { new: true, runValidators: true } // Return the updated document and run schema validators
+      { $set: updates },
+      { new: true, runValidators: true }
     );
 
     if (!updatedJob) {
-      console.log(`[updateJobById] Job not found for ID: ${jobId}`);
       return res.status(404).json({ message: "Job posting not found" });
     }
 
-    console.log(`[updateJobById] Job updated for ID: ${jobId}`);
     res.status(200).json(updatedJob);
   } catch (error) {
     handleError(
@@ -144,23 +158,17 @@ exports.updateJobById = async (req, res) => {
   }
 };
 
-
 exports.deleteJobById = async (req, res) => {
   const { jobId } = req.params;
 
   try {
-    console.log(`[deleteJobById] DELETE request received for jobId: ${jobId}`);
     const deletedJob = await Job.findByIdAndDelete(jobId);
 
     if (!deletedJob) {
-      console.log(`[deleteJobById] Job not found for ID: ${jobId}`);
       return res.status(404).json({ message: "Job posting not found" });
     }
 
-    console.log(`[deleteJobById] Job deleted successfully for ID: ${jobId}`);
-
     res.status(200).json({ message: "Job posting deleted successfully." });
-    // Alternative for DELETE with no content: res.status(204).send();
   } catch (error) {
     handleError(res, error, "Failed to delete job posting", 500);
   }

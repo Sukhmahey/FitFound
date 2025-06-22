@@ -1,60 +1,165 @@
-const Candidate = require("../models/CandidateModel"); 
+const Candidate = require("../models/CandidateModel");
 
 const handleError = (res, error, message, status = 500) => {
-  console.error(`${message}:`, error);
+  console.error(`[CandidateController] ${message}:`, error);
   res.status(status).json({
     error: message,
     details: error.message || "Server Error",
-
     ...(error.name === "ValidationError" && { validationErrors: error.errors }),
   });
+};
+
+// General Profile Operations
+
+exports.createCandidateProfile = async (req, res) => {
+  const {
+    userId,
+    personalInfo,
+    basicInfo,
+    skills,
+    workHistory,
+    portfolio,
+    education,
+    jobPreference,
+  } = req.body;
+
+  try {
+    const existingProfile = await Candidate.findOne({ userId });
+    if (existingProfile) {
+      return res
+        .status(409)
+        .json({ message: "Candidate profile already exists for this user." });
+    }
+
+    const newCandidateProfile = new Candidate({
+      userId,
+      personalInfo,
+      basicInfo,
+      skills,
+      workHistory,
+      portfolio,
+      education,
+      jobPreference,
+    });
+
+    const savedProfile = await newCandidateProfile.save();
+    res.status(201).json(savedProfile);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to create candidate profile",
+      error.name === "ValidationError" ? 400 : 500
+    );
+  }
 };
 
 exports.getCandidateByUserId = async (req, res) => {
   const { userId } = req.params;
   try {
-    console.log(
-      `[getCandidateByUserId] Request initiated for userId: ${userId}`
-    );
-    const candidate = await Candidate.findOne({ userId }); // Find by the userId field
+    const candidate = await Candidate.findOne({ userId });
     if (!candidate) {
-      console.log(
-        `[getCandidateByUserId] Candidate not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found" });
     }
-    console.log(`[getCandidateByUserId] Candidate found for userId: ${userId}`);
     res.status(200).json(candidate);
   } catch (error) {
     handleError(res, error, "Failed to fetch candidate profile", 500);
   }
 };
 
+exports.getAllCandidateProfiles = async (req, res) => {
+  // Major change: Added comprehensive filtering for employer search criteria
+  const {
+    title, // Corresponds to employer's "Title" search for desired job title
+    jobType, // Corresponds to employer's "Job Type" search (candidate's preferred job type)
+    location, // Corresponds to employer's "Location" search (candidate's location)
+    salaryFrom, // Corresponds to employer's "Salary Range From"
+    salaryTo, // Corresponds to employer's "Salary Range To"
+    jobDescriptionKeywords, // Corresponds to employer's "Job Description" (keywords for candidate bio/experience)
+    workStatus, // Corresponds to employer's "Work Status" (candidate's immigration/residency status)
+    skills, // Corresponds to employer's "Skills" search
+  } = req.query;
+
+  let filter = {};
+
+
+  if (title) {
+    filter["jobPreference.desiredJobTitle"] = { $regex: title, $options: "i" }; // Case-insensitive search
+  }
+
+
+  if (jobType) {
+    filter["jobPreference.jobType"] = jobType;
+  }
+
+
+  if (location) {
+    filter["basicInfo.location"] = { $regex: location, $options: "i" }; // Case-insensitive search
+  }
+
+
+  if (salaryFrom || salaryTo) {
+    filter["jobPreference.salaryExpectation.min"] = {};
+    if (salaryFrom) {
+      filter["jobPreference.salaryExpectation.min"].$gte = parseInt(salaryFrom);
+    }
+    if (salaryTo) {
+      filter["jobPreference.salaryExpectation.min"].$lte = parseInt(salaryTo);
+    }
+  }
+
+
+  if (jobDescriptionKeywords) {
+    filter["basicInfo.bio"] = { $regex: jobDescriptionKeywords, $options: "i" }; // Case-insensitive search
+  }
+
+
+  if (workStatus) {
+    const searchWorkStatuses = Array.isArray(workStatus)
+      ? workStatus
+      : [workStatus];
+    filter["basicInfo.workStatus"] = { $in: searchWorkStatuses };
+  }
+
+
+  if (skills) {
+    const searchSkills = Array.isArray(skills)
+      ? skills
+      : skills.split(",").map((s) => s.trim());
+    filter["skills.skill"] = {
+      $in: searchSkills.map((s) => new RegExp(s, "i")),
+    }; // Case-insensitive match for each skill
+  }
+
+  try {
+    const candidateProfiles = await Candidate.find(filter);
+    res.status(200).json(candidateProfiles);
+  } catch (error) {
+    handleError(res, error, "Failed to fetch candidate profiles", 500);
+  }
+};
+
 exports.updateCandidateProfile = async (req, res) => {
   const { userId } = req.params;
   const updates = req.body;
-  try {
-    console.log(
-      `[updateCandidateProfile] PATCH request received for userId: ${userId}`
-    );
-    console.log(`[updateCandidateProfile] Request body:`, updates);
 
+  if (!updates || Object.keys(updates).length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Request body must contain fields to update." });
+  }
+
+  try {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: updates }, // Use $set to update only the fields provided in req.body
-      { new: true, runValidators: true } // Return the updated document and run schema validators
+      { $set: updates },
+      { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[updateCandidateProfile] Candidate profile not found for userId: ${userId}`
-      );
-      return res.status(404).json({ message: "Candidate profile not found" });
+      return res.status(404).json({ message: "Candidate profile not found." });
     }
 
-    console.log(
-      `[updateCandidateProfile] Candidate profile updated for userId: ${userId}`
-    );
     res.status(200).json(updatedCandidate);
   } catch (error) {
     handleError(
@@ -66,36 +171,179 @@ exports.updateCandidateProfile = async (req, res) => {
   }
 };
 
+exports.deleteCandidateProfile = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const deletedProfile = await Candidate.findOneAndDelete({ userId });
+    if (!deletedProfile) {
+      return res.status(404).json({ message: "Candidate profile not found" });
+    }
+    res
+      .status(200)
+      .json({ message: "Candidate profile deleted successfully." });
+  } catch (error) {
+    handleError(res, error, "Failed to delete candidate profile", 500);
+  }
+};
+
+// Nested Object Update Endpoints
+
+exports.updatePersonalInfo = async (req, res) => {
+  const { userId } = req.params;
+  const updates = req.body;
+  try {
+    const updatedCandidate = await Candidate.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          "personalInfo.firstName": updates.firstName,
+          "personalInfo.middleName": updates.middleName,
+          "personalInfo.lastName": updates.lastName,
+          "personalInfo.email": updates.email,
+          "personalInfo.currentStatus": updates.currentStatus,
+          "personalInfo.specialization": updates.specialization,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    if (!updatedCandidate) {
+      return res.status(404).json({ message: "Candidate profile not found." });
+    }
+    res.status(200).json(updatedCandidate.personalInfo);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to update personal info",
+      error.name === "ValidationError" ? 400 : 500
+    );
+  }
+};
+
+exports.updateBasicInfo = async (req, res) => {
+  const { userId } = req.params;
+  const updates = req.body;
+  try {
+    const updatedCandidate = await Candidate.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          "basicInfo.phoneNumber": updates.phoneNumber,
+          "basicInfo.workStatus": updates.workStatus,
+          "basicInfo.language": updates.language,
+          "basicInfo.bio": updates.bio,
+          "basicInfo.additionalInfo": updates.additionalInfo,
+          "basicInfo.location": updates.location, // ADDED: to allow updating location
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    if (!updatedCandidate) {
+      return res.status(404).json({ message: "Candidate profile not found." });
+    }
+    res.status(200).json(updatedCandidate.basicInfo);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to update basic info",
+      error.name === "ValidationError" ? 400 : 500
+    );
+  }
+};
+
+exports.updatePortfolio = async (req, res) => {
+  const { userId } = req.params;
+  const updates = req.body;
+  const updateQuery = {};
+  if (updates.socialLinks && typeof updates.socialLinks === "object") {
+    for (const key in updates.socialLinks) {
+      updateQuery[`portfolio.socialLinks.${key}`] = updates.socialLinks[key];
+    }
+  }
+
+  if (Object.keys(updateQuery).length === 0) {
+    return res.status(400).json({
+      message: "Request body must contain valid portfolio fields to update.",
+    });
+  }
+
+  try {
+    const updatedCandidate = await Candidate.findOneAndUpdate(
+      { userId },
+      { $set: updateQuery },
+      { new: true, runValidators: true }
+    );
+    if (!updatedCandidate) {
+      return res.status(404).json({ message: "Candidate profile not found." });
+    }
+    res.status(200).json(updatedCandidate.portfolio);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to update portfolio",
+      error.name === "ValidationError" ? 400 : 500
+    );
+  }
+};
+
+exports.updateJobPreference = async (req, res) => {
+  const { userId } = req.params;
+  const updates = req.body;
+  try {
+    const updatedCandidate = await Candidate.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          "jobPreference.desiredJobTitle": updates.desiredJobTitle,
+          "jobPreference.jobType": updates.jobType,
+          "jobPreference.salaryExpectation.min": updates.salaryExpectation?.min,
+          "jobPreference.salaryExpectation.perHour":
+            updates.salaryExpectation?.perHour,
+          "jobPreference.salaryExpectation.perYear":
+            updates.salaryExpectation?.perYear,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    if (!updatedCandidate) {
+      return res.status(404).json({ message: "Candidate profile not found." });
+    }
+    res.status(200).json(updatedCandidate.jobPreference);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to update job preferences",
+      error.name === "ValidationError" ? 400 : 500
+    );
+  }
+};
+
+// Skills Endpoints
+
 exports.updateSkills = async (req, res) => {
   const { userId } = req.params;
-  const { skills } = req.body; // Expects an array of skill objects
+  const { skills } = req.body;
 
   if (!Array.isArray(skills)) {
-    console.log(`[updateSkills] Invalid request: 'skills' must be an array.`);
     return res
       .status(400)
       .json({ message: "Request body must contain a 'skills' array." });
   }
 
   try {
-    console.log(`[updateSkills] PATCH request received for userId: ${userId}`);
-    console.log(`[updateSkills] New skills array:`, skills);
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { skills: skills } }, // Replace the entire skills array
+      { $set: { skills: skills } },
       { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[updateSkills] Candidate profile not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found." });
     }
-
-    console.log(`[updateSkills] Skills updated for userId: ${userId}`);
-    res.status(200).json(updatedCandidate);
+    res.status(200).json(updatedCandidate.skills);
   } catch (error) {
     handleError(
       res,
@@ -106,42 +354,131 @@ exports.updateSkills = async (req, res) => {
   }
 };
 
+exports.addSkillEntry = async (req, res) => {
+  const { userId } = req.params;
+  const newSkillEntry = req.body;
+
+  if (!newSkillEntry || Object.keys(newSkillEntry).length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Request body must contain a new skill entry." });
+  }
+
+  try {
+    const updatedCandidate = await Candidate.findOneAndUpdate(
+      { userId },
+      { $push: { skills: newSkillEntry } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCandidate) {
+      return res.status(404).json({ message: "Candidate profile not found." });
+    }
+    res.status(201).json(updatedCandidate.skills);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to add skill entry",
+      error.name === "ValidationError" ? 400 : 500
+    );
+  }
+};
+
+exports.updateSkillEntryById = async (req, res) => {
+  const { userId, skillId } = req.params;
+  const updates = req.body;
+
+  if (!updates || Object.keys(updates).length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Request body must contain fields to update." });
+  }
+
+  try {
+    const updateOperation = {};
+    for (const key in updates) {
+      if (Object.prototype.hasOwnProperty.call(updates, key)) {
+        updateOperation[`skills.$[elem].${key}`] = updates[key];
+      }
+    }
+
+    const updatedCandidate = await Candidate.findOneAndUpdate(
+      { userId: userId, "skills._id": skillId },
+      { $set: updateOperation },
+      {
+        new: true,
+        runValidators: true,
+        arrayFilters: [{ "elem._id": skillId }],
+      }
+    );
+
+    if (!updatedCandidate) {
+      return res
+        .status(404)
+        .json({ message: "Candidate profile or skill entry not found." });
+    }
+    const updatedEntry = updatedCandidate.skills.id(skillId);
+    if (!updatedEntry) {
+      return res.status(404).json({
+        message: "Skill entry not found within the candidate's profile.",
+      });
+    }
+    res.status(200).json(updatedEntry);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to update skill entry",
+      error.name === "ValidationError" ? 400 : 500
+    );
+  }
+};
+
+exports.deleteSkillEntryById = async (req, res) => {
+  const { userId, skillId } = req.params;
+
+  try {
+    const updatedCandidate = await Candidate.findOneAndUpdate(
+      { userId: userId },
+      { $pull: { skills: { _id: skillId } } },
+      { new: true }
+    );
+
+    if (!updatedCandidate) {
+      return res
+        .status(404)
+        .json({ message: "Candidate profile or skill entry not found." });
+    }
+    res.status(200).json({ message: "Skill entry deleted successfully." });
+  } catch (error) {
+    handleError(res, error, "Failed to delete skill entry", 500);
+  }
+};
+
+// Work History Endpoints
+
 exports.updateWorkHistory = async (req, res) => {
   const { userId } = req.params;
-  const { workHistory } = req.body; // Expects an array of work history objects
+  const { workHistory } = req.body;
 
   if (!Array.isArray(workHistory)) {
-    console.log(
-      `[updateWorkHistory] Invalid request: 'workHistory' must be an array.`
-    );
     return res
       .status(400)
       .json({ message: "Request body must contain a 'workHistory' array." });
   }
 
   try {
-    console.log(
-      `[updateWorkHistory] PATCH request received for userId: ${userId}`
-    );
-    console.log(`[updateWorkHistory] New workHistory array:`, workHistory);
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { workHistory: workHistory } }, // Replace the entire workHistory array
+      { $set: { workHistory: workHistory } },
       { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[updateWorkHistory] Candidate profile not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found." });
     }
-
-    console.log(
-      `[updateWorkHistory] Work history updated for userId: ${userId}`
-    );
-    res.status(200).json(updatedCandidate);
+    res.status(200).json(updatedCandidate.workHistory);
   } catch (error) {
     handleError(
       res,
@@ -154,41 +491,25 @@ exports.updateWorkHistory = async (req, res) => {
 
 exports.addWorkHistoryEntry = async (req, res) => {
   const { userId } = req.params;
-  const newWorkEntry = req.body; // Expects a single work history object
-
+  const newWorkEntry = req.body;
 
   if (!newWorkEntry || Object.keys(newWorkEntry).length === 0) {
-    console.log(
-      `[addWorkHistoryEntry] Invalid request: Empty body for new work entry.`
-    );
     return res
       .status(400)
       .json({ message: "Request body must contain a new work history entry." });
   }
 
   try {
-    console.log(
-      `[addWorkHistoryEntry] POST request received for userId: ${userId}`
-    );
-    console.log(`[addWorkHistoryEntry] New work entry to add:`, newWorkEntry);
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $push: { workHistory: newWorkEntry } }, // Add the new entry to the array
+      { $push: { workHistory: newWorkEntry } },
       { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[addWorkHistoryEntry] Candidate profile not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found." });
     }
-
-    console.log(
-      `[addWorkHistoryEntry] New work history entry added for userId: ${userId}`
-    );
-    res.status(201).json(updatedCandidate); // 201 Created for a new resource
+    res.status(201).json(updatedCandidate.workHistory);
   } catch (error) {
     handleError(
       res,
@@ -200,24 +521,16 @@ exports.addWorkHistoryEntry = async (req, res) => {
 };
 
 exports.updateWorkEntryById = async (req, res) => {
-  const { userId, workExpId } = req.params;
-  const updates = req.body; // Contains fields to update for that specific entry
+  const { userId, entryId } = req.params;
+  const updates = req.body;
 
   if (!updates || Object.keys(updates).length === 0) {
-    console.log(
-      `[updateWorkEntryById] Invalid request: Empty body for work entry update.`
-    );
     return res
       .status(400)
       .json({ message: "Request body must contain fields to update." });
   }
 
   try {
-    console.log(
-      `[updateWorkEntryById] PATCH request received for userId: ${userId}, workExpId: ${workExpId}`
-    );
-    console.log(`[updateWorkEntryById] Updates for work entry:`, updates);
-
     const updateOperation = {};
     for (const key in updates) {
       if (Object.prototype.hasOwnProperty.call(updates, key)) {
@@ -226,41 +539,27 @@ exports.updateWorkEntryById = async (req, res) => {
     }
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
-      { userId: userId }, // Find the main candidate document
-      { $set: updateOperation }, // Apply the now updates
+      { userId: userId, "workHistory._id": entryId },
+      { $set: updateOperation },
       {
         new: true,
         runValidators: true,
-        arrayFilters: [{ "elem._id": workExpId }], // Target the specific subdocument by its _id
+        arrayFilters: [{ "elem._id": entryId }],
       }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[updateWorkEntryById] Candidate profile or work experience not found for userId: ${userId}, workExpId: ${workExpId}`
-      );
-      return res
-        .status(404)
-        .json({ message: "Candidate profile or work experience not found." });
+      return res.status(404).json({
+        message: "Candidate profile or work history entry not found.",
+      });
     }
-    // Check if the arrayFilters actually matched and updated an element
-    const updatedEntry = updatedCandidate.workHistory.id(workExpId);
+    const updatedEntry = updatedCandidate.workHistory.id(entryId);
     if (!updatedEntry) {
-      console.log(
-        `[updateWorkEntryById] Work experience with ID ${workExpId} not found within candidate ${userId}'s profile.`
-      );
-      return res
-        .status(404)
-        .json({
-          message:
-            "Work experience entry not found within the candidate's profile.",
-        });
+      return res.status(404).json({
+        message: "Work history entry not found within the candidate's profile.",
+      });
     }
-
-    console.log(
-      `[updateWorkEntryById] Work history entry updated for userId: ${userId}, workExpId: ${workExpId}`
-    );
-    res.status(200).json(updatedCandidate);
+    res.status(200).json(updatedEntry);
   } catch (error) {
     handleError(
       res,
@@ -272,78 +571,51 @@ exports.updateWorkEntryById = async (req, res) => {
 };
 
 exports.deleteWorkEntryById = async (req, res) => {
-  const { userId, workExpId } = req.params;
+  const { userId, entryId } = req.params;
 
   try {
-    console.log(
-      `[deleteWorkEntryById] DELETE request received for userId: ${userId}, workExpId: ${workExpId}`
-    );
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId: userId },
-      { $pull: { workHistory: { _id: workExpId } } }, // Remove elements matching the condition
-      { new: true } // Return the updated document
+      { $pull: { workHistory: { _id: entryId } } },
+      { new: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[deleteWorkEntryById] Candidate profile or work experience not found for userId: ${userId}, workExpId: ${workExpId}`
-      );
-      return res
-        .status(404)
-        .json({ message: "Candidate profile or work experience not found." });
+      return res.status(404).json({
+        message: "Candidate profile or work history entry not found.",
+      });
     }
-    // You could check if the length of the array changed to confirm deletion,
-
-    console.log(
-      `[deleteWorkEntryById] Work history entry deleted for userId: ${userId}, workExpId: ${workExpId}`
-    );
     res
       .status(200)
-      .json({
-        message: "Work experience entry deleted successfully.",
-        candidate: updatedCandidate,
-      });
-    // Or res.status(204).send() for no content response
+      .json({ message: "Work history entry deleted successfully." });
   } catch (error) {
     handleError(res, error, "Failed to delete work history entry", 500);
   }
 };
 
+// Education Endpoints
+
 exports.updateEducation = async (req, res) => {
   const { userId } = req.params;
-  const { education } = req.body; // Expects an array of education objects
+  const { education } = req.body;
 
   if (!Array.isArray(education)) {
-    console.log(
-      `[updateEducation] Invalid request: 'education' must be an array.`
-    );
     return res
       .status(400)
       .json({ message: "Request body must contain an 'education' array." });
   }
 
   try {
-    console.log(
-      `[updateEducation] PATCH request received for userId: ${userId}`
-    );
-    console.log(`[updateEducation] New education array:`, education);
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { education: education } }, // Replace the entire education array
+      { $set: { education: education } },
       { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[updateEducation] Candidate profile not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found." });
     }
-
-    console.log(`[updateEducation] Education updated for userId: ${userId}`);
-    res.status(200).json(updatedCandidate);
+    res.status(200).json(updatedCandidate.education);
   } catch (error) {
     handleError(
       res,
@@ -356,43 +628,25 @@ exports.updateEducation = async (req, res) => {
 
 exports.addEducationEntry = async (req, res) => {
   const { userId } = req.params;
-  const newEducationEntry = req.body; // Expects a single education object
+  const newEducationEntry = req.body;
 
   if (!newEducationEntry || Object.keys(newEducationEntry).length === 0) {
-    console.log(
-      `[addEducationEntry] Invalid request: Empty body for new education entry.`
-    );
     return res
       .status(400)
       .json({ message: "Request body must contain a new education entry." });
   }
 
   try {
-    console.log(
-      `[addEducationEntry] POST request received for userId: ${userId}`
-    );
-    console.log(
-      `[addEducationEntry] New education entry to add:`,
-      newEducationEntry
-    );
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $push: { education: newEducationEntry } }, // Add the new entry to the array
+      { $push: { education: newEducationEntry } },
       { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[addEducationEntry] Candidate profile not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found." });
     }
-
-    console.log(
-      `[addEducationEntry] New education entry added for userId: ${userId}`
-    );
-    res.status(201).json(updatedCandidate);
+    res.status(201).json(updatedCandidate.education);
   } catch (error) {
     handleError(
       res,
@@ -404,24 +658,16 @@ exports.addEducationEntry = async (req, res) => {
 };
 
 exports.updateEducationById = async (req, res) => {
-  const { userId, educationId } = req.params;
-  const updates = req.body; // Contains fields to update for that specific entry
+  const { userId, entryId } = req.params;
+  const updates = req.body;
 
   if (!updates || Object.keys(updates).length === 0) {
-    console.log(
-      `[updateEducationById] Invalid request: Empty body for education entry update.`
-    );
     return res
       .status(400)
       .json({ message: "Request body must contain fields to update." });
   }
 
   try {
-    console.log(
-      `[updateEducationById] PATCH request received for userId: ${userId}, educationId: ${educationId}`
-    );
-    console.log(`[updateEducationById] Updates for education entry:`, updates);
-
     const updateOperation = {};
     for (const key in updates) {
       if (Object.prototype.hasOwnProperty.call(updates, key)) {
@@ -430,40 +676,27 @@ exports.updateEducationById = async (req, res) => {
     }
 
     const updatedCandidate = await Candidate.findOneAndUpdate(
-      { userId: userId },
+      { userId: userId, "education._id": entryId },
       { $set: updateOperation },
       {
         new: true,
         runValidators: true,
-        arrayFilters: [{ "elem._id": educationId }],
+        arrayFilters: [{ "elem._id": entryId }],
       }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[updateEducationById] Candidate profile or education entry not found for userId: ${userId}, educationId: ${educationId}`
-      );
       return res
         .status(404)
         .json({ message: "Candidate profile or education entry not found." });
     }
-
-    const updatedEntry = updatedCandidate.education.id(educationId);
+    const updatedEntry = updatedCandidate.education.id(entryId);
     if (!updatedEntry) {
-      console.log(
-        `[updateEducationById] Education entry with ID ${educationId} not found within candidate ${userId}'s profile.`
-      );
-      return res
-        .status(404)
-        .json({
-          message: "Education entry not found within the candidate's profile.",
-        });
+      return res.status(404).json({
+        message: "Education entry not found within the candidate's profile.",
+      });
     }
-
-    console.log(
-      `[updateEducationById] Education entry updated for userId: ${userId}, educationId: ${educationId}`
-    );
-    res.status(200).json(updatedCandidate);
+    res.status(200).json(updatedEntry);
   } catch (error) {
     handleError(
       res,
@@ -475,73 +708,45 @@ exports.updateEducationById = async (req, res) => {
 };
 
 exports.deleteEducationById = async (req, res) => {
-  const { userId, educationId } = req.params;
+  const { userId, entryId } = req.params;
 
   try {
-    console.log(
-      `[deleteEducationById] DELETE request received for userId: ${userId}, educationId: ${educationId}`
-    );
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId: userId },
-      { $pull: { education: { _id: educationId } } },
+      { $pull: { education: { _id: entryId } } },
       { new: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[deleteEducationById] Candidate profile or education entry not found for userId: ${userId}, educationId: ${educationId}`
-      );
       return res
         .status(404)
         .json({ message: "Candidate profile or education entry not found." });
     }
-
-    console.log(
-      `[deleteEducationById] Education entry deleted for userId: ${userId}, educationId: ${educationId}`
-    );
-    res
-      .status(200)
-      .json({
-        message: "Education entry deleted successfully.",
-        candidate: updatedCandidate,
-      });
-    // Or res.status(204).send() for no content
+    res.status(200).json({ message: "Education entry deleted successfully." });
   } catch (error) {
     handleError(res, error, "Failed to delete education entry", 500);
   }
 };
 
+// Meta-data & Dashboard Endpoints
+
 exports.incrementVisibility = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    console.log(
-      `[incrementVisibility] PATCH request received for userId: ${userId}`
-    );
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $inc: { visibilityCount: 1 } }, // Increment visibilityCount by 1
+      { $inc: { visibilityCount: 1 } },
       { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[incrementVisibility] Candidate profile not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found." });
     }
-
-    console.log(
-      `[incrementVisibility] Visibility count incremented for userId: ${userId}. New count: ${updatedCandidate.visibilityCount}`
-    );
-    res
-      .status(200)
-      .json({
-        message: "Visibility count incremented successfully.",
-        candidate: updatedCandidate,
-      });
+    res.status(200).json({
+      message: "Visibility count incremented successfully.",
+      visibilityCount: updatedCandidate.visibilityCount,
+    });
   } catch (error) {
     handleError(res, error, "Failed to increment visibility count", 500);
   }
@@ -551,31 +756,78 @@ exports.markVerified = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    console.log(`[markVerified] PATCH request received for userId: ${userId}`);
-
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
-      { $set: { verifiedBadge: true } }, // Set verifiedBadge to true
+      { $set: { verifiedBadge: true } },
       { new: true, runValidators: true }
     );
 
     if (!updatedCandidate) {
-      console.log(
-        `[markVerified] Candidate profile not found for userId: ${userId}`
-      );
       return res.status(404).json({ message: "Candidate profile not found." });
     }
-
-    console.log(
-      `[markVerified] Candidate profile marked as verified for userId: ${userId}`
-    );
-    res
-      .status(200)
-      .json({
-        message: "Candidate profile marked as verified.",
-        candidate: updatedCandidate,
-      });
+    res.status(200).json({
+      message: "Candidate profile marked as verified.",
+      verifiedBadge: updatedCandidate.verifiedBadge,
+    });
   } catch (error) {
     handleError(res, error, "Failed to mark profile as verified", 500);
+  }
+};
+
+exports.getDashboardMainRoleCounts = async (req, res) => {
+  try {
+    const counts = await Candidate.aggregate([
+      {
+        $match: {
+          "jobPreference.mainRole": {
+            $in: [
+              "Frontend Developer",
+              "Backend Developer",
+              "Full Stack Developer",
+              "UI/UX Designer",
+              "Project Manager",
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$jobPreference.mainRole",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          role: "$_id",
+          count: 1,
+        },
+      },
+      {
+        $sort: { role: 1 },
+      },
+    ]);
+
+    const allRoles = [
+      "Frontend Developer",
+      "Backend Developer",
+      "Full Stack Developer",
+      "UI/UX Designer",
+      "Project Manager",
+    ];
+
+    const finalCounts = allRoles.map((role) => {
+      const found = counts.find((item) => item.role === role);
+      return { role, count: found ? found.count : 0 };
+    });
+
+    res.status(200).json(finalCounts);
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Failed to retrieve candidate main role counts",
+      500
+    );
   }
 };
