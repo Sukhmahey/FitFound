@@ -28,6 +28,8 @@ export const candidateApi = {
   updateBasicInfo: (userId, data) => api.patch(`/candidates/${userId}/basic-info`, data),
   updatePortfolio: (userId, data) => api.patch(`/candidates/${userId}/portfolio`, data),
   updateJobPreference: (userId, data) => api.patch(`/candidates/${userId}/job-preference`, data),
+  getProfileByUserId: (userId) => api.get(`/candidates/user/${userId}`),
+
 
   
 
