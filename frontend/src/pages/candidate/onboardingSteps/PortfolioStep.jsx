@@ -1,48 +1,4 @@
-// import React from 'react';
 
-// export default function PortfolioStep({ data, onUpdate }) {
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     onUpdate({ [name]: value });
-//   };
-
-//   return (
-//     <div>
-//       <h3>Portfolio</h3>
-//       <form>
-//         <div>
-//           <label>LinkedIn:</label>
-//           <input
-//             type="text"
-//             name="linkedin"
-//             value={data.linkedin || ''}
-//             onChange={handleChange}
-//           />
-//         </div>
-
-//         <div>
-//           <label>Personal Portfolio Website:</label>
-//           <input
-//             type="text"
-//             name="website"
-//             value={data.website || ''}
-//             onChange={handleChange}
-//           />
-//         </div>
-
-//         <div>
-//           <label>Additional Links:</label>
-//           <input
-//             type="text"
-//             name="additional"
-//             value={data.additional || ''}
-//             onChange={handleChange}
-//           />
-//         </div>
-//       </form>
-//     </div>
-//   );
-// }
 
 import React from 'react';
 
