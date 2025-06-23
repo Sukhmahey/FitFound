@@ -390,26 +390,36 @@ export default function InfoConfirmationPage({ data }) {
   };
 
   const addWorkExperience = () => {
-    setForm(prev => ({
-      ...prev,
-      workExperience: [
-        ...prev.workExperience,
-        {
-          companyName: '',
-          role: '',
-          startDate: '',
-          endDate: '',
-          achievements: ['']
-        }
-      ]
-    }));
-  };
+  setForm(prev => ({
+    ...prev,
+    workExperience: [
+      ...prev.workExperience,
+      {
+        companyName: '',
+        role: '',
+        jobTitle: '',
+        experienceLevel: '',
+        remarkFromEmployer: '',
+        startDate: '',
+        endDate: '',
+        achievements: ['']
+      }
+    ]
+  }));
+};
+
 
   const updateWorkAchievement = (weIndex, achIndex, value) => {
     const updated = [...form.workExperience];
     updated[weIndex].achievements[achIndex] = value;
     setForm(prev => ({ ...prev, workExperience: updated }));
   };
+const formatDate = (date) => {
+  if (!date) return '';
+  const [year, month] = date.split('-');
+  return `${month}-${year}`; 
+};
+
 
   const submitForm = async () => {
     try {
@@ -419,8 +429,20 @@ export default function InfoConfirmationPage({ data }) {
         skills: form.skills.map(skill => ({ skill }))
       });
       await candidateApi.updateWorkHistory(userId, {
-        workExperience: form.workExperience
-      });
+  workHistory: form.workExperience.map(exp => ({
+    companyName: exp.companyName,
+    jobTitle: exp.jobTitle,
+    role: exp.role,
+    startDate: formatDate(exp.startDate),
+    endDate: formatDate(exp.endDate),
+    achievements: exp.achievements,
+    experienceLevel: exp.experienceLevel,
+    remarkFromEmployer: exp.remarkFromEmployer
+  }))
+});
+
+
+
       await candidateApi.updateEducation(userId, {
         education: form.education
       });
@@ -454,6 +476,17 @@ export default function InfoConfirmationPage({ data }) {
         <input value={form.basicInfo.phoneNumber} onChange={e => handleNestedChange('basicInfo', 'phoneNumber', e.target.value)} />
       </label><br />
 
+      <label>Current Status:
+        <select value={form.personalInfo.currentStatus} onChange={e => handleNestedChange('personalInfo', 'currentStatus', e.target.value)}>
+          <option value="">Select status</option>
+          <option value="Student">Student</option>
+          <option value="Working Professional">Working Professional</option>
+          <option value="Unemployed">Unemployed</option>
+          <option value="Other">Other</option>
+        </select>
+      </label><br />
+
+
       <label>Specialization:
         <input value={form.personalInfo.specialization} onChange={e => handleNestedChange('personalInfo', 'specialization', e.target.value)} />
       </label><br />
@@ -486,15 +519,44 @@ export default function InfoConfirmationPage({ data }) {
                 setForm({ ...form, workExperience: updated });
               }} />
             </label><br />
+            <label>Job Title:
+  <input value={we.jobTitle} onChange={e => {
+    const updated = [...form.workExperience];
+    updated[i].jobTitle = e.target.value;
+    setForm({ ...form, workExperience: updated });
+  }} />
+</label><br />
+
+<label>Experience Level:
+  <select value={we.experienceLevel} onChange={e => {
+    const updated = [...form.workExperience];
+    updated[i].experienceLevel = e.target.value;
+    setForm({ ...form, workExperience: updated });
+  }}>
+    <option value="">Select level</option>
+    <option value="junior">Junior</option>
+    <option value="middle">Middle</option>
+    <option value="senior">Senior</option>
+  </select>
+</label><br />
+
+<label>Remark from Employer:
+  <textarea value={we.remarkFromEmployer} onChange={e => {
+    const updated = [...form.workExperience];
+    updated[i].remarkFromEmployer = e.target.value;
+    setForm({ ...form, workExperience: updated });
+  }} />
+</label><br />
+
             <label>Start Date:
-              <input value={we.startDate} onChange={e => {
+              <input type='month' value={we.startDate} onChange={e => {
                 const updated = [...form.workExperience];
                 updated[i].startDate = e.target.value;
                 setForm({ ...form, workExperience: updated });
               }} />
             </label><br />
             <label>End Date:
-              <input value={we.endDate} onChange={e => {
+              <input type='month' value={we.endDate} onChange={e => {
                 const updated = [...form.workExperience];
                 updated[i].endDate = e.target.value;
                 setForm({ ...form, workExperience: updated });
@@ -538,6 +600,22 @@ export default function InfoConfirmationPage({ data }) {
           }} />
         </label>
       </fieldset>
+      <label>Job Type:
+  <select
+    value={form.jobPreference.jobType}
+    onChange={e => handleNestedChange('jobPreference', 'jobType', e.target.value)}
+  >
+    <option value="">Select job type</option>
+    <option value="Remote">Remote</option>
+    <option value="full-time">full-time</option>
+    <option value="part-time">part-time</option>
+    <option value="contract">contract</option>
+    <option value="internship">internship</option>
+    <option value="on-site">on-site</option>
+    <option value="hybrid">hybrid</option>
+  </select>
+</label><br />
+
 
       <button onClick={submitForm}>Submit</button>
     </div>

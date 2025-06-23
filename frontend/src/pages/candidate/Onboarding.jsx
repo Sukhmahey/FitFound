@@ -406,7 +406,7 @@ export default function CandidateOnboarding() {
   });
 
   const handleManual = () => setStepIndex(1);
-  const handleUpload = () => setStepIndex(4);
+  const handleUpload = () => setStepIndex(14);
 
   const convertMonthFormat = (value) => {
     if (!value || !value.includes("-")) return value;
@@ -427,7 +427,7 @@ export default function CandidateOnboarding() {
         await candidateApi.updateSkills(userId, { skills: cleanedSkills });
         setStepIndex(4);
       } else if (stepIndex === 14) {
-        setStepIndex(99); 
+        // setStepIndex(99); 
       } else if (stepIndex === 5) {
         const cleanedExperience = formData.workExperience.map(item => ({
           ...item,
