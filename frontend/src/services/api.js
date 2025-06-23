@@ -24,6 +24,11 @@ export const candidateApi = {
 updateSkills: (userId, data) => api.patch(`/candidates/${userId}/skills`, data),
 updateWorkHistory: (userId, data) => api.patch(`/candidates/${userId}/work-history`, data),
 updateEducation: (userId, data) => api.patch(`/candidates/${userId}/education`, data),
+updatePersonalInfo: (userId, data) => api.patch(`/candidates/${userId}/personal-info`, data),
+  updateBasicInfo: (userId, data) => api.patch(`/candidates/${userId}/basic-info`, data),
+  updatePortfolio: (userId, data) => api.patch(`/candidates/${userId}/portfolio`, data),
+  updateJobPreference: (userId, data) => api.patch(`/candidates/${userId}/job-preference`, data),
+  
 
 };
 

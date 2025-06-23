@@ -426,8 +426,8 @@ export default function CandidateOnboarding() {
         const cleanedSkills = formData.skills.map(skill => ({ skill: skill.skill?.trim?.() || '' }));
         await candidateApi.updateSkills(userId, { skills: cleanedSkills });
         setStepIndex(4);
-      } else if (stepIndex === 4) {
-        setStepIndex(5); 
+      } else if (stepIndex === 14) {
+        setStepIndex(99); 
       } else if (stepIndex === 5) {
         const cleanedExperience = formData.workExperience.map(item => ({
           ...item,
@@ -453,7 +453,7 @@ export default function CandidateOnboarding() {
       } else if (stepIndex === 8) {
         await candidateApi.updateJobPreference(userId, formData.jobPreference);
         alert("Profile saved successfully!");
-        setStepIndex(99);
+        // setStepIndex(99);
       } else {
         setStepIndex(stepIndex + 1);
       }
@@ -487,7 +487,7 @@ export default function CandidateOnboarding() {
         return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} />;
       case 3:
         return <SkillsStep data={formData.skills} onUpdate={(data) => updateFormData('skills', data)} />;
-      case 4:
+      case 14:
         return <ResumeParsing setStep={setStepIndex} setConfirmedData={setConfirmedData} />;
       case 5:
         return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
@@ -497,6 +497,7 @@ export default function CandidateOnboarding() {
         return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} />;
       case 8:
         return <JobPreferenceStep data={formData.jobPreference} onUpdate={(data) => updateFormData('jobPreference', data)} />;
+        
       case 99:
         return <InfoConfirmationPage data={confirmedData} />;
       default:
@@ -507,9 +508,9 @@ export default function CandidateOnboarding() {
   return (
     <div>
       <div>Onboarding</div>
-      {stepIndex < 90 && stepIndex !== 4 && (<h2>({stepIndex + 1}/9)</h2>)}
+      {stepIndex < 90 && stepIndex !== 14 && (<h2>({stepIndex + 1}/9)</h2>)}
       {renderStep()}
-      {stepIndex < 90 && stepIndex > 0 && stepIndex !== 4 && (
+      {stepIndex < 90 && stepIndex > 0 && stepIndex !== 14 && (
         <div>
           <button onClick={handlePrevBtn}>Back</button>
           <button onClick={handleNextBtn}>{stepIndex === 8 ? 'Finish' : 'Next'}</button>
