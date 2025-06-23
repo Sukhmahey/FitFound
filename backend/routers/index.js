@@ -12,6 +12,6 @@ router.use("/user", userRouter);
 router.use("/login", loginRouter);
 router.use("/candidates", candidateRouter);
 router.use("/jobs", jobRouter);
-// router.use("/employers", employerProfileRouter);
+router.use("/employers", employerProfileRouter);
 
 module.exports = router;

@@ -27,6 +27,11 @@ updateEducation: (userId, data) => api.patch(`/candidates/${userId}/education`, 
 
 };
 
+// employer endpoints
+export const employerApi = {
+  addEmployerProfile: (userId, data) => api.post(`/employers/${userId}/profile`, data)
+};
+
 
 export { api };
 
