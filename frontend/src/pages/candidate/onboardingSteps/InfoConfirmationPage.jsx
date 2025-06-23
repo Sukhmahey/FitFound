@@ -7,6 +7,13 @@ export default function InfoConfirmationPage({ data }) {
   const { user } = useAuth();
   const userId = user?.userId;
 
+  const convertToHtmlMonth = (date) => {
+  if (!date || !/^\d{2}-\d{4}$/.test(date)) return '';
+  const [month, year] = date.split('-');
+  return `${year}-${month.padStart(2, '0')}`; // YYYY-MM
+};
+
+
   const [form, setForm] = useState(() => ({
     personalInfo: {
       firstName: data.personalInfo?.firstName || '',
@@ -24,7 +31,13 @@ export default function InfoConfirmationPage({ data }) {
       additionalInfo: data.basicInfo?.additionalInfo || ''
     },
     skills: data.skills || [''],
-    workExperience: data.workExperience || [],
+    // workExperience: data.workExperience || [],
+    workExperience: (data.workExperience || []).map(exp => ({
+  ...exp,
+  startDate: convertToHtmlMonth(exp.startDate),
+  endDate: convertToHtmlMonth(exp.endDate)
+}))
+,
     portfolio: {
       socialLinks: {
         linkedin: data.portfolio?.socialLinks?.linkedin || '',
