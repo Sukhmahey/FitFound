@@ -9,8 +9,6 @@ const JobSchema = new Schema(
     requiredSkills: [
       {
         skill: { type: String, minLength: 2, maxLength: 60 },
-        yearsOfExperience: { type: Number, min: 0, validate: Number.isInteger },
-        level: { type: String, enum: ["junior", "middle", "senior"] },
       },
     ],
     mustHaveCriteria: { type: String, minLength: 2, maxLength: 60 },
