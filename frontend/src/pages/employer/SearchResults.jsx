@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 import {
   Box,
@@ -47,20 +48,17 @@ const CandidateCard = ({ data, onViewDetails }) => (
         mr: 3,
       }}
     >
-      {data.match}
+      {data.matchingScore}%
     </Box>
 
     {/* Info Section */}
     <Box sx={{ flexGrow: 1 }}>
-      <Typography variant="subtitle1">{data.username}</Typography>
+      <Typography variant="subtitle1">{"-"}</Typography>
       <Typography variant="body2">
-        Specialization <strong>{data.specialization}</strong>
+        Specialization <strong>{data.mainRole}</strong>
       </Typography>
       <Typography variant="body2">
-        Role: <strong>{data.role}</strong> • {data.type}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        {data.date} | {data.time}
+        Role: <strong>{data.mainRole}</strong> • {data.jobType}
       </Typography>
     </Box>
 
@@ -129,6 +127,13 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
 const SearchResults = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [candidateList, setCandidateList] = useState([]);
+  const candidates = useSelector((state) => state.search.candidates); // 🔹 Get from Redux
+
+  useEffect(() => {
+    console.log("Candidates", candidates);
+    setCandidateList(candidates);
+  }, [candidates]);
 
   const handleViewDetails = (candidate) => {
     setSelectedCandidate(candidate);
@@ -157,7 +162,7 @@ const SearchResults = () => {
         }}
       >
         <Typography fontWeight="bold">Full Stack Backend Developer</Typography>
-        <Box>🔍 ⚙️</Box>
+        {/* <Box>🔍 ⚙️</Box> */}
       </Box>
 
       {/* Scrollable Container */}
@@ -168,8 +173,8 @@ const SearchResults = () => {
           pr: 1,
         }}
       >
-        {candidates.map((c, i) => (
-          <CandidateCard key={i} data={c} onViewDetails={handleViewDetails} />
+        {candidates.map((c, _id) => (
+          <CandidateCard key={_id} data={c} onViewDetails={handleViewDetails} />
         ))}
       </Box>
 

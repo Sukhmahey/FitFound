@@ -48,6 +48,7 @@ export const employerApi = {
   updateEmployerContactInfo: (userId, data) =>
     api.patch(`/employers/${userId}/profile`, data),
   saveJob: (id, data) => api.post(`/jobs`, data),
+  getAllCandidates: () => api.get(`/candidates`),
   getSearchedCandidates: (data) =>
     api.get(
       `/candidates?title=${data.title}&jobType=${data.jobType}&location=${data.location}&salaryFrom=${data.salaryFrom}&salaryTo=${data.salaryTo}&jobDescriptionKeywords=${data.jobDescription}&workStatus=${data.workStatus}&skills=${data.skills}`

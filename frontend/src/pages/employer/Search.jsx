@@ -1,4 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
+
+import { scoreCandidates } from "./GenerateCandidateScore";
 
 import {
   FormControl,
@@ -66,6 +71,9 @@ const Search = () => {
     skills: "",
   });
 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   console.log("searchQuery", searchQuery);
   const onChangeInputFiels = (value, type) => {
     setSearchQuery((data) => {
@@ -115,16 +123,33 @@ const Search = () => {
 
     try {
       // await employerApi.saveJob("uakvb65lGWfOqbsEix2dUvOL1nH2", dummyobj1);
-      await employerApi.getSearchedCandidates({
-        title: dataParams.jobTitle,
-        jobType: dataParams.jobType,
-        location: dataParams.location,
-        salaryFrom: dataParams.salaryRange.min,
-        salaryTo: dataParams.salaryRange.max,
-        jobDescription: dataParams.jobDescription,
-        workStatus: dataParams.requiredWorkAuthorization[0],
-        skills: "html",
-      });
+      const candidateList = await employerApi
+        .getAllCandidates()
+        .then(async (data) => {
+          const scoredC = await scoreCandidates(
+            data.data.slice(0, 3),
+            dummyobj1.jobDescription
+          );
+          console.log("scoredC", scoredC);
+          dispatch(setSearchForm(dummyobj1));
+          dispatch(setCandidates(scoredC));
+          navigate("/employer/searchResults");
+        });
+
+      console.log("Candidate List", candidateList);
+      // await employerApi.getSearchedCandidates({
+      //   title: dataParams.jobTitle,
+      //   jobType: dataParams.jobType,
+      //   location: dataParams.location,
+      //   salaryFrom: dataParams.salaryRange.min,
+      //   salaryTo: dataParams.salaryRange.max,
+      //   jobDescription: dataParams.jobDescription,
+      //   workStatus: dataParams.requiredWorkAuthorization[0], \
+      //   skills: "html",
+      // });
+
+      if (candidateList) {
+      }
     } catch (c) {
       console.log("here");
     }

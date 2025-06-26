@@ -20,7 +20,7 @@ function App() {
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
+      {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
 
       {/* Candidate Routes */}
       <Route
