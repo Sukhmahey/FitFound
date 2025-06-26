@@ -14,6 +14,7 @@ const EmployerProfile = () => {
   const [formSection, setFormSection] = useState("details"); // the other is contact
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
+  const [userProfile, setUserProfile] = useState({});
 
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
@@ -31,11 +32,13 @@ const EmployerProfile = () => {
     // Getting the user profile by ID
     employerApi.getEmployerProfile(userId)
     .then( result => {
+      setUserProfile(result.data);
       // setting the data for every form section
       const { contactInfo, ...companyInfo } = result.data; 
       setCompanyInfo( companyInfo );
       methods.reset( companyInfo );
       setContactInfo(result.data.contactInfo);
+
     })
     .catch( error => {
       console.log(error);
@@ -43,47 +46,53 @@ const EmployerProfile = () => {
   }, []);
 
   const onSubmit = (data) => {
-    // if (formSection == "details") {
-    //   setFormSection('contact');
-    // }
+
+    let employerProfile;
     
-    // if (formSection == "contact") {
+    if (formSection == "details") {
+      employerProfile = {
+        userId: userId,
+        companyLogo: "https://example.com/logo.png", //data.companyLogo,
+        companyName: data.companyName,
+        establishedYear: data.establishedYear,
+        businessRegisteredNumber: data.businessRegisteredNumber,
+        industrySector: data.industrySector,
+        companySize: data.companySize,
+        workLocation: data.workLocation,
+        companyWebsite: data.companyWebsite,
+        companyDescription: data.companyDescription,
+        contactInfo: contactInfo
+      };
+      setCompanyInfo(data);
+    }
+    else {
+      let newContactInfo = {
+        profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
+        firstName: data.firstName,
+        middleName: data.middleName,
+        lastName: data.lastName,
+        designation: data.designation,
+        phone: data.phone,
+        email: data.email,
+        linkedInProfile: data.linkedInProfile,
+        additionalDetails: data.additionalDetails
+      };
+      employerProfile = {...companyInfo , contactInfo: newContactInfo };
+      setContactInfo(data);
+    }
 
-    //   const employerProfile = {
-    //     userId: userId,
-    //     companyLogo: "https://example.com/logo.png", //data.companyLogo,
-    //     companyName: data.companyName,
-    //     establishedYear: data.establishedYear,
-    //     businessRegisteredNumber: data.businessRegisteredNumber,
-    //     industrySector: data.industrySector,
-    //     companySize: data.companySize,
-    //     workLocation: data.workLocation,
-    //     companyWebsite: data.companyWebsite,
-    //     companyDescription: data.companyDescription,
-    //     contactInfo: {
-    //       profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
-    //       firstName: data.firstName,
-    //       middleName: data.middleName,
-    //       lastName: data.lastName,
-    //       designation: data.designation,
-    //       phone: data.phone,
-    //       email: data.email,
-    //       linkedInProfile: data.linkedInProfile,
-    //       additionalDetails: data.additionalDetails
-    //     }
-    //   };
-
-    //   console.log(employerProfile);
       
-    //   // save data
-    //   employerApi.addEmployerProfile(userId, employerProfile)
-    //   .then( result => {
-    //     console.log(result);
-    //   })
-    //   .catch( error => {
-    //     console.log(error);
-    //   });
-    // }
+
+      console.log(employerProfile);
+      
+      // save data
+      employerApi.updateEmployerProfile(userId, employerProfile)
+      .then( result => {
+        console.log(result);
+      })
+      .catch( error => {
+        console.log(error);
+      });
     
   };
 
