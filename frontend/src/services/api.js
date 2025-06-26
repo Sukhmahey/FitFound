@@ -37,7 +37,8 @@ export const candidateApi = {
 
 // employer endpoints
 export const employerApi = {
-  addEmployerProfile: (userId, data) => api.post(`/employers/${userId}/profile`, data)
+  addEmployerProfile: (userId, data) => api.post(`/employers/${userId}/profile`, data),
+  getEmployerProfile: (userId, data) => api.get(`/employers/${userId}/profile`, data)
 };
 
 

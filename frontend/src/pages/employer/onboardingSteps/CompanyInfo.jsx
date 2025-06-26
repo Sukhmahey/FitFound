@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const CompanyInfo = () => {
+const CompanyInfo = ( ) => {
     const { register } = useFormContext();
 
     return (
@@ -20,7 +21,9 @@ const CompanyInfo = () => {
                     <div className="col-md-6">
                         <div className="mb-3">
                             <label htmlFor="companyName" className="form-label">Company Name</label>
-                            <input type="text" {...register("companyName")} className="form-control form-control-sm" name="companyName" id="companyName" maxLength="60" minLength="5"  />
+                            <input type="text" {...register("companyName")} className="form-control form-control-sm" name="companyName" id="companyName" maxLength="60" minLength="5"  
+                            // value={ currentCompanyInfo.companyName }
+                            />
                         </div>
                         
                         <div className="mb-3">

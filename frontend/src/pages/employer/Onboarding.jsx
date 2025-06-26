@@ -1,17 +1,18 @@
 import { useState } from "react";
-
 import { useForm, FormProvider } from "react-hook-form";
-import CompanyInfo from './onboardingSteps/CompanyInfo';
-import UserContactInfo from './onboardingSteps/UserContactInfo';
+
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
+
+import CompanyInfo from './onboardingSteps/CompanyInfo';
+import UserContactInfo from './onboardingSteps/UserContactInfo';
 
 const EmployerOnboarding = () => {
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
   const [formSection, setFormSection] = useState("details"); // the other is contact
-  // const [employerProfile, setEmployerProfile] = useState({});
+  
 
   // const handleFormSectionClick = (e) => {
   //   setFormSection(e.target.id);
@@ -67,8 +68,8 @@ const EmployerOnboarding = () => {
     <div>
       
       <div>
-        <span>Organisation Details</span>
-        <span>Primary Contact Person</span>
+        <div>Organisation Details</div>
+        <div>Primary Contact</div>
       </div>
 
       <FormProvider {...methods}>
