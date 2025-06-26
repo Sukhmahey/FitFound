@@ -84,6 +84,7 @@ const CandidateSchema = new Schema(
           trim: true,
         },
         credentials: { type: String, trim: true, maxLength: 100 },
+        fieldOfStudy: { type: String, trim: true, maxLength: 100 },
         startDate: {
           type: String,
           match: /^(0[1-9]|1[0-2])-(\d{4})$/,
@@ -96,6 +97,8 @@ const CandidateSchema = new Schema(
         },
       },
     ],
+
+    certificates: [{ type: String, trim: true, maxLength: 200 }],
 
     jobPreference: {
       desiredJobTitle: [
