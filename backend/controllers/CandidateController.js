@@ -1,15 +1,17 @@
 const Candidate = require("../models/CandidateModel");
+const { calculateProfileScore } = require("../utils/scoringUtils");
 
 const handleError = (res, error, message, status = 500) => {
-  console.error(`[CandidateController] ${message}:`, error);
+  console.error(
+    `[CandidateController] ${new Date().toISOString()} ${message}:`,
+    error
+  );
   res.status(status).json({
     error: message,
     details: error.message || "Server Error",
     ...(error.name === "ValidationError" && { validationErrors: error.errors }),
   });
 };
-
-// General Profile Operations
 
 exports.createCandidateProfile = async (req, res) => {
   const {
@@ -57,10 +59,31 @@ exports.createCandidateProfile = async (req, res) => {
 exports.getCandidateByUserId = async (req, res) => {
   const { userId } = req.params;
   try {
-    const candidate = await Candidate.findOne({ userId });
+    const candidate = await Candidate.findOne({ userId }).lean();
     if (!candidate) {
       return res.status(404).json({ message: "Candidate profile not found" });
     }
+
+    console.log("[DEBUG] Candidate fetched (lean object):", candidate);
+    console.log(
+      "[DEBUG] Desired Job Title for Scoring:",
+      candidate.jobPreference?.desiredJobTitle?.[0]
+    );
+
+    const desiredRoleForScoring = candidate.jobPreference?.desiredJobTitle?.[0];
+    let profileScore = 0;
+    if (desiredRoleForScoring) {
+      profileScore = calculateProfileScore(candidate, desiredRoleForScoring);
+    }
+
+    console.log("[DEBUG] Calculated Profile Score:", profileScore);
+    candidate.profileScore = profileScore;
+    
+    console.log(
+      "[DEBUG] Candidate object BEFORE sending response (should contain profileScore):",
+      candidate
+    );
+
     res.status(200).json(candidate);
   } catch (error) {
     handleError(res, error, "Failed to fetch candidate profile", 500);
@@ -68,35 +91,30 @@ exports.getCandidateByUserId = async (req, res) => {
 };
 
 exports.getAllCandidateProfiles = async (req, res) => {
-  // Major change: Added comprehensive filtering for employer search criteria
   const {
-    title, // Corresponds to employer's "Title" search for desired job title
-    jobType, // Corresponds to employer's "Job Type" search (candidate's preferred job type)
-    location, // Corresponds to employer's "Location" search (candidate's location)
-    salaryFrom, // Corresponds to employer's "Salary Range From"
-    salaryTo, // Corresponds to employer's "Salary Range To"
-    jobDescriptionKeywords, // Corresponds to employer's "Job Description" (keywords for candidate bio/experience)
-    workStatus, // Corresponds to employer's "Work Status" (candidate's immigration/residency status)
-    skills, // Corresponds to employer's "Skills" search
+    title,
+    jobType,
+    location,
+    salaryFrom,
+    salaryTo,
+    jobDescriptionKeywords,
+    workStatus,
+    skills,
   } = req.query;
 
   let filter = {};
 
-
   if (title) {
-    filter["jobPreference.desiredJobTitle"] = { $regex: title, $options: "i" }; // Case-insensitive search
+    filter["jobPreference.desiredJobTitle"] = { $regex: title, $options: "i" };
   }
-
 
   if (jobType) {
     filter["jobPreference.jobType"] = jobType;
   }
 
-
   if (location) {
-    filter["basicInfo.location"] = { $regex: location, $options: "i" }; // Case-insensitive search
+    filter["basicInfo.location"] = { $regex: location, $options: "i" };
   }
-
 
   if (salaryFrom || salaryTo) {
     filter["jobPreference.salaryExpectation.min"] = {};
@@ -108,11 +126,9 @@ exports.getAllCandidateProfiles = async (req, res) => {
     }
   }
 
-
   if (jobDescriptionKeywords) {
-    filter["basicInfo.bio"] = { $regex: jobDescriptionKeywords, $options: "i" }; // Case-insensitive search
+    filter["basicInfo.bio"] = { $regex: jobDescriptionKeywords, $options: "i" };
   }
-
 
   if (workStatus) {
     const searchWorkStatuses = Array.isArray(workStatus)
@@ -121,19 +137,29 @@ exports.getAllCandidateProfiles = async (req, res) => {
     filter["basicInfo.workStatus"] = { $in: searchWorkStatuses };
   }
 
-
   if (skills) {
     const searchSkills = Array.isArray(skills)
       ? skills
       : skills.split(",").map((s) => s.trim());
     filter["skills.skill"] = {
       $in: searchSkills.map((s) => new RegExp(s, "i")),
-    }; // Case-insensitive match for each skill
+    };
   }
 
   try {
-    const candidateProfiles = await Candidate.find(filter);
-    res.status(200).json(candidateProfiles);
+    const candidateProfiles = await Candidate.find(filter).lean();
+
+    const candidatesWithScores = candidateProfiles.map((candidate) => {
+      const desiredRoleForScoring =
+        candidate.jobPreference?.desiredJobTitle?.[0];
+      let profileScore = 0;
+      if (desiredRoleForScoring) {
+        profileScore = calculateProfileScore(candidate, desiredRoleForScoring);
+      }
+      return { ...candidate, profileScore };
+    });
+
+    res.status(200).json(candidatesWithScores);
   } catch (error) {
     handleError(res, error, "Failed to fetch candidate profiles", 500);
   }
@@ -153,12 +179,23 @@ exports.updateCandidateProfile = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $set: updates },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
       return res.status(404).json({ message: "Candidate profile not found." });
     }
+
+    const desiredRoleForScoring =
+      updatedCandidate.jobPreference?.desiredJobTitle?.[0];
+    let profileScore = 0;
+    if (desiredRoleForScoring) {
+      profileScore = calculateProfileScore(
+        updatedCandidate,
+        desiredRoleForScoring
+      );
+    }
+    updatedCandidate.profileScore = profileScore;
 
     res.status(200).json(updatedCandidate);
   } catch (error) {
@@ -186,8 +223,6 @@ exports.deleteCandidateProfile = async (req, res) => {
   }
 };
 
-// Nested Object Update Endpoints
-
 exports.updatePersonalInfo = async (req, res) => {
   const { userId } = req.params;
   const updates = req.body;
@@ -204,7 +239,7 @@ exports.updatePersonalInfo = async (req, res) => {
           "personalInfo.specialization": updates.specialization,
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
     if (!updatedCandidate) {
       return res.status(404).json({ message: "Candidate profile not found." });
@@ -233,10 +268,10 @@ exports.updateBasicInfo = async (req, res) => {
           "basicInfo.language": updates.language,
           "basicInfo.bio": updates.bio,
           "basicInfo.additionalInfo": updates.additionalInfo,
-          "basicInfo.location": updates.location, // ADDED: to allow updating location
+          "basicInfo.location": updates.location,
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
     if (!updatedCandidate) {
       return res.status(404).json({ message: "Candidate profile not found." });
@@ -272,7 +307,7 @@ exports.updatePortfolio = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $set: updateQuery },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
     if (!updatedCandidate) {
       return res.status(404).json({ message: "Candidate profile not found." });
@@ -305,7 +340,7 @@ exports.updateJobPreference = async (req, res) => {
             updates.salaryExpectation?.perYear,
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
     if (!updatedCandidate) {
       return res.status(404).json({ message: "Candidate profile not found." });
@@ -321,8 +356,6 @@ exports.updateJobPreference = async (req, res) => {
   }
 };
 
-// Skills Endpoints
-
 exports.updateSkills = async (req, res) => {
   const { userId } = req.params;
   const { skills } = req.body;
@@ -337,7 +370,7 @@ exports.updateSkills = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $set: { skills: skills } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -368,7 +401,7 @@ exports.addSkillEntry = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $push: { skills: newSkillEntry } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -410,6 +443,7 @@ exports.updateSkillEntryById = async (req, res) => {
         new: true,
         runValidators: true,
         arrayFilters: [{ "elem._id": skillId }],
+        lean: true,
       }
     );
 
@@ -418,7 +452,9 @@ exports.updateSkillEntryById = async (req, res) => {
         .status(404)
         .json({ message: "Candidate profile or skill entry not found." });
     }
-    const updatedEntry = updatedCandidate.skills.id(skillId);
+    const updatedEntry = updatedCandidate.skills.find(
+      (s) => s._id.toString() === skillId
+    );
     if (!updatedEntry) {
       return res.status(404).json({
         message: "Skill entry not found within the candidate's profile.",
@@ -442,7 +478,7 @@ exports.deleteSkillEntryById = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId: userId },
       { $pull: { skills: { _id: skillId } } },
-      { new: true }
+      { new: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -455,8 +491,6 @@ exports.deleteSkillEntryById = async (req, res) => {
     handleError(res, error, "Failed to delete skill entry", 500);
   }
 };
-
-// Work History Endpoints
 
 exports.updateWorkHistory = async (req, res) => {
   const { userId } = req.params;
@@ -472,7 +506,7 @@ exports.updateWorkHistory = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $set: { workHistory: workHistory } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -503,7 +537,7 @@ exports.addWorkHistoryEntry = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $push: { workHistory: newWorkEntry } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -545,6 +579,7 @@ exports.updateWorkEntryById = async (req, res) => {
         new: true,
         runValidators: true,
         arrayFilters: [{ "elem._id": entryId }],
+        lean: true,
       }
     );
 
@@ -553,7 +588,9 @@ exports.updateWorkEntryById = async (req, res) => {
         message: "Candidate profile or work history entry not found.",
       });
     }
-    const updatedEntry = updatedCandidate.workHistory.id(entryId);
+    const updatedEntry = updatedCandidate.workHistory.find(
+      (e) => e._id.toString() === entryId
+    );
     if (!updatedEntry) {
       return res.status(404).json({
         message: "Work history entry not found within the candidate's profile.",
@@ -577,7 +614,7 @@ exports.deleteWorkEntryById = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId: userId },
       { $pull: { workHistory: { _id: entryId } } },
-      { new: true }
+      { new: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -593,8 +630,6 @@ exports.deleteWorkEntryById = async (req, res) => {
   }
 };
 
-// Education Endpoints
-
 exports.updateEducation = async (req, res) => {
   const { userId } = req.params;
   const { education } = req.body;
@@ -609,7 +644,7 @@ exports.updateEducation = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $set: { education: education } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -640,7 +675,7 @@ exports.addEducationEntry = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $push: { education: newEducationEntry } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -682,6 +717,7 @@ exports.updateEducationById = async (req, res) => {
         new: true,
         runValidators: true,
         arrayFilters: [{ "elem._id": entryId }],
+        lean: true,
       }
     );
 
@@ -690,7 +726,9 @@ exports.updateEducationById = async (req, res) => {
         .status(404)
         .json({ message: "Candidate profile or education entry not found." });
     }
-    const updatedEntry = updatedCandidate.education.id(entryId);
+    const updatedEntry = updatedCandidate.education.find(
+      (e) => e._id.toString() === entryId
+    );
     if (!updatedEntry) {
       return res.status(404).json({
         message: "Education entry not found within the candidate's profile.",
@@ -714,7 +752,7 @@ exports.deleteEducationById = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId: userId },
       { $pull: { education: { _id: entryId } } },
-      { new: true }
+      { new: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -728,8 +766,6 @@ exports.deleteEducationById = async (req, res) => {
   }
 };
 
-// Meta-data & Dashboard Endpoints
-
 exports.incrementVisibility = async (req, res) => {
   const { userId } = req.params;
 
@@ -737,7 +773,7 @@ exports.incrementVisibility = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $inc: { visibilityCount: 1 } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
@@ -759,7 +795,7 @@ exports.markVerified = async (req, res) => {
     const updatedCandidate = await Candidate.findOneAndUpdate(
       { userId },
       { $set: { verifiedBadge: true } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
 
     if (!updatedCandidate) {
