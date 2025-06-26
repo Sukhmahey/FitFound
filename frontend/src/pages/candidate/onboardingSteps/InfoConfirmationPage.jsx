@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { candidateApi } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function InfoConfirmationPage({ data }) {
   const { user } = useAuth();
   const userId = user?.userId;
+  const navigate = useNavigate();
 
   const convertToHtmlMonth = (date) => {
   if (!date || !/^\d{2}-\d{4}$/.test(date)) return '';
@@ -138,6 +140,7 @@ const formatDate = (date) => {
       await candidateApi.updateJobPreference(userId, form.jobPreference);
 
       alert("Confirmation data saved successfully!");
+      navigate('/dashboard');
     } catch (err) {
       console.error("Failed to submit confirmation data:", err);
       alert("Submission failed.");

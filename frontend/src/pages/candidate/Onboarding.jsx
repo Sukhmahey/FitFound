@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { candidateApi } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
-
+import { useNavigate } from 'react-router-dom';
 import PersonalInfoStep from './onboardingSteps/PersonalInfoStep';
 import BasicInfoStep from './onboardingSteps/BasicInfoStep';
 import SkillsStep from './onboardingSteps/SkillsStep';
@@ -17,6 +17,7 @@ import Dashboard from './Dashboard';
 export default function CandidateOnboarding() {
   const { user } = useAuth();
   const userId = user?.userId;
+  const navigate = useNavigate();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [confirmedData, setConfirmedData] = useState(null);
@@ -105,7 +106,7 @@ export default function CandidateOnboarding() {
       } else if (stepIndex === 7) {
         await candidateApi.updateJobPreference(userId, formData.jobPreference);
         alert("Profile saved successfully!");
-        <Dashboard></Dashboard>
+        navigate('/dashboard');
 
         // setStepIndex(99);
       } else {
