@@ -5,15 +5,13 @@ const JobSchema = new Schema(
   {
     employerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     jobTitle: { type: String, minLength: 6, maxLength: 60 },
-    jobDescription: { type: String, minLength: 12, maxLength: 300 },
+    jobDescription: { type: String, minLength: 12},
     requiredSkills: [
       {
         skill: { type: String, minLength: 2, maxLength: 60 },
-        yearsOfExperience: { type: Number, min: 0, validate: Number.isInteger },
-        level: { type: String, enum: ["junior", "middle", "senior"] },
       },
     ],
-    mustHaveCriteria: { type: String, minLength: 2, maxLength: 60 },
+    mustHaveCriteria: { type: String },
     salaryRange: {
       min: { type: Number, min: 0, validate: Number.isInteger },
       max: { type: Number, min: 0, validate: Number.isInteger },
@@ -26,7 +24,6 @@ const JobSchema = new Schema(
       enum: ["full-time", "part-time", "contract", "internship"],
     },
     workEnvironment: {
-
       type: String,
       enum: ["on-site", "remote", "hybrid"],
       trim: true,
@@ -34,12 +31,7 @@ const JobSchema = new Schema(
 
     requiredWorkAuthorization: {
       type: [String], // Array of strings
-      enum: [
-        "Work Permit",
-        "Study Permit",
-        "PR Citizen",
-
-      ],
+      enum: ["Work Permit", "Study Permit", "PR Citizen"],
 
       required: true, // Making this required for clarity on job postings
     },
