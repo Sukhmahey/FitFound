@@ -15,6 +15,7 @@ const EmployerProfile = () => {
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
   const [userProfile, setUserProfile] = useState({});
+  const [message, setMessage] = useState('');
 
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
@@ -89,16 +90,30 @@ const EmployerProfile = () => {
       employerApi.updateEmployerProfile(userId, employerProfile)
       .then( result => {
         console.log(result);
+        setMessage(`Success: Info saved.`);
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+          setMessage('');
+        }, 5000);
+
       })
       .catch( error => {
         console.log(error);
+        setMessage(`Error: Info not saved.`);
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+          setMessage('');
+        }, 5000);
       });
+      
     
   };
 
   return (
     <div>
-      
+
+      <div id="message">{ message }</div>
+
       <div>
         <div id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</div>
         <div id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</div>
