@@ -1,95 +1,117 @@
 import React, { useState } from 'react';
 import { candidateApi } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
-
+import { useNavigate } from 'react-router-dom';
 import PersonalInfoStep from './onboardingSteps/PersonalInfoStep';
-import EducationSkillsStep from './onboardingSteps/EducationSkillsStep';
-import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
-import ProfileSetupOption from './onboardingSteps/ProfileSetupOption';
+import BasicInfoStep from './onboardingSteps/BasicInfoStep';
+import SkillsStep from './onboardingSteps/SkillsStep';
 import ResumeParsing from './onboardingSteps/ResumeParsing';
+import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
+import PortfolioStep from './onboardingSteps/PortfolioStep';
+import EducationStep from './onboardingSteps/EducationStep';
+import JobPreferenceStep from './onboardingSteps/JobPreferenceStep';
+import ProfileSetupOption from './onboardingSteps/ProfileSetupOption';
 import InfoConfirmationPage from './onboardingSteps/InfoConfirmationPage';
+import Dashboard from './Dashboard';
 
 export default function CandidateOnboarding() {
   const { user } = useAuth();
   const userId = user?.userId;
+  const navigate = useNavigate();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [confirmedData, setConfirmedData] = useState(null);
   const [formData, setFormData] = useState({
-    personalInfo: {},
+    personalInfo: {
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      email: '',
+      currentStatus: '',
+      specialization: ''
+    },
+    basicInfo: {
+      phoneNumber: '',
+      workStatus: '',
+      language: '',
+      bio: '',
+      additionalInfo: ''
+    },
+    skills: [],
     workExperience: [],
-    educationSkills: {}
+    portfolio: {
+      socialLinks: {
+        linkedin: '',
+        personalPortfolioWebsite: '',
+        additionalLinks: []
+      }
+    },
+    education: [],
+    jobPreference: {
+      desiredJobTitle: [],
+      jobType: '',
+      salaryExpectation: {
+        min: 0,
+        perHour: false,
+        perYear: false
+      }
+    }
   });
 
-  const handleManual = () => {
-    console.log("Manual form selected");
-    setStepIndex(1);
-  };
-
-  const handleUpload = () => {
-    console.log("Resume upload selected");
-    setStepIndex(4);
-  };
+  const handleManual = () => setStepIndex(1);
+  const handleUpload = () => setStepIndex(14);
 
   const convertMonthFormat = (value) => {
-  if (!value || !value.includes("-")) return value;
-  const [year, month] = value.split("-");
-  return `${month}-${year}`;
-};
-
-
+    if (!value || !value.includes("-")) return value;
+    const [year, month] = value.split("-");
+    return `${month}-${year}`;
+  };
 
   const handleNextBtn = async () => {
-    const cleanedPersonalInfo = {
-      ...formData.personalInfo,
-      salary: Number(formData.personalInfo.salary),
-      yearsOfExperience: Number(formData.personalInfo.yearsOfExperience),
-      preferredRole: formData.personalInfo.prefferedRole,
-    };
-    delete cleanedPersonalInfo.prefferedRole;
-
-    const educationData = [{
-      degree: formData.educationSkills.degree,
-      field: formData.educationSkills.field,
-      gradYear: formData.educationSkills.gradYear,
-      institution: formData.educationSkills.institution
-    }];
-
-    const skillsData = formData.educationSkills.skills
-      ? formData.educationSkills.skills.split(',').map(skill => ({ skill: skill.trim() }))
-      : [];
-
-    
-const cleanedWorkExperience = formData.workExperience.map(item => ({
-  ...item,
-  startDate: convertMonthFormat(item.startDate),
-  endDate: convertMonthFormat(item.endDate),
-  achievements: item.achievements
-    ? item.achievements.split(',').map(a => a.trim())
-    : [],
-  technologiesUsed: item.technologiesUsed
-    ? item.technologiesUsed.split(',').map(t => t.trim())
-    : []
-}));
-
-
-
     try {
       if (stepIndex === 1) {
-        await candidateApi.updateProfile(userId, cleanedPersonalInfo);
+        await candidateApi.updatePersonalInfo(userId, formData.personalInfo);
         setStepIndex(2);
       } else if (stepIndex === 2) {
-        await candidateApi.updateWorkHistory(userId, { workHistory: cleanedWorkExperience });
+        await candidateApi.updateBasicInfo(userId, formData.basicInfo);
         setStepIndex(3);
       } else if (stepIndex === 3) {
-        await candidateApi.updateEducation(userId, { education: educationData });
-        await candidateApi.updateSkills(userId, { skills: skillsData });
+        const cleanedSkills = formData.skills.map(skill => ({ skill: skill.skill?.trim?.() || '' }));
+        await candidateApi.updateSkills(userId, { skills: cleanedSkills });
+        setStepIndex(4);
+      } else if (stepIndex === 14) {
+        // setStepIndex(99); 
+      } else if (stepIndex === 4) {
+        const cleanedExperience = formData.workExperience.map(item => ({
+          ...item,
+          startDate: convertMonthFormat(item.startDate),
+          endDate: convertMonthFormat(item.endDate),
+          achievements: item.achievements?.filter(a => a.trim()) || []
+        }));
+        await candidateApi.updateWorkHistory(userId, { workHistory: cleanedExperience });
+        setStepIndex(5);
+      } else if (stepIndex === 5) {
+        await candidateApi.updatePortfolio(userId, {
+          socialLinks: formData.portfolio.socialLinks
+        });
+        setStepIndex(6);
+      } else if (stepIndex === 6) {
+        const cleanedEducation = formData.education.map(item => ({
+          ...item,
+          startDate: convertMonthFormat(item.startDate),
+          endDate: convertMonthFormat(item.endDate)
+        }));
+        await candidateApi.updateEducation(userId, { education: cleanedEducation });
+        setStepIndex(7);
+      } else if (stepIndex === 7) {
+        await candidateApi.updateJobPreference(userId, formData.jobPreference);
         alert("Profile saved successfully!");
-      } else if (stepIndex === 0) {
-        
-        setStepIndex(1);
+        navigate('/candidate/dashboard');
+
+        // setStepIndex(99);
+      } else {
+        setStepIndex(stepIndex + 1);
       }
-      
     } catch (err) {
       console.error("Failed to submit:", err);
       alert("Submission failed.");
@@ -97,9 +119,7 @@ const cleanedWorkExperience = formData.workExperience.map(item => ({
   };
 
   const handlePrevBtn = () => {
-    if (stepIndex > 0 && stepIndex < 4) {
-      setStepIndex(stepIndex - 1);
-    }
+    if (stepIndex > 0 && stepIndex < 99) setStepIndex(stepIndex - 1);
   };
 
   const updateFormData = (section, data) => {
@@ -119,13 +139,22 @@ const cleanedWorkExperience = formData.workExperience.map(item => ({
       case 1:
         return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
       case 2:
-        return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
+        return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} />;
       case 3:
-        return <EducationSkillsStep data={formData.educationSkills} onUpdate={(data) => updateFormData('educationSkills', data)} />;
+        return <SkillsStep data={formData.skills} onUpdate={(data) => updateFormData('skills', data)} />;
+      case 14:
+        return <ResumeParsing setStep={setStepIndex} setConfirmedData={setConfirmedData} />;
       case 4:
-        return <ResumeParsing setStep={setStepIndex} setConfirmedData={setConfirmedData}/>;
+        return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
+      case 5:
+        return <PortfolioStep data={formData.portfolio} onUpdate={(data) => updateFormData('portfolio', data)} />;
+      case 6:
+        return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} />;
+      case 7:
+        return <JobPreferenceStep data={formData.jobPreference} onUpdate={(data) => updateFormData('jobPreference', data)} />;
+        
       case 99:
-        return <InfoConfirmationPage data={confirmedData}></InfoConfirmationPage>
+        return <InfoConfirmationPage data={confirmedData} />;
       default:
         return null;
     }
@@ -134,13 +163,12 @@ const cleanedWorkExperience = formData.workExperience.map(item => ({
   return (
     <div>
       <div>Onboarding</div>
-      {stepIndex <90 && stepIndex !== 4 && ( <h2>({stepIndex + 1}/4)</h2>)}
-
+      {stepIndex < 90 && stepIndex !== 14 && (<h2>({stepIndex + 1}/8)</h2>)}
       {renderStep()}
-      {stepIndex <90 && stepIndex > 0 && stepIndex !== 4 && (
+      {stepIndex < 90 && stepIndex > 0 && stepIndex !== 14 && (
         <div>
           <button onClick={handlePrevBtn}>Back</button>
-          <button onClick={handleNextBtn}>{stepIndex === 3 ? 'Finish' : 'Next'}</button>
+          <button onClick={handleNextBtn}>{stepIndex === 7 ? 'Finish' : 'Next'}</button>
         </div>
       )}
     </div>

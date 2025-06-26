@@ -1,9 +1,9 @@
 import React from 'react'
 import { useEffect } from 'react';
 
-function ProfileSummary() {
+function ProfileSummary({profileScore}) {
 
-    const [profileScore, setProfileScore] = React.useState(70);
+    // const [profileScore, setProfileScore] = React.useState(0);
     const [profileScoreRemark, setProfileScoreRemark] = React.useState('');
     const [appearanceScore, setAppearanceScore] = React.useState(85);
     const [invitationScore, setInvitationScore] = React.useState(10);
