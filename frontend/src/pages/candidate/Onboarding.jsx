@@ -106,7 +106,7 @@ export default function CandidateOnboarding() {
       } else if (stepIndex === 7) {
         await candidateApi.updateJobPreference(userId, formData.jobPreference);
         alert("Profile saved successfully!");
-        navigate('/dashboard');
+        navigate('/candidate/dashboard');
 
         // setStepIndex(99);
       } else {
