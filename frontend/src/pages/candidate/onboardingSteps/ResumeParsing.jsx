@@ -36,27 +36,70 @@ function ResumeParsing({ setStep, setConfirmedData }) {
   };
 
   const extractEducation = (text) => {
-    const lines = text.split('\n').map(l => l.trim());
-    const start = lines.findIndex(l => /education/i.test(l));
-    if (start === -1) return [];
+  const lines = text.split('\n').map(l => l.trim());
+  const start = lines.findIndex(l => /education/i.test(l));
+  if (start === -1) return [];
 
-    const info = lines.slice(start + 1, start + 6);
-    let institution = '', degree = '', graduationDate = '';
+  const info = lines.slice(start + 1, start + 10);
 
-    for (let line of info) {
-      if (!institution && /University/i.test(line)) institution = line;
-      else if (!degree && /(Bachelor|Master|BSc|BCA|MCA)/i.test(line)) degree = line;
-      else if (!graduationDate && /20\d{2}/.test(line)) graduationDate = line;
+  let institution = '', degree = '', startDate = '', endDate = '', fieldOfStudy = '';
+
+  for (let line of info) {
+    if (!institution && (/University|College|Institute/i.test(line))) {
+      institution = line;
+    }
+    if (!degree && /Degree[:\-]?\s*(.*)/i.test(line)) {
+      degree = line.match(/Degree[:\-]?\s*(.*)/i)?.[1]?.trim() || '';
+    } else if (!degree && /(Bachelor|Master|BSc|MCA|BCA)/i.test(line)) {
+      degree = line;
     }
 
-    return [{
-      institution,
-      degree,
-      graduationDate,
-      gpa: null,
-      fieldOfStudy: degree.includes('(') ? degree.split('(')[1].replace(')', '') : null
-    }];
-  };
+    if (!startDate && /Start Date[:\-]?\s*(.*)/i.test(line)) {
+      startDate = line.match(/Start Date[:\-]?\s*(.*)/i)?.[1]?.trim() || '';
+    }
+
+    if (!endDate && /End Date[:\-]?\s*(.*)/i.test(line)) {
+      endDate = line.match(/End Date[:\-]?\s*(.*)/i)?.[1]?.trim() || '';
+    }
+
+    if (!fieldOfStudy && degree.includes(' in ')) {
+      fieldOfStudy = degree.split(' in ')[1];
+    }
+  }
+
+  return [{
+    instituteName: institution,
+    credentials: degree,
+    startDate,
+    endDate,
+    fieldOfStudy,
+    certificateLink: ''
+  }];
+};
+
+
+  // const extractEducation = (text) => {
+  //   const lines = text.split('\n').map(l => l.trim());
+  //   const start = lines.findIndex(l => /education/i.test(l));
+  //   if (start === -1) return [];
+
+  //   const info = lines.slice(start + 1, start + 6);
+  //   let institution = '', degree = '', graduationDate = '';
+
+  //   for (let line of info) {
+  //     if (!institution && /University/i.test(line)) institution = line;
+  //     else if (!degree && /(Bachelor|Master|BSc|BCA|MCA)/i.test(line)) degree = line;
+  //     else if (!graduationDate && /20\d{2}/.test(line)) graduationDate = line;
+  //   }
+
+  //   return [{
+  //     institution,
+  //     degree,
+  //     graduationDate,
+  //     gpa: null,
+  //     fieldOfStudy: degree.includes('(') ? degree.split('(')[1].replace(')', '') : null
+  //   }];
+  // };
 
   const extractBioSummary = (text) => {
     return text.match(/summary[:\-\s]*([\s\S]+?)(experience|education|skills|projects)/i)?.[1]?.trim() || '';
