@@ -11,7 +11,7 @@ export default function Dashboard() {
   const userId = user?.userId;
 
   const [candidateName, setCandidateName] = useState("Name");
-  const [profileScore, setProfileScore] = useState(90);
+  const [profileScore, setProfileScore] = useState(0);
   const [profileView, setProfileView] = useState(40);
 
 
@@ -26,7 +26,7 @@ export default function Dashboard() {
       const data = response.data;
       // console.log(data);
       setCandidateName(data.personalInfo.firstName);
-      // setProfileScore(data.score);
+      setProfileScore(data.profileScore);
       // setProfileView(data.view);
 
     } catch (error) {
@@ -50,7 +50,7 @@ export default function Dashboard() {
     <div style={styles.outerCard}>
       <h1>Dashboard</h1>
       <h2> Hello 👋, {dummyProfile.name}</h2>
-      <ProfileSummary></ProfileSummary>
+      <ProfileSummary profileScore={profileScore}></ProfileSummary>
       <TrendingKeywordsSection></TrendingKeywordsSection>
       <InvitationsSection></InvitationsSection>
 

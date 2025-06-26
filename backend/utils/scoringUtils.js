@@ -17,12 +17,6 @@ const roleTemplates = {
       "front-end engineer",
       "javascript developer",
     ],
-    relevantDegrees: [
-      "computer science",
-      "web development",
-      "software engineering",
-      "multimedia design",
-    ],
     certificateKeywords: [
       "frontend",
       "web dev",
@@ -32,6 +26,14 @@ const roleTemplates = {
       "html",
       "ui/ux",
     ],
+    relevantDegrees: [
+  "bca",
+  "b.sc. it",
+  "btech",
+  "mtech",
+  "m.sc. it",
+  "p.d.d. web and mobile app development and design"
+]
   },
   "backend developer": {
     requiredSkills: [
@@ -55,10 +57,13 @@ const roleTemplates = {
       "python developer",
     ],
     relevantDegrees: [
-      "computer science",
-      "software engineering",
-      "information technology",
-    ],
+  "bca",
+  "b.sc. it",
+  "btech",
+  "mtech",
+  "m.sc. it",
+  "p.d.d. web and mobile app development and design"
+],
     certificateKeywords: [
       "backend",
       "api",
@@ -90,10 +95,13 @@ const roleTemplates = {
       "web developer (fullstack)",
     ],
     relevantDegrees: [
-      "computer science",
-      "software engineering",
-      "web development",
-    ],
+  "bca",
+  "b.sc. it",
+  "btech",
+  "mtech",
+  "m.sc. it",
+  "p.d.d. web and mobile app development and design"
+],
     certificateKeywords: [
       "fullstack",
       "web dev",
@@ -225,9 +233,16 @@ function calculateProfileScore(candidate, desiredRole) {
   );
   score += hasMatchingJobTitle ? WEIGHTS.WORK_EXPERIENCE_TITLE : 0;
 
-  const eduField = candidate.education?.[0]?.fieldOfStudy?.toLowerCase() || "";
-  const eduMatch = template.relevantDegrees.includes(eduField);
-  score += eduMatch ? WEIGHTS.EDUCATION_FIELD : 0;
+  // const eduField = candidate.education?.[0]?.fieldOfStudy?.toLowerCase() || "";
+  // const eduMatch = template.relevantDegrees.includes(eduField);
+  // score += eduMatch ? WEIGHTS.EDUCATION_FIELD : 0;
+
+
+const credential = candidate.education?.[0]?.credentials?.toLowerCase() || "";
+const degreeMatch = template.relevantDegrees.some(degree =>
+  credential.includes(degree.toLowerCase())
+);
+score += degreeMatch ? WEIGHTS.EDUCATION_FIELD : 0;
 
   const hasBio =
     !!candidate.basicInfo?.bio && candidate.basicInfo.bio.length > 50;
