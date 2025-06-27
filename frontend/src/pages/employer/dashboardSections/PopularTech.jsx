@@ -1,16 +1,51 @@
 const PopularTech = () => {
     return (
-        <div>
-            <h2>Popular Technologies (As per interested Candidates)</h2>
+        <div className="container">
+            <h4>Popular Technologies (As per interested Candidates)</h4>
 
-            <div>
+            <div className="d-flex justify-content-lg-around flex-wrap gap-6">
                 {/* here a bucle */}
-                <div>
-                    <div>97</div>
-                    <div><h3>“FrontEnd” Candidates</h3></div>
+                <div className="border">
+                    <div><span>97</span></div>
+                    <div>
+                        <span>“FrontEnd”</span>
+                        <span>Candidates</span>
+                    </div>
                 </div>
 
-                <div>
+                <div className="border">
+                    <div><span>97</span></div>
+                    <div>
+                        <span>“FrontEnd”</span>
+                        <span>Candidates</span>
+                    </div>
+                </div>
+
+                <div className="border">
+                    <div><span>97</span></div>
+                    <div>
+                        <span>“FrontEnd”</span>
+                        <span>Candidates</span>
+                    </div>
+                </div>
+
+                <div className="border">
+                    <div><span>97</span></div>
+                    <div>
+                        <span>“FrontEnd”</span>
+                        <span>Candidates</span>
+                    </div>
+                </div>
+
+                <div className="border">
+                    <div><span>97</span></div>
+                    <div>
+                        <span>“FrontEnd”</span>
+                        <span>Candidates</span>
+                    </div>
+                </div>
+
+                {/* <div>
                     <div>81</div>
                     <div><h3>“BackEnd” Candidates</h3></div>
                 </div>
@@ -23,7 +58,7 @@ const PopularTech = () => {
                 <div>
                     <div>51</div>
                     <div><h3>“UI/UX”  Candidates </h3></div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

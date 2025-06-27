@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 
 import { employerApi } from "../../services/api";
@@ -7,26 +7,50 @@ import { useAuth } from '../../contexts/AuthContext';
 import CompanyInfo from './onboardingSteps/CompanyInfo';
 import UserContactInfo from './onboardingSteps/UserContactInfo';
 
-const EmployerOnboarding = () => {
+const EmployerProfile = () => {
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
   const [formSection, setFormSection] = useState("details"); // the other is contact
-  
+  const [companyInfo, setCompanyInfo] = useState({});
+  const [contactInfo, setContactInfo] = useState({});
+  const [userProfile, setUserProfile] = useState({});
 
-  // const handleFormSectionClick = (e) => {
-  //   setFormSection(e.target.id);
-  //   console.log(e.target.id);
-  // };
+  const handleFormSectionClick = (e) => {
+    setFormSection(e.target.id);
+
+    // when the user changes the form section
+    if (e.target.id == "details") {
+      methods.reset(companyInfo);
+    }
+    else {
+      methods.reset(contactInfo);
+    }
+  };
+
+  useEffect(() => {
+    // Getting the user profile by ID
+    employerApi.getEmployerProfile(userId)
+    .then( result => {
+      setUserProfile(result.data);
+      // setting the data for every form section
+      const { contactInfo, ...companyInfo } = result.data; 
+      setCompanyInfo( companyInfo );
+      methods.reset( companyInfo );
+      setContactInfo(result.data.contactInfo);
+
+    })
+    .catch( error => {
+      console.log(error);
+    });
+  }, []);
 
   const onSubmit = (data) => {
-    if (formSection == "details") {
-      setFormSection('contact');
-    }
-    
-    if (formSection == "contact") {
 
-      const employerProfile = {
+    let employerProfile;
+    
+    if (formSection == "details") {
+      employerProfile = {
         userId: userId,
         companyLogo: "https://example.com/logo.png", //data.companyLogo,
         companyName: data.companyName,
@@ -37,30 +61,38 @@ const EmployerOnboarding = () => {
         workLocation: data.workLocation,
         companyWebsite: data.companyWebsite,
         companyDescription: data.companyDescription,
-        contactInfo: {
-          profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
-          firstName: data.firstName,
-          middleName: data.middleName,
-          lastName: data.lastName,
-          designation: data.designation,
-          phone: data.phone,
-          email: data.email,
-          linkedInProfile: data.linkedInProfile,
-          additionalDetails: data.additionalDetails
-        }
+        contactInfo: contactInfo
       };
+      setCompanyInfo(data);
+    }
+    else {
+      let newContactInfo = {
+        profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
+        firstName: data.firstName,
+        middleName: data.middleName,
+        lastName: data.lastName,
+        designation: data.designation,
+        phone: data.phone,
+        email: data.email,
+        linkedInProfile: data.linkedInProfile,
+        additionalDetails: data.additionalDetails
+      };
+      employerProfile = {...companyInfo , contactInfo: newContactInfo };
+      setContactInfo(data);
+    }
+
+      
 
       console.log(employerProfile);
       
       // save data
-      employerApi.addEmployerProfile(userId, employerProfile)
+      employerApi.updateEmployerProfile(userId, employerProfile)
       .then( result => {
         console.log(result);
       })
       .catch( error => {
         console.log(error);
       });
-    }
     
   };
 
@@ -68,8 +100,8 @@ const EmployerOnboarding = () => {
     <div>
       
       <div>
-        <div>Organisation Details</div>
-        <div>Primary Contact</div>
+        <div id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</div>
+        <div id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</div>
       </div>
 
       <FormProvider {...methods}>
@@ -79,7 +111,7 @@ const EmployerOnboarding = () => {
               <div className="row">
                 <CompanyInfo />
                 <div className="d-flex justify-content-end gap-4">
-                  <input type="submit" value="next" className="btn btn-primary btn-sm mb-3" />
+                  <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" />
                 </div>
               </div>
             </div>
@@ -104,4 +136,4 @@ const EmployerOnboarding = () => {
   );
 };
 
-export default EmployerOnboarding;
+export default EmployerProfile;

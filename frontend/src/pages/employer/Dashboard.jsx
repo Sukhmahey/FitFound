@@ -4,10 +4,9 @@ import RecentSearch from "./dashboardSections/RecentSearch";
 const EmployerDashboard = () => {
   return (
     <div>
-      <h1>Employer Dashboard Page</h1>
       <div>
-        <RecentSearch></RecentSearch>
         <PopularTech></PopularTech>
+        <RecentSearch></RecentSearch>
       </div>
     </div>
   );

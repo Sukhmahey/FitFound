@@ -1,307 +1,523 @@
-// import React from 'react'
-// import PersonalInfoStep from './PersonalInfoStep'
-// import WorkExperienceStep from './WorkExperienceStep'
-// import EducationSkillsStep from './EducationSkillsStep'
-
-// function InfoConfirmationPage({data}) {
-
-
-//     console.log(data);
-
-//   return (
-//     <div>
-//         <label>Name: </label>
-//         inp
-//     </div>
-//   )
-// }
-
-// export default InfoConfirmationPage
 
 import React, { useState } from 'react';
 import { candidateApi } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-
-export default function InfoConfirmationPage({data}) {
+export default function InfoConfirmationPage({ data }) {
   const { user } = useAuth();
-const userId = user?.userId;
+  const userId = user?.userId;
+  const navigate = useNavigate();
 
-   const [form, setForm] = useState(() => ({
-    fullName: data.fullName || '',
-    email: data.email || '',
-    phone: data.phone || '',
-    skills: data.skills || [''],
-    preferredRole: data.mainRole || '',
-    salaryExpectation: data.salaryExpectation || '',
-    eligibleToWork: data.ableToWork?.length > 0,
-    bio: '',
-    languages: [],
-    specialization: data.specialization || '',
-    education: data.education?.[0] || {
-      degree: '',
-      fieldOfStudy: '',
-      gpa: '',
-      graduationDate: '',
-      institution: '',
+  const convertToHtmlMonth = (date) => {
+  if (!date || !/^\d{2}-\d{4}$/.test(date)) return '';
+  const [month, year] = date.split('-');
+  return `${year}-${month.padStart(2, '0')}`; // YYYY-MM
+};
+
+
+  const [form, setForm] = useState(() => ({
+    personalInfo: {
+      firstName: data.personalInfo?.firstName || '',
+      middleName: data.personalInfo?.middleName || '',
+      lastName: data.personalInfo?.lastName || '',
+      email: data.personalInfo?.email || '',
+      currentStatus: data.personalInfo?.currentStatus || '',
+      specialization: data.personalInfo?.specialization || ''
     },
-    workHistory: data.workHistory?.length > 0 ? data.workHistory : [
-      {
-        companyName: '',
-        role: '',
-        startDate: '',
-        endDate: '',
-        achievements: [''],
-      }
-    ],
+    basicInfo: {
+      phoneNumber: data.basicInfo?.phoneNumber || '',
+      workStatus: data.basicInfo?.workStatus || '',
+      language: data.basicInfo?.language || '',
+      bio: data.basicInfo?.bio || '',
+      additionalInfo: data.basicInfo?.additionalInfo || ''
+    },
+    skills: data.skills || [''],
+    // workExperience: data.workExperience || [],
+    workExperience: (data.workExperience || []).map(exp => ({
+  ...exp,
+  startDate: convertToHtmlMonth(exp.startDate),
+  endDate: convertToHtmlMonth(exp.endDate)
+}))
+,
     portfolio: {
-      linkedin: '',
-      website: '',
-      additional: '',
+      socialLinks: {
+        linkedin: data.portfolio?.socialLinks?.linkedin || '',
+        personalPortfolioWebsite: data.portfolio?.socialLinks?.personalPortfolioWebsite || '',
+        additionalLinks: data.portfolio?.socialLinks?.additionalLinks || []
+      }
+    },
+    education: (data.education || []).map(edu => {
+  const toHtmlMonth = (dateStr) => {
+    if (!dateStr) return '';
+    const [mm, yyyy] = dateStr.split('-');
+    return `${yyyy}-${mm.padStart(2, '0')}`;  // returns YYYY-MM
+  };
+
+  return {
+  instituteName: edu.instituteName || edu.institution || '',
+  credentials: edu.credentials || edu.degree || '',
+  fieldOfStudy: edu.fieldOfStudy || '',
+  startDate: toHtmlMonth(edu.startDate || edu.graduationDate || ''),
+  endDate: toHtmlMonth(edu.endDate || edu.graduationDate || '')
+};
+
+})
+
+
+,
+    jobPreference: {
+      desiredJobTitle: data.jobPreference?.desiredJobTitle || [],
+      jobType: data.jobPreference?.jobType || '',
+      salaryExpectation: {
+        min: data.jobPreference?.salaryExpectation?.min || 0,
+        perHour: data.jobPreference?.salaryExpectation?.perHour || false,
+        perYear: data.jobPreference?.salaryExpectation?.perYear || false
+      }
     }
   }));
 
-
-  const handleChange = (field, value) => {
-    setForm({ ...form, [field]: value });
-    
-
-  };
-
-// const convertToBackendDate = (date) => {
-//   if (!date || !date.includes("-")) return date;
-//   const [year, month] = date.split("-");
-//   return `${month}-${year}`; 
-// };
-
-
-
   const handleNestedChange = (section, field, value) => {
-    setForm({ ...form, [section]: { ...form[section], [field]: value } });
+    setForm(prev => ({
+      ...prev,
+      [section]: { ...prev[section], [field]: value }
+    }));
   };
 
   const handleArrayChange = (section, index, value) => {
     const updated = [...form[section]];
     updated[index] = value;
-    setForm({ ...form, [section]: updated });
+    setForm(prev => ({ ...prev, [section]: updated }));
   };
 
   const addToArray = (section) => {
-    setForm({ ...form, [section]: [...form[section], ''] });
+    setForm(prev => ({
+      ...prev,
+      [section]: [...prev[section], '']
+    }));
   };
 
-  const addWorkHistory = () => {
-    setForm({
-      ...form,
-      workHistory: [
-        ...form.workHistory,
-        { companyName: '', role: '', startDate: '', endDate: '', achievements: [''] },
-      ],
-    });
-  };
-
-  const updateWorkAchievement = (whIndex, achIndex, value) => {
-    const updated = [...form.workHistory];
-    updated[whIndex].achievements[achIndex] = value;
-    setForm({ ...form, workHistory: updated });
-  };
-
-  // const submitForm = ()=>{
-  //   console.log(form);
-  // }
-  const submitForm = async () => {
-  const cleanedProfile = {
-    fullName: form.fullName,
-    email: form.email,
-    phone: form.phone,
-    preferredRole: form.preferredRole,
-    salary: Number(form.salaryExpectation),
-    bio: form.bio,
-    languages: form.languages,
-    specialization: form.specialization,
-    isEligibleToWork: form.eligibleToWork,
-    experienceLevel: 'junior',
-    jobType: 'full-time',
-    mainRole: form.preferredRole,
-    yearsOfExperience: 2
-  };
-
-  const skills = form.skills.map(skill => ({ skill }));
-
-  const education = [
-    {
-      degree: form.education.degree,
-      field: form.education.fieldOfStudy,
-      gpa: form.education.gpa,
-      graduationDate: form.education.graduationDate,
-      institution: form.education.institution,
-    }
-  ];
-
-  const workHistory = form.workHistory.map(w => ({
-    company: w.companyName,
-    role: w.role,
-    startDate: w.startDate,
-    endDate: w.endDate,
-    current: false,
-    achievements: w.achievements,
+  const addWorkExperience = () => {
+  setForm(prev => ({
+    ...prev,
+    workExperience: [
+      ...prev.workExperience,
+      {
+        companyName: '',
+        role: '',
+        jobTitle: '',
+        experienceLevel: '',
+        remarkFromEmployer: '',
+        startDate: '',
+        endDate: '',
+        achievements: ['']
+      }
+    ]
   }));
-
-  try {
-    await candidateApi.updateProfile(userId, cleanedProfile);
-    await candidateApi.updateWorkHistory(userId, { workHistory });
-    await candidateApi.updateEducation(userId, { education });
-    await candidateApi.updateSkills(userId, { skills });
-
-    alert("Confirmation data saved successfully!");
-  } catch (err) {
-    console.error("Failed to submit confirmation data:", err);
-    alert("Submission failed.");
-  }
 };
 
+
+  const updateWorkAchievement = (weIndex, achIndex, value) => {
+    const updated = [...form.workExperience];
+    updated[weIndex].achievements[achIndex] = value;
+    setForm(prev => ({ ...prev, workExperience: updated }));
+  };
+const formatDate = (date) => {
+  if (!date) return '';
+  const [year, month] = date.split('-');
+  return `${month}-${year}`; 
+};
+
+
+  const submitForm = async () => {
+    console.log("Submitting data", {
+  personalInfo: form.personalInfo,
+  basicInfo: form.basicInfo,
+  skills: form.skills.map(skill => ({ skill })),
+  workHistory: form.workExperience.map(exp => ({
+    companyName: exp.companyName,
+    jobTitle: exp.jobTitle,
+    role: exp.role,
+    startDate: formatDate(exp.startDate),
+    endDate: formatDate(exp.endDate),
+    achievements: exp.achievements,
+    experienceLevel: exp.experienceLevel,
+    remarkFromEmployer: exp.remarkFromEmployer
+  })),
+  education: form.education.map(edu => ({
+    instituteName: edu.instituteName,
+    credentials: edu.credentials,
+    startDate: formatDate(edu.startDate),
+    endDate: formatDate(edu.endDate)
+  })),
+  portfolio: form.portfolio,
+  jobPreference: form.jobPreference
+});
+
+    try {
+      await candidateApi.updatePersonalInfo(userId, form.personalInfo);
+      await candidateApi.updateBasicInfo(userId, form.basicInfo);
+      // await candidateApi.updateSkills(userId, {
+      //   skills: form.skills.map(skill => ({ skill }))
+      // });
+      await candidateApi.updateSkills(userId, {
+  skills: form.skills.map(skill => ({ skill }))
+});
+
+      await candidateApi.updateWorkHistory(userId, {
+  workHistory: form.workExperience.map(exp => ({
+    companyName: exp.companyName,
+    jobTitle: exp.jobTitle,
+    role: exp.role,
+    startDate: formatDate(exp.startDate),
+    endDate: formatDate(exp.endDate),
+    achievements: exp.achievements,
+    experienceLevel: exp.experienceLevel,
+    remarkFromEmployer: exp.remarkFromEmployer
+  }))
+});
+
+
+
+     await candidateApi.updateEducation(userId, {
+  education: form.education.map(edu => ({
+  instituteName: edu.instituteName,
+  credentials: edu.credentials,
+  startDate: formatDate(edu.startDate), 
+  endDate: formatDate(edu.endDate)
+}))
+
+});
+
+      await candidateApi.updatePortfolio(userId, form.portfolio);
+      await candidateApi.updateJobPreference(userId, form.jobPreference);
+
+      alert("Confirmation data saved successfully!");
+      navigate('/candidate/dashboard');
+    } catch (err) {
+      console.error("Failed to submit confirmation data:", err);
+      alert("Submission failed.");
+    }
+  };
 
   return (
     <div>
       <h2>Candidate Form</h2>
 
-      <label>Full Name:
-        <input value={form.fullName} onChange={e => handleChange('fullName', e.target.value)} />
+      <label>First Name:
+        <input value={form.personalInfo.firstName} onChange={e => handleNestedChange('personalInfo', 'firstName', e.target.value)} />
+      </label><br />
+
+      <label>Last Name:
+        <input value={form.personalInfo.lastName} onChange={e => handleNestedChange('personalInfo', 'lastName', e.target.value)} />
       </label><br />
 
       <label>Email:
-        <input type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} />
+        <input type="email" value={form.personalInfo.email} onChange={e => handleNestedChange('personalInfo', 'email', e.target.value)} />
       </label><br />
 
       <label>Phone:
-        <input value={form.phone} onChange={e => handleChange('phone', e.target.value)} />
+        <input value={form.basicInfo.phoneNumber} onChange={e => handleNestedChange('basicInfo', 'phoneNumber', e.target.value)} />
       </label><br />
 
-      <label>Preferred Role:
-        <input value={form.preferredRole} onChange={e => handleChange('preferredRole', e.target.value)} />
+      <label>Current Status:
+        <select value={form.personalInfo.currentStatus} onChange={e => handleNestedChange('personalInfo', 'currentStatus', e.target.value)}>
+          <option value="">Select status</option>
+          <option value="Student">Student</option>
+          <option value="Working Professional">Working Professional</option>
+          <option value="Unemployed">Unemployed</option>
+          <option value="Other">Other</option>
+        </select>
       </label><br />
 
-      <label>Salary Expectation:
-        <input value={form.salaryExpectation} onChange={e => handleChange('salaryExpectation', e.target.value)} />
-      </label><br />
-
-      <label>Eligible to Work:
-        <input type="checkbox" checked={form.eligibleToWork} onChange={e => handleChange('eligibleToWork', e.target.checked)} />
-      </label><br />
+    <label>Language:
+  <input value={form.basicInfo.language} onChange={e => handleNestedChange('basicInfo', 'language', e.target.value)} />
+</label><br />
 
       <label>Specialization:
-        <input value={form.specialization} onChange={e => handleChange('specialization', e.target.value)} />
+        <input value={form.personalInfo.specialization} onChange={e => handleNestedChange('personalInfo', 'specialization', e.target.value)} />
       </label><br />
 
       <label>Bio:
-        <textarea value={form.bio} onChange={e => handleChange('bio', e.target.value)} />
+        <textarea value={form.basicInfo.bio} onChange={e => handleNestedChange('basicInfo', 'bio', e.target.value)} />
       </label><br />
+      <label>Additional Info:
+  <textarea value={form.basicInfo.additionalInfo} onChange={e => handleNestedChange('basicInfo', 'additionalInfo', e.target.value)} />
+</label><br />
+
 
       <label>Skills:</label><br />
       {form.skills.map((skill, i) => (
         <input key={i} value={skill} onChange={e => handleArrayChange('skills', i, e.target.value)} />
       ))}
       <button type="button" onClick={() => addToArray('skills')}>+ Add Skill</button><br />
-
-      <label>Languages:</label><br />
-      <select multiple onChange={e => {
-        const selected = Array.from(e.target.selectedOptions, opt => opt.value);
-        handleChange('languages', selected);
-      }}>
-        <option value="English">English</option>
-        <option value="French">French</option>
-        <option value="Hindi">Hindi</option>
-        <option value="Spanish">Spanish</option>
-      </select><br />
+      <fieldset>
+  <legend>Education</legend>
+  {form.education.map((edu, i) => (
+    <div key={i} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
+      <label>Institute Name:
+        <input value={edu.instituteName} onChange={e => {
+          const updated = [...form.education];
+          updated[i].instituteName = e.target.value;
+          setForm({ ...form, education: updated });
+        }} />
+      </label><br />
+      <label>Credentials (e.g., BCA):
+        <input value={edu.credentials} onChange={e => {
+          const updated = [...form.education];
+          updated[i].credentials = e.target.value;
+          setForm({ ...form, education: updated });
+        }} />
+      </label><br />
+      <label>Start Date:
+        <input type="month" value={edu.startDate} onChange={e => {
+          const updated = [...form.education];
+          updated[i].startDate = e.target.value;
+          setForm({ ...form, education: updated });
+        }} />
+      </label><br />
+      <label>End Date:
+        <input type="month" value={edu.endDate} onChange={e => {
+          const updated = [...form.education];
+          updated[i].endDate = e.target.value;
+          setForm({ ...form, education: updated });
+        }} />
+      </label>
+    </div>
+  ))}
+  <button type="button" onClick={() => {
+    setForm(prev => ({
+      ...prev,
+      education: [
+        ...prev.education,
+        {
+          instituteName: '',
+          credentials: '',
+          startDate: '',
+          endDate: ''
+        }
+      ]
+    }));
+  }}>+ Add Education</button>
+</fieldset>
 
       <fieldset>
-        <legend>Education</legend>
-        <label>Degree:
-          <input value={form.education.degree} onChange={e => handleNestedChange('education', 'degree', e.target.value)} />
-        </label><br />
-
-        <label>Field of Study:
-          <input value={form.education.fieldOfStudy} onChange={e => handleNestedChange('education', 'fieldOfStudy', e.target.value)} />
-        </label><br />
-
-        <label>GPA:
-          <input value={form.education.gpa} onChange={e => handleNestedChange('education', 'gpa', e.target.value)} />
-        </label><br />
-
-        <label>Graduation Date:
-          <input value={form.education.graduationDate} onChange={e => handleNestedChange('education', 'graduationDate', e.target.value)} />
-        </label><br />
-
-        <label>Institution:
-          <input value={form.education.institution} onChange={e => handleNestedChange('education', 'institution', e.target.value)} />
-        </label>
-      </fieldset>
-
-      <fieldset>
-        <legend>Work History</legend>
-        {form.workHistory.map((wh, i) => (
+        <legend>Work Experience</legend>
+        {form.workExperience.map((we, i) => (
           <div key={i} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
             <label>Company Name:
-              <input value={wh.companyName} onChange={e => {
-                const updated = [...form.workHistory];
+              <input value={we.companyName} onChange={e => {
+                const updated = [...form.workExperience];
                 updated[i].companyName = e.target.value;
-                handleChange('workHistory', updated);
+                setForm({ ...form, workExperience: updated });
               }} />
             </label><br />
-
             <label>Role:
-              <input value={wh.role} onChange={e => {
-                const updated = [...form.workHistory];
+              <input value={we.role} onChange={e => {
+                const updated = [...form.workExperience];
                 updated[i].role = e.target.value;
-                handleChange('workHistory', updated);
+                setForm({ ...form, workExperience: updated });
               }} />
             </label><br />
+            <label>Job Title:
+  <input value={we.jobTitle} onChange={e => {
+    const updated = [...form.workExperience];
+    updated[i].jobTitle = e.target.value;
+    setForm({ ...form, workExperience: updated });
+  }} />
+</label><br />
+
+<label>Experience Level:
+  <select value={we.experienceLevel} onChange={e => {
+    const updated = [...form.workExperience];
+    updated[i].experienceLevel = e.target.value;
+    setForm({ ...form, workExperience: updated });
+  }}>
+    <option value="">Select level</option>
+    <option value="junior">Junior</option>
+    <option value="middle">Middle</option>
+    <option value="senior">Senior</option>
+  </select>
+</label><br />
+
+<label>Remark from Employer:
+  <textarea value={we.remarkFromEmployer} onChange={e => {
+    const updated = [...form.workExperience];
+    updated[i].remarkFromEmployer = e.target.value;
+    setForm({ ...form, workExperience: updated });
+  }} />
+</label><br />
 
             <label>Start Date:
-              <input value={wh.startDate} onChange={e => {
-                const updated = [...form.workHistory];
+              <input type='month' value={we.startDate} onChange={e => {
+                const updated = [...form.workExperience];
                 updated[i].startDate = e.target.value;
-                handleChange('workHistory', updated);
+                setForm({ ...form, workExperience: updated });
               }} />
             </label><br />
-
             <label>End Date:
-              <input value={wh.endDate} onChange={e => {
-                const updated = [...form.workHistory];
+              <input type='month' value={we.endDate} onChange={e => {
+                const updated = [...form.workExperience];
                 updated[i].endDate = e.target.value;
-                handleChange('workHistory', updated);
+                setForm({ ...form, workExperience: updated });
               }} />
             </label><br />
-
             <label>Achievements:</label><br />
-            {wh.achievements.map((ach, j) => (
+            {we.achievements.map((ach, j) => (
               <input key={j} value={ach} onChange={e => updateWorkAchievement(i, j, e.target.value)} />
             ))}
             <button type="button" onClick={() => {
-              const updated = [...form.workHistory];
+              const updated = [...form.workExperience];
               updated[i].achievements.push('');
-              handleChange('workHistory', updated);
+              setForm({ ...form, workExperience: updated });
             }}>+ Add Achievement</button>
           </div>
         ))}
-        <button type="button" onClick={addWorkHistory}>+ Add Work History</button>
+        <button type="button" onClick={addWorkExperience}>+ Add Work Experience</button>
       </fieldset>
 
       <fieldset>
         <legend>Portfolio</legend>
         <label>LinkedIn:
-          <input value={form.portfolio.linkedin} onChange={e => handleNestedChange('portfolio', 'linkedin', e.target.value)} />
+          <input value={form.portfolio.socialLinks.linkedin} onChange={e => {
+            const updated = { ...form.portfolio };
+            updated.socialLinks.linkedin = e.target.value;
+            setForm({ ...form, portfolio: updated });
+          }} />
         </label><br />
         <label>Website:
-          <input value={form.portfolio.website} onChange={e => handleNestedChange('portfolio', 'website', e.target.value)} />
+          <input value={form.portfolio.socialLinks.personalPortfolioWebsite} onChange={e => {
+            const updated = { ...form.portfolio };
+            updated.socialLinks.personalPortfolioWebsite = e.target.value;
+            setForm({ ...form, portfolio: updated });
+          }} />
         </label><br />
         <label>Additional Link:
-          <input value={form.portfolio.additional} onChange={e => handleNestedChange('portfolio', 'additional', e.target.value)} />
+          <input value={form.portfolio.socialLinks.additionalLinks[0] || ''} onChange={e => {
+            const updated = { ...form.portfolio };
+            updated.socialLinks.additionalLinks[0] = e.target.value;
+            setForm({ ...form, portfolio: updated });
+          }} />
         </label>
       </fieldset>
 
-      <button onClick={submitForm}>Submit</button>
+<fieldset>
+  <legend>Desired Job Titles</legend>
+  {form.jobPreference.desiredJobTitle.map((title, i) => (
+    <div key={i}>
+      <input
+        value={title}
+        onChange={e => {
+          const updated = [...form.jobPreference.desiredJobTitle];
+          updated[i] = e.target.value;
+          setForm(prev => ({
+            ...prev,
+            jobPreference: {
+              ...prev.jobPreference,
+              desiredJobTitle: updated
+            }
+          }));
+        }}
+      />
+    </div>
+  ))}
+  <button
+    type="button"
+    onClick={() =>
+      setForm(prev => ({
+        ...prev,
+        jobPreference: {
+          ...prev.jobPreference,
+          desiredJobTitle: [...prev.jobPreference.desiredJobTitle, '']
+        }
+      }))
+    }
+  >
+    + Add Desired Job Title
+  </button>
+</fieldset>
+<fieldset>
+  <legend>Salary Expectation</legend>
 
+  <label>Minimum Salary:
+    <input
+      type="number"
+      value={form.jobPreference.salaryExpectation.min}
+      onChange={e =>
+        setForm(prev => ({
+          ...prev,
+          jobPreference: {
+            ...prev.jobPreference,
+            salaryExpectation: {
+              ...prev.jobPreference.salaryExpectation,
+              min: parseInt(e.target.value || 0)
+            }
+          }
+        }))
+      }
+    />
+  </label><br />
+
+  <label>
+    <input
+      type="checkbox"
+      checked={form.jobPreference.salaryExpectation.perHour}
+      onChange={e =>
+        setForm(prev => ({
+          ...prev,
+          jobPreference: {
+            ...prev.jobPreference,
+            salaryExpectation: {
+              ...prev.jobPreference.salaryExpectation,
+              perHour: e.target.checked
+            }
+          }
+        }))
+      }
+    />
+    Per Hour
+  </label><br />
+
+  <label>
+    <input
+      type="checkbox"
+      checked={form.jobPreference.salaryExpectation.perYear}
+      onChange={e =>
+        setForm(prev => ({
+          ...prev,
+          jobPreference: {
+            ...prev.jobPreference,
+            salaryExpectation: {
+              ...prev.jobPreference.salaryExpectation,
+              perYear: e.target.checked
+            }
+          }
+        }))
+      }
+    />
+    Per Year
+  </label><br />
+</fieldset>
+
+
+      <label>Job Type:
+  <select
+    value={form.jobPreference.jobType}
+    onChange={e => handleNestedChange('jobPreference', 'jobType', e.target.value)}
+  >
+    <option value="">Select job type</option>
+    <option value="Remote">Remote</option>
+    <option value="full-time">full-time</option>
+    <option value="part-time">part-time</option>
+    <option value="contract">contract</option>
+    <option value="internship">internship</option>
+    <option value="on-site">on-site</option>
+    <option value="hybrid">hybrid</option>
+  </select>
+</label><br />
+
+
+      <button onClick={submitForm}>Submit</button>
     </div>
   );
 }

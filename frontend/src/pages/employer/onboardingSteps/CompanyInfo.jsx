@@ -1,44 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 
-const CompanyInfo = () => {
+const CompanyInfo = ( ) => {
+    const { register } = useFormContext();
 
     return (
         <div className="container">
-            <h4>Company Info</h4>
-            <form>
+                <div className="row">
+                    <div className="col-md-6">
+                        <div className="mb-3">
+                            <label htmlFor="companyLogo" className="form-label">Company Logo</label>
+                            <input type="file" {...register("companyLogo")} className="form-control form-control-sm" name="companyLogo" id="companyLogo" />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="row">
 
                     {/* LEFT COLUMN */}
                     <div className="col-md-6">
                         <div className="mb-3">
-                            <label for="company-name" className="form-label">Company Name</label>
-                            <input type="text" className="form-control form-control-sm" name="company-name" id="company-name" maxLength="60" minLength="5"/>
+                            <label htmlFor="companyName" className="form-label">Company Name</label>
+                            <input type="text" {...register("companyName")} className="form-control form-control-sm" name="companyName" id="companyName" maxLength="60" minLength="5"  
+                            // value={ currentCompanyInfo.companyName }
+                            />
                         </div>
                         
                         <div className="mb-3">
-                            <label for="year-established" className="form-label">Established In (Year)</label>
-                            <input type="number" className="form-control form-control-sm" name="year-established" id="year-established" min="1000" max={ new Date().getFullYear() }/>
+                            <label htmlFor="establishedYear" className="form-label">Established In (Year)</label>
+                            <input type="number" {...register("establishedYear")} className="form-control form-control-sm" name="establishedYear" id="establishedYear" min="1000" max={ new Date().getFullYear() }  />
                         </div>
 
                         <div className="mb-3">
-                            <label for="registered-number" className="form-label">Business Registered Number</label>
-                            <input type="text" className="form-control form-control-sm" name="registered-number" id="registered-number" maxLength="60" minLength="5"/>
+                            <label htmlFor="businessRegisteredNumber" className="form-label">Business Registered Number</label>
+                            <input type="text" {...register("businessRegisteredNumber")} className="form-control form-control-sm" name="businessRegisteredNumber" id="businessRegisteredNumber" maxLength="60" minLength="5"  />
                         </div>
 
                         <div className="mb-3">
-                            <label for="industry-sector" className="form-label">Industry Sector</label>
-                                <select id="industry-sector" name="industry-sector" className="form-control form-control-sm">
+                            <label htmlFor="industrySector" className="form-label">Industry Sector</label>
+                                <select {...register("industrySector")} id="industrySector" name="industrySector" className="form-control form-control-sm" >
                                     <option value="">-- Select Industry Sector --</option>
-                                    <option value="software_consulting">Software Consulting</option>
-                                    <option value="manufacturing">Manufacturing</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="finance">Finance</option>
+                                    <option value="Information Technology">Information Technology</option>
                                 </select>
                         </div>
 
                         <div className="mb-3">
-                            <label for="company-size" className="form-label">Company Size (number of employees)</label>
-                            <select name="company-size" id="company-size" className="form-control form-control-sm">
+                            <label htmlFor="companySize" className="form-label">Company Size (number of employees)</label>
+                            <select {...register("companySize")} name="companySize" id="companySize" className="form-control form-control-sm" >
                                 <option value="">-- Select Company Size --</option>
                                 <option value="1-10">1–10 employees</option>
                                 <option value="11-50">11–50 employees</option>
@@ -54,32 +62,27 @@ const CompanyInfo = () => {
                     {/* RIGHT COLUMN */}
                     <div className="col-md-6">
                         <div className="mb-3">
-                            <label for="location" className="form-label">Location</label>
-                            <input type="text" className="form-control form-control-sm" name="location" id="location" />
+                            <label htmlFor="workLocation" className="form-label">Location</label>
+                            <input type="text" {...register("workLocation")} className="form-control form-control-sm" name="workLocation" id="workLocation" />
                             
                         </div>
                         
                         
                         <div className="mb-3">
-                            <label for="company-website" className="form-label">Company Website</label>
-                            <input type="text" className="form-control form-control-sm" name="company-website" id="company-website" maxLength="60" minLength="5"/>
+                            <label htmlFor="companyWebsite" className="form-label">Company Website</label>
+                            <input type="text" {...register("companyWebsite")} className="form-control form-control-sm" name="companyWebsite" id="companyWebsite" maxLength="60" minLength="5" />
                             
                         </div>
                         
                         <div className="mb-3">
-                            <label for="company-description" className="form-label">Company Description</label>
-                            <textarea id="company-description" className="form-control" name="company-description" rows="4" cols="50" maxLength="600" minLength="50"></textarea>
+                            <label htmlFor="companyDescription" className="form-label">Company Description</label>
+                            <textarea {...register("companyDescription")} id="companyDescription" className="form-control" name="companyDescription" rows="4" cols="50" maxLength="600" minLength="50"></textarea>
                         </div>        
                         
                     </div>
 
                 </div>
-                
-                <div className="d-flex justify-content-end gap-4">
-                    <input type="reset" value="Cancel" className="btn btn-secondary btn-sm mb-3" />
-                    <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" />
-                </div>
-            </form>
+
         </div>
     );
 };
