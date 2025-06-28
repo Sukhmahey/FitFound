@@ -1,0 +1,37 @@
+import { supabase } from '../services/supabaseClient';
+
+const bucket = 'company';
+
+// saving file in Supabase
+export const addFile = (filePath, file) => {
+    supabase.storage
+    .from(bucket)
+    .upload(filePath, file)
+    .then(result => {
+        return result;
+    })
+    .catch(error => {
+        return error;
+    });
+};
+
+// getting the file ulr
+export const getUlrFile = (filePath) => {
+    return supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath)
+        .data.publicUrl;
+};
+
+// set file name
+export const setFileName = (name) => {
+    return name.toLowerCase()
+          .normalize("NFD") // separate letters and accents
+          .replace(/[\u0300-\u036f]/g, '') // delete accents
+          .replace(/[^a-z0-9\s-]/g, '') // delete special chars
+          .trim() // delete starting and ending spaces
+          .replace(/\s+/g, '-'); // replace spaces between words
+};
+
+        
+        

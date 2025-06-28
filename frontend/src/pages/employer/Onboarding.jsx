@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
+import { setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,23 +13,50 @@ const EmployerOnboarding = () => {
   const userId = user?.userId;
   const methods = useForm();
   const [formSection, setFormSection] = useState("details"); // the other is contact
-  
+  const [logoUrl, setLogoUrl] = useState("");
+  let profilePictureUrl;
 
-  // const handleFormSectionClick = (e) => {
-  //   setFormSection(e.target.id);
-  //   console.log(e.target.id);
-  // };
 
   const onSubmit = (data) => {
     if (formSection == "details") {
+      // save the logo and profile picture
+      if (data.companyLogo) {
+        const logoFile = data.companyLogo["0"];
+        const logoFileName = setFileName(data.companyName + "-logo");
+        const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
+
+        addFile(logoFilePath, logoFile);
+        setLogoUrl(getUlrFile(logoFilePath));
+
+        console.log(logoUrl);
+      }
+      else {
+        return;
+      }
+
       setFormSection('contact');
     }
     
     if (formSection == "contact") {
 
+      console.log(data);
+
+      if (data.profilePicture) {
+        const profileFile = data.profilePicture["0"];
+        const profileFileName = setFileName(data.companyName + "-profile-picture");
+        const profileFilePath = `profile-picture/${Date.now()}-${profileFileName}`;
+
+        addFile(profileFilePath, profileFile);
+        profilePictureUrl = getUlrFile(profileFilePath);
+        console.log(profilePictureUrl);
+      }
+      else {
+        return;
+      }
+
       const employerProfile = {
         userId: userId,
-        companyLogo: "https://example.com/logo.png", //data.companyLogo,
+        companyLogo: logoUrl,
         companyName: data.companyName,
         establishedYear: data.establishedYear,
         businessRegisteredNumber: data.businessRegisteredNumber,
@@ -38,7 +66,7 @@ const EmployerOnboarding = () => {
         companyWebsite: data.companyWebsite,
         companyDescription: data.companyDescription,
         contactInfo: {
-          profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
+          profilePicture: profilePictureUrl,
           firstName: data.firstName,
           middleName: data.middleName,
           lastName: data.lastName,
