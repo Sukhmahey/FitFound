@@ -1,6 +1,10 @@
 import { supabase } from '../services/supabaseClient';
 
 const bucket = 'company';
+export const genericFiles = { 
+    profilePicture: "https://oqxdehxgtmolkgmxpten.supabase.co/storage/v1/object/public/company/profile-picture/1751146261117-generic-logo-profile-picture",
+    logo: "https://oqxdehxgtmolkgmxpten.supabase.co/storage/v1/object/public/company/logo/1751146249753-generic-logo-logo"
+};
 
 // saving file in Supabase
 export const addFile = (filePath, file) => {

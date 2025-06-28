@@ -3,6 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
+import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
 
 import CompanyInfo from './onboardingSteps/CompanyInfo';
 import UserContactInfo from './onboardingSteps/UserContactInfo';
@@ -15,10 +16,13 @@ const EmployerProfile = () => {
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
   const [userProfile, setUserProfile] = useState({});
+  const [logoUrl, setLogoUrl] = useState("");
+  let profilePictureUrl;
   const [message, setMessage] = useState('');
 
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
+    
 
     // when the user changes the form section
     if (e.target.id == "details") {
@@ -51,6 +55,22 @@ const EmployerProfile = () => {
     let employerProfile;
     
     if (formSection == "details") {
+      
+      // saving the logo url
+      // if (data.companyLogo) {
+      //   const logoFile = data.companyLogo["0"];
+      //   const logoFileName = setFileName(data.companyName + "-logo");
+      //   const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
+
+      //   addFile(logoFilePath, logoFile);
+      //   setLogoUrl(getUlrFile(logoFilePath));
+
+      //   console.log(logoUrl);
+      // }
+      // else {
+      //   return;
+      // }
+
       employerProfile = {
         userId: userId,
         companyLogo: "https://example.com/logo.png", //data.companyLogo,

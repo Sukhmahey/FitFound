@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const CompanyInfo = ( ) => {
-    const { register } = useFormContext();
+const CompanyInfo = () => {
+    const { register, watch } = useFormContext();
 
     return (
         <div className="container">
@@ -11,6 +11,12 @@ const CompanyInfo = ( ) => {
                         <div className="mb-3">
                             <label htmlFor="companyLogo" className="form-label">Company Logo</label>
                             <input type="file" {...register("companyLogo")} className="form-control form-control-sm" name="companyLogo" id="companyLogo" />
+                            { watch('companyLogo') && (
+                                <div>
+                                <p></p>
+                                <img src={ watch('companyLogo') } alt="Vista previa" style={{ maxWidth: '100px', maxHeight: '100px' }} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -21,8 +27,7 @@ const CompanyInfo = ( ) => {
                     <div className="col-md-6">
                         <div className="mb-3">
                             <label htmlFor="companyName" className="form-label">Company Name</label>
-                            <input type="text" {...register("companyName")} className="form-control form-control-sm" name="companyName" id="companyName" maxLength="60" minLength="5"  
-                            // value={ currentCompanyInfo.companyName }
+                            <input type="text" {...register("companyName")} className="form-control form-control-sm" name="companyName" id="companyName" maxLength="60" minLength="5"
                             />
                         </div>
                         

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
+import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
@@ -47,7 +47,7 @@ const EmployerOnboarding = () => {
         const profileFilePath = `profile-picture/${Date.now()}-${profileFileName}`;
 
         addFile(profileFilePath, profileFile);
-        profilePictureUrl = getUlrFile(profileFilePath);
+        profilePictureUrl= getUlrFile(profileFilePath);
         console.log(profilePictureUrl);
       }
       else {
