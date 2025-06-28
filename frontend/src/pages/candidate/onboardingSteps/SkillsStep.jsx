@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { Box, TextField, Button, Chip, Stack } from '@mui/material';
 
 export default function SkillsStep({ data = [], onUpdate }) {
   const [skill, setSkill] = useState('');
@@ -18,26 +18,40 @@ export default function SkillsStep({ data = [], onUpdate }) {
   };
 
   return (
-    <div>
+    <div className="d-flex justify-content-center w-80 flex-column mx-auto">
       <h3>Skills</h3>
-      <div>
-        <input
-          type="text"
-          placeholder="Enter a skill"
-          value={skill}
-          onChange={(e) => setSkill(e.target.value)}
-        />
-        <button onClick={addSkill}>Add</button>
+      <div className="d-flex flex-column w-50 mx-auto gap-3">
+        <Box className="d-flex gap-2 align-items-center">
+          <TextField
+            label="Enter a skill"
+            variant="outlined"
+            fullWidth
+            value={skill}
+            onChange={(e) => setSkill(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkill();
+              }
+            }}
+          />
+          <Button variant="contained" color="primary" onClick={addSkill}>
+            Add
+          </Button>
+        </Box>
+
+        <Stack direction="row" useFlexGap spacing={1} flexWrap="wrap">
+          {data.map((item, index) => (
+            <Chip
+              key={index}
+              label={item.skill}
+              onDelete={() => removeSkill(index)}
+              color="primary"
+              sx={{ marginBottom: 1 }}
+            />
+          ))}
+        </Stack>
       </div>
-      <ul>
-        {data.map((item, index) => (
-          <li key={index}>
-            {item.skill}
-            <button onClick={() => removeSkill(index)}>x</button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
-

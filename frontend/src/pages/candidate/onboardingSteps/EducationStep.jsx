@@ -1,4 +1,6 @@
 import React from 'react';
+import { Box, TextField, Button } from '@mui/material';
+
 
 export default function EducationStep({ data = [], onUpdate }) {
   const handleChange = (index, field, value) => {
@@ -29,40 +31,66 @@ if (field === 'startDate' || field === 'endDate') {
     updated.splice(index, 1);
     onUpdate(updated);
   };
-
   return (
-    <div>
+  <div className='d-flex justify-content-center w-80 flex-column mx-auto'>
       <h3>Education</h3>
-      {data.map((edu, index) => (
-        <div key={index} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
-          <input
-            type="text"
-            placeholder="Institute Name"
-            value={edu.instituteName}
-            onChange={(e) => handleChange(index, 'instituteName', e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Credentials"
-            value={edu.credentials}
-            onChange={(e) => handleChange(index, 'credentials', e.target.value)}
-          />
-          <input
-            type="month"
-            placeholder="Start Date"
-            value={edu.startDate ? `${edu.startDate.split('-')[1]}-${edu.startDate.split('-')[0]}` : ''}
-            onChange={(e) => handleChange(index, 'startDate', e.target.value)}
-          />
-          <input
-            type="month"
-            placeholder="End Date"
-            value={edu.endDate ? `${edu.endDate.split('-')[1]}-${edu.endDate.split('-')[0]}` : ''}
-            onChange={(e) => handleChange(index, 'endDate', e.target.value)}
-          />
-          <button onClick={() => removeEducation(index)}>Remove</button>
-        </div>
-      ))}
-      <button onClick={addEducation}>+ Add Education</button>
+      <div className="d-flex flex-column w-75 mx-auto gap-4">
+        {data.map((edu, index) => (
+          <Box
+            component="form"
+            key={index}
+            sx={{ '& > :not(style)': { m: 1, width: '25ch' } }}
+            noValidate
+            autoComplete="off"
+          >
+            <TextField
+              label="Institute Name"
+              id="outlined-basic"
+              variant="outlined"
+              value={edu.instituteName}
+              onChange={(e) => handleChange(index, 'instituteName', e.target.value)}
+            />
+            <TextField
+              label="Credentials"
+              variant="outlined"
+              value={edu.credentials}
+              onChange={(e) => handleChange(index, 'credentials', e.target.value)}
+            />
+            <TextField
+              type="month"
+              label="Start Date"
+              InputLabelProps={{ shrink: true }}
+              value={
+                edu.startDate
+                  ? `${edu.startDate.split('-')[1]}-${edu.startDate.split('-')[0]}`
+                  : ''
+              }
+              onChange={(e) => handleChange(index, 'startDate', e.target.value)}
+            />
+            <TextField
+              type="month"
+              label="End Date"
+              InputLabelProps={{ shrink: true }}
+              value={
+                edu.endDate
+                  ? `${edu.endDate.split('-')[1]}-${edu.endDate.split('-')[0]}`
+                  : ''
+              }
+              onChange={(e) => handleChange(index, 'endDate', e.target.value)}
+            />
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => removeEducation(index)}
+            >
+              Remove
+            </Button>
+          </Box>
+        ))}
+        <Button variant="contained" color="primary" onClick={addEducation}>
+          + Add Education
+        </Button>
+      </div>
     </div>
   );
 }
