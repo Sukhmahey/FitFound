@@ -1,12 +1,27 @@
-
 import React, { useState } from 'react';
+import {
+  Box,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Stack,
+  Chip,
+  Checkbox,
+  FormControlLabel
+} from '@mui/material';
 
 export default function JobPreferenceStep({ data, onUpdate }) {
   const [title, setTitle] = useState('');
 
   const addTitle = () => {
     if (title.trim()) {
-      onUpdate({ ...data, desiredJobTitle: [...(data.desiredJobTitle || []), title.trim()] });
+      onUpdate({
+        ...data,
+        desiredJobTitle: [...(data.desiredJobTitle || []), title.trim()]
+      });
       setTitle('');
     }
   };
@@ -41,62 +56,98 @@ export default function JobPreferenceStep({ data, onUpdate }) {
   };
 
   return (
-    <div>
-      <h3>Job Preferences</h3>
-      <div>
-        <input
-          type="text"
-          placeholder="Enter Desired Job Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <button onClick={addTitle}>Add</button>
-        <ul>
+    <div className="d-flex justify-content-center w-80 flex-column mx-auto">
+      <h4>Job Preferences</h4>
+      <div className="d-flex flex-column w-75 mx-auto gap-4">
+
+        {/* Desired Job Titles Input */}
+        <Box className="d-flex gap-2 align-items-center">
+          <TextField
+            label="Enter Desired Job Title"
+            variant="outlined"
+            fullWidth
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addTitle();
+              }
+            }}
+          />
+          <Button variant="contained" color="primary" onClick={addTitle}>
+            Add
+          </Button>
+        </Box>
+
+        {/* Display Added Job Titles */}
+        <Stack direction="row" spacing={1} flexWrap="wrap">
           {(data.desiredJobTitle || []).map((t, index) => (
-            <li key={index}>
-              {t} <button onClick={() => removeTitle(index)}>x</button>
-            </li>
+            <Chip
+              key={index}
+              label={t}
+              onDelete={() => removeTitle(index)}
+              color="primary"
+              sx={{ marginBottom: 1 }}
+            />
           ))}
-        </ul>
-      </div>
+        </Stack>
 
-      <select name="jobType" value={data.jobType} onChange={handleChange}>
-        <option value="">Select Job Type</option>
-        <option value="Remote">Remote</option>
-        <option value="full-time">Full-time</option>
-        <option value="part-time">Part-time</option>
-        <option value="contract">Contract</option>
-        <option value="internship">Internship</option>
-        <option value="on-site">On-site</option>
-        <option value="hybrid">Hybrid</option>
-      </select>
+        {/* Job Type Selection */}
+        <FormControl fullWidth>
+          <InputLabel id="job-type-label">Job Type</InputLabel>
+          <Select
+            labelId="job-type-label"
+            name="jobType"
+            value={data.jobType}
+            label="Job Type"
+            onChange={handleChange}
+          >
+            <MenuItem value="">Select Job Type</MenuItem>
+            <MenuItem value="Remote">Remote</MenuItem>
+            <MenuItem value="full-time">Full-time</MenuItem>
+            <MenuItem value="part-time">Part-time</MenuItem>
+            <MenuItem value="contract">Contract</MenuItem>
+            <MenuItem value="internship">Internship</MenuItem>
+            <MenuItem value="on-site">On-site</MenuItem>
+            <MenuItem value="hybrid">Hybrid</MenuItem>
+          </Select>
+        </FormControl>
 
-      <div>
-        <label>
-          Salary Expectation: $
-          <input
+        {/* Salary Expectation */}
+        <Box className="d-flex flex-column gap-2">
+          <h6>Salary Expectation</h6>
+          <TextField
             type="number"
             name="min"
+            label="Minimum Salary"
             value={data.salaryExpectation?.min || ''}
             onChange={handleChange}
+            InputProps={{ startAdornment: <span>$</span> }}
           />
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="perHour"
-            checked={data.salaryExpectation?.perHour || false}
-            onChange={handleChange}
-          /> Per Hour
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="perYear"
-            checked={data.salaryExpectation?.perYear || false}
-            onChange={handleChange}
-          /> Per Year
-        </label>
+          <Box className="d-flex gap-4">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="perHour"
+                  checked={data.salaryExpectation?.perHour || false}
+                  onChange={handleChange}
+                />
+              }
+              label="Per Hour"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="perYear"
+                  checked={data.salaryExpectation?.perYear || false}
+                  onChange={handleChange}
+                />
+              }
+              label="Per Year"
+            />
+          </Box>
+        </Box>
       </div>
     </div>
   );
