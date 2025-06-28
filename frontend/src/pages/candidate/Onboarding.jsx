@@ -15,10 +15,7 @@ import InfoConfirmationPage from './onboardingSteps/InfoConfirmationPage';
 import Dashboard from './Dashboard';
 import {
   Box,
-  Tabs,
-  Tab,
   Button,
-  CircularProgress,
   Container,
   Stepper,
   Step,
