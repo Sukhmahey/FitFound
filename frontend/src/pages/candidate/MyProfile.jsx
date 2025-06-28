@@ -30,6 +30,7 @@ export default function MyProfile() {
       try {
         const response = await candidateApi.getProfileByUserId(userId);
         setFormData(response.data);
+        console.log(response.data)
       } catch (err) {
         console.error('Failed to load profile:', err);
       }
