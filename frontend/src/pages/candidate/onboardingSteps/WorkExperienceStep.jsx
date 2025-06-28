@@ -7,20 +7,21 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  Typography,
   Stack
 } from '@mui/material';
 
 export default function WorkExperienceStep({ data = [], onUpdate }) {
   const handleChange = (index, field, value) => {
     const updated = [...data];
-    if (field === 'startDate' || field === 'endDate') {
-      const [year, month] = value.split('-');
-      updated[index][field] = `${month}-${year}`;
-    } else {
-      updated[index][field] = value;
-    }
+    updated[index][field] = value;
     onUpdate(updated);
+  };
+
+  const normalizeDate = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts[0].length === 4) return dateStr;
+    return `${parts[1]}-${parts[0]}`;
   };
 
   const handleAchievementChange = (index, i, value) => {
@@ -79,7 +80,7 @@ export default function WorkExperienceStep({ data = [], onUpdate }) {
               value={exp.jobTitle}
               onChange={(e) => handleChange(index, 'jobTitle', e.target.value)}
             />
-            <TextField
+            {/* <TextField
               type="month"
               label="Start Date"
               InputLabelProps={{ shrink: true }}
@@ -99,6 +100,22 @@ export default function WorkExperienceStep({ data = [], onUpdate }) {
                   ? `${exp.endDate.split('-')[1]}-${exp.endDate.split('-')[0]}`
                   : ''
               }
+              onChange={(e) => handleChange(index, 'endDate', e.target.value)}
+            /> */}
+            <TextField
+              type="month"
+              label="Start Date"
+              InputLabelProps={{ shrink: true }}
+              value={normalizeDate(exp.startDate) || ''}
+
+              onChange={(e) => handleChange(index, 'startDate', e.target.value)}
+            />
+
+            <TextField
+              type="month"
+              label="End Date"
+              InputLabelProps={{ shrink: true }}
+              value={normalizeDate(exp.endDate) || ''}
               onChange={(e) => handleChange(index, 'endDate', e.target.value)}
             />
             <TextField

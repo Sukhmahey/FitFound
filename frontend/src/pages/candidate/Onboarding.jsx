@@ -13,10 +13,22 @@ import JobPreferenceStep from './onboardingSteps/JobPreferenceStep';
 import ProfileSetupOption from './onboardingSteps/ProfileSetupOption';
 import InfoConfirmationPage from './onboardingSteps/InfoConfirmationPage';
 import Dashboard from './Dashboard';
+import {
+  Box,
+  Tabs,
+  Tab,
+  Button,
+  CircularProgress,
+  Container,
+  Stepper,
+  Step,
+  StepLabel,
+} from '@mui/material';
 
 export default function CandidateOnboarding() {
   const { user } = useAuth();
   const userId = user?.userId;
+  const userEmail = user?.email;
   const navigate = useNavigate();
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -57,6 +69,7 @@ export default function CandidateOnboarding() {
       }
     }
   });
+  
 
   const handleManual = () => setStepIndex(1);
   const handleUpload = () => setStepIndex(14);
@@ -118,6 +131,8 @@ export default function CandidateOnboarding() {
     }
   };
 
+  
+
   const handlePrevBtn = () => {
     if (stepIndex > 0 && stepIndex < 99) setStepIndex(stepIndex - 1);
   };
@@ -132,12 +147,22 @@ export default function CandidateOnboarding() {
     }));
   };
 
+const steps = [
+  'Personal Information',
+  'Basic Information',
+  'Skill set',
+  'Work Experience',
+  'Portfolio Details',
+  'Education',
+  'Job Preference',
+];
+
   const renderStep = () => {
     switch (stepIndex) {
       case 0:
         return <ProfileSetupOption onManualClick={handleManual} onUploadClick={handleUpload} />;
       case 1:
-        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
+        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} userEmail={userEmail}/>;
       case 2:
         return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} />;
       case 3:
@@ -161,16 +186,25 @@ export default function CandidateOnboarding() {
   };
 
   return (
-    <div>
-      <div>Onboarding</div>
-      {stepIndex < 90 && stepIndex !== 14 && (<h2>({stepIndex + 1}/8)</h2>)}
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      { stepIndex>0 && stepIndex < 90 && stepIndex !== 14 &&<Box sx={{ width: '100%' }}>
+      <Stepper activeStep={stepIndex-1} alternativeLabel>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>}
+      {/* <div>Onboarding</div> */}
+      {/* {stepIndex < 90 && stepIndex !== 14 && (<h2>({stepIndex + 1}/8)</h2>)} */}
       {renderStep()}
       {stepIndex < 90 && stepIndex > 0 && stepIndex !== 14 && (
-        <div>
-          <button onClick={handlePrevBtn}>Back</button>
-          <button onClick={handleNextBtn}>{stepIndex === 7 ? 'Finish' : 'Next'}</button>
+        <div className=' d-flex justify-content-between mt-5'>
+          <Button variant="contained" color="primary" onClick={handlePrevBtn}>Back</Button>
+          <Button variant="contained" color="primary" onClick={handleNextBtn}>{stepIndex === 7 ? 'Finish' : 'Next'}</Button>
         </div>
       )}
-    </div>
+    </Container>
   );
 }
