@@ -18,6 +18,7 @@ function App() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
