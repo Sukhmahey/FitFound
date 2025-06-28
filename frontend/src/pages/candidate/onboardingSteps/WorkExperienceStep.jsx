@@ -3,11 +3,24 @@
 import React from 'react';
 
 export default function WorkExperienceStep({ data = [], onUpdate }) {
+  // const handleChange = (index, field, value) => {
+  //   const updated = [...data];
+  //   updated[index] = { ...updated[index], [field]: value };
+  //   onUpdate(updated);
+  // };
   const handleChange = (index, field, value) => {
-    const updated = [...data];
-    updated[index] = { ...updated[index], [field]: value };
-    onUpdate(updated);
-  };
+  const updated = [...data];
+
+  if (field === 'startDate' || field === 'endDate') {
+    const [year, month] = value.split('-');
+    updated[index][field] = `${month}-${year}`;
+  } else {
+    updated[index][field] = value;
+  }
+
+  onUpdate(updated);
+};
+
 
   const addExperience = () => {
     onUpdate([
@@ -60,7 +73,7 @@ export default function WorkExperienceStep({ data = [], onUpdate }) {
             value={exp.jobTitle}
             onChange={(e) => handleChange(index, 'jobTitle', e.target.value)}
           />
-          <input
+          {/* <input
             type="month"
             placeholder="Start Date"
             value={exp.startDate}
@@ -71,7 +84,27 @@ export default function WorkExperienceStep({ data = [], onUpdate }) {
             placeholder="End Date"
             value={exp.endDate}
             onChange={(e) => handleChange(index, 'endDate', e.target.value)}
-          />
+          /> */}
+          <input
+  type="month"
+  value={
+    exp.startDate
+      ? `${exp.startDate.split('-')[1]}-${exp.startDate.split('-')[0]}`
+      : ''
+  }
+  onChange={(e) => handleChange(index, 'startDate', e.target.value)}
+/>
+
+<input
+  type="month"
+  value={
+    exp.endDate
+      ? `${exp.endDate.split('-')[1]}-${exp.endDate.split('-')[0]}`
+      : ''
+  }
+  onChange={(e) => handleChange(index, 'endDate', e.target.value)}
+/>
+
           <input
             type="text"
             placeholder="Role"

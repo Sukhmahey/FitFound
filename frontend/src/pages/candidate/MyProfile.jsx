@@ -35,6 +35,16 @@ export default function MyProfile() {
     }));
   };
 
+  const handleUpdate = async ()=>{
+    try {
+      const response = await candidateApi.updateProfile(userId, formData);
+      }
+      catch (err) {
+        console.error('Failed to update profile:', err);
+        }
+
+  }
+
   if (!formData) return <div>Loading profile...</div>;
 
   const tabList = [
@@ -122,6 +132,8 @@ export default function MyProfile() {
         ))}
       </div>
       <div>{renderTab()}</div>
+      <br/>
+      <button onClick={handleUpdate}>Update</button>
     </div>
   );
 }

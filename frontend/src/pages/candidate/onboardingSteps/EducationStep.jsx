@@ -3,7 +3,12 @@ import React from 'react';
 export default function EducationStep({ data = [], onUpdate }) {
   const handleChange = (index, field, value) => {
     const updated = [...data];
-    updated[index] = { ...updated[index], [field]: value };
+if (field === 'startDate' || field === 'endDate') {
+  const [year, month] = value.split('-');
+  updated[index][field] = `${month}-${year}`;
+} else {
+  updated[index][field] = value;
+}
     onUpdate(updated);
   };
 
@@ -45,13 +50,13 @@ export default function EducationStep({ data = [], onUpdate }) {
           <input
             type="month"
             placeholder="Start Date"
-            value={edu.startDate}
+            value={edu.startDate ? `${edu.startDate.split('-')[1]}-${edu.startDate.split('-')[0]}` : ''}
             onChange={(e) => handleChange(index, 'startDate', e.target.value)}
           />
           <input
             type="month"
             placeholder="End Date"
-            value={edu.endDate}
+            value={edu.endDate ? `${edu.endDate.split('-')[1]}-${edu.endDate.split('-')[0]}` : ''}
             onChange={(e) => handleChange(index, 'endDate', e.target.value)}
           />
           <button onClick={() => removeEducation(index)}>Remove</button>
