@@ -24,22 +24,6 @@ const UserSchema = new Schema(
       required: true,
     },
     personalSummary: { type: String, minLength: 50, maxLength: 600 },
-    companyName: {
-      type: String,
-      minLength: 5,
-      maxLength: 60,
-      required: function () {
-        return this.role === "employer";
-      },
-    },
-    companyDescription: {
-      type: String,
-      minLength: 50,
-      maxLength: 600,
-      required: function () {
-        return this.role === "employer";
-      },
-    },
   },
   { timestamps: true, collection: "users" }
 );

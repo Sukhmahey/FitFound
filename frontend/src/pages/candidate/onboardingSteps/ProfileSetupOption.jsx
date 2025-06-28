@@ -1,22 +1,30 @@
 import React from 'react'
+import {
+  Box,
+  Tabs,
+  Tab,
+  Button,
+  CircularProgress,
+  Container
+} from '@mui/material';
 
 function ProfileSetupOption({onManualClick,onUploadClick}) {
    
   return (
-    <div>
+    <Container maxWidth="lg" sx={{mt:5}}>
       <h2>Get Started</h2>
       <p>Choose how you want to set up your profile:</p>
 
       <div >
-        <button onClick={onManualClick}>
+        <Button onClick={onManualClick} variant="contained" color="success" sx={{mr:2}}>
           Fill Details Manually
-        </button>
+        </Button>
 
-        <button onClick={onUploadClick}>
+        <Button onClick={onUploadClick} variant="contained" color="success">
           Upload Resume
-        </button>
+        </Button>
       </div>
-    </div>
+    </Container>
   )
 };
 
