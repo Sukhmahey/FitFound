@@ -18,18 +18,27 @@ const EmployerProfile = () => {
   const [userProfile, setUserProfile] = useState({});
   const [logoUrl, setLogoUrl] = useState("");
   let profilePictureUrl;
+  const [detailsIsActive, setDetailsIsActive] = useState(true);
+  const [contactIsActive, setContactIsActive] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
     
+    console.log(e.target.id);
 
     // when the user changes the form section
     if (e.target.id == "details") {
       methods.reset(companyInfo);
+
+      setDetailsIsActive(true);
+      setContactIsActive(false);
     }
     else {
       methods.reset(contactInfo);
+
+      setDetailsIsActive(false);
+      setContactIsActive(true);
     }
   };
 
@@ -87,6 +96,7 @@ const EmployerProfile = () => {
       setCompanyInfo(data);
     }
     else {
+
       let newContactInfo = {
         profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
         firstName: data.firstName,
@@ -131,13 +141,25 @@ const EmployerProfile = () => {
 
   return (
     <div>
+      <div>
+        <ul className="nav nav-underline">
+          <li className="nav-item">
+            <a className={`nav-link ${detailsIsActive ? 'active' : ''}`} aria-current="page" 
+            id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</a>
+          </li>
+          <li className="nav-item">
+            <a className={`nav-link ${contactIsActive ? 'active' : ''}`} aria-disabled="true"
+            id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</a>
+          </li>
+        </ul>
+      </div>
 
       <div id="message">{ message }</div>
 
-      <div>
+      {/* <div>
         <div id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</div>
         <div id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</div>
-      </div>
+      </div> */}
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>

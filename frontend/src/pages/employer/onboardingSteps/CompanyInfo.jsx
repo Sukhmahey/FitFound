@@ -2,23 +2,84 @@ import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const CompanyInfo = () => {
-    const { register, watch } = useFormContext();
+    const { register, watch, setValue } = useFormContext();
+    const [imageSrc, setImageSrc] = useState( null );
+
+    const styles = {
+        wrapper: {
+        display: "block",
+        width: "120px",
+        height: "120px",
+        border: "2px dashed #999",
+        borderRadius: "8px",
+        cursor: "pointer",
+        position: "relative",
+        overflow: "hidden"
+        },
+        input: {
+        display: "none"
+        },
+        iconContainer: {
+        width: "100%",
+        height: "100%",
+        display: "grid",
+        placeContent: "center",
+        position: "relative"
+        },
+        image: {
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+        opacity: 0.8
+        },
+        arrow: {
+        position: "absolute",
+        bottom: "8px",
+        right: "8px",
+        fontSize: "20px",
+        color: "#333"
+        }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      console.log(file);
+      setFileValue(file);
+    }
+  };
+
+  const setFileValue = (file) => {
+    setValue('companyLogo', file);
+  };
 
     return (
         <div className="container">
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="mb-3">
-                            <label htmlFor="companyLogo" className="form-label">Company Logo</label>
-                            <input type="file" {...register("companyLogo")} className="form-control form-control-sm" name="companyLogo" id="companyLogo" />
-                            { watch('companyLogo') && (
-                                <div>
-                                <p></p>
-                                <img src={ watch('companyLogo') } alt="Vista previa" style={{ maxWidth: '100px', maxHeight: '100px' }} />
-                                </div>
-                            )}
+
+
+                {/* Test Element */}
+                <div>
+                    <label htmlFor="companyLogo">
+                        Company logo
+                        <div style={styles.wrapper}>
+                            <input type="file" style={styles.input} {...register("companyLogo")} name="companyLogo" id="companyLogo" 
+                            // onChange={(e) => {
+                            //     handleImageChange(e);                    
+                            //     register("companyLogo").onChange(e);
+                            // }} 
+                            />
+                            <div style={styles.iconContainer}>
+                                <img src = {imageSrc ? imageSrc : watch('companyLogo') } style={styles.image} />
+                                <span style={styles.arrow}>⬆</span>
+                            </div>
                         </div>
-                    </div>
+                    </label>
                 </div>
 
                 <div className="row">

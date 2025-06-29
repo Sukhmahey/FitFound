@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
 
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -14,16 +18,25 @@ const EmployerOnboarding = () => {
   const methods = useForm();
   const [formSection, setFormSection] = useState("details"); // the other is contact
   const [logoUrl, setLogoUrl] = useState("");
+  const [detailsIsActive, setDetailsIsActive] = useState(true);
+  const [contactIsActive, setContactIsActive] = useState(false);
   let profilePictureUrl;
 
 
   const onSubmit = (data) => {
     if (formSection == "details") {
+      // Tabs css
+      setDetailsIsActive(false);
+      setContactIsActive(true);
+
       // save the logo and profile picture
       if (data.companyLogo) {
         const logoFile = data.companyLogo["0"];
         const logoFileName = setFileName(data.companyName + "-logo");
         const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
+
+        // console.log(logoFile);
+        // return;
 
         addFile(logoFilePath, logoFile);
         setLogoUrl(getUlrFile(logoFilePath));
@@ -38,6 +51,9 @@ const EmployerOnboarding = () => {
     }
     
     if (formSection == "contact") {
+      // Tabs css
+      setDetailsIsActive(false);
+      setContactIsActive(true);
 
       console.log(data);
 
@@ -94,10 +110,15 @@ const EmployerOnboarding = () => {
 
   return (
     <div>
-      
       <div>
-        <div>Organisation Details</div>
-        <div>Primary Contact</div>
+        <ul className="nav nav-underline">
+          <li className="nav-item">
+            <a className={`nav-link ${detailsIsActive ? 'active' : 'disabled'}`} aria-current="page" href="#">Organisation Details</a>
+          </li>
+          <li className="nav-item">
+            <a className={`nav-link ${contactIsActive ? 'active' : 'disabled'}`} aria-disabled="true">Primary Contact</a>
+          </li>
+        </ul>
       </div>
 
       <FormProvider {...methods}>
