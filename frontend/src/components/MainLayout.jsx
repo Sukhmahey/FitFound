@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { AppInfoContext } from "../contexts/AppInfoContext";
+
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
 
@@ -7,8 +10,11 @@ import Footer from './Footer';
 
 
 const MainLayout = () => {
+    const [appGeneralInfo, setAppGeneralInfo] = useState({});
+    
+
     return (
-        <div>
+        <AppInfoContext.Provider value={{ appGeneralInfo, setAppGeneralInfo }}>
             <Box
                 sx={{
                     display: 'grid',
@@ -32,7 +38,7 @@ const MainLayout = () => {
                     <Footer></Footer>
                 </Box>
             </Box>
-        </div>
+        </AppInfoContext.Provider>
     );
 };
 

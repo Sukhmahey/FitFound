@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
 import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -22,6 +24,12 @@ const EmployerOnboarding = () => {
   const [contactIsActive, setContactIsActive] = useState(false);
   let profilePictureUrl;
 
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+
+  useEffect(() => {
+      setAppGeneralInfo({ pageTitle: "Onboarding"});
+  }, []);
+  
 
   const onSubmit = (data) => {
     if (formSection == "details") {

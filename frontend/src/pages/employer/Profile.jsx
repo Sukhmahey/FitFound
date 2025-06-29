@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
 import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 import CompanyInfo from './onboardingSteps/CompanyInfo';
 import UserContactInfo from './onboardingSteps/UserContactInfo';
@@ -21,6 +23,12 @@ const EmployerProfile = () => {
   const [detailsIsActive, setDetailsIsActive] = useState(true);
   const [contactIsActive, setContactIsActive] = useState(false);
   const [message, setMessage] = useState('');
+
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+  
+    useEffect(() => {
+        setAppGeneralInfo({ pageTitle: "My Profile"});
+    }, []);
 
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
