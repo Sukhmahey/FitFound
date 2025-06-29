@@ -13,12 +13,12 @@ import MyProfile from "./pages/candidate/MyProfile";
 import EmployerSearch from "./pages/employer/Search";
 import EmployerSearchResults from "./pages/employer/SearchResults";
 import Unauthorized from "./pages/Unauthorized";
+import MainLayout from "./components/MainLayout";
 
 function App() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
@@ -50,22 +50,33 @@ function App() {
       />
 
       {/* Employer Routes */}
-      <Route
-        path="/employer/onboarding"
+      <Route path="/employer"
         element={
           <ProtectedRoute role="employer">
-            <EmployerOnboarding />
+            <MainLayout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/employer/profile"
-        element={
-          <ProtectedRoute role="employer">
-            <EmployerProfile />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route
+          path="onboarding"
+          element={<EmployerOnboarding />}
+        />
+
+        <Route
+          path="/employer/profile"
+          element={<EmployerProfile />}
+        />
+
+        <Route
+          path="/employer/dashboard"
+          element={<EmployerDashboard />
+          }
+        />
+
+      </Route>
+
+      
+      
       <Route
         path="/employer/create-form"
         element={
@@ -74,14 +85,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/employer/dashboard"
-        element={
-          <ProtectedRoute role="employer">
-            <EmployerDashboard />
-          </ProtectedRoute>
-        }
-      />
+      
       <Route
         path="/employer/search"
         element={
