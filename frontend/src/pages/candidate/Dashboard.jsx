@@ -6,6 +6,7 @@ import TrendingKeywordsSection from './candidateDashboardItems/TrendingKeywordsS
 import InvitationsSection from './candidateDashboardItems/InvitationsSection';
 import { useAuth } from '../../contexts/AuthContext';
 import Allroles from '../../ScoringUtil/skillsFromJob'
+import { Container } from '@mui/material'
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -18,7 +19,7 @@ export default function Dashboard() {
   const [suggestedSkills, setSuggestedSkills] = useState([]);
   const [alreadySkills, setAlreadySkills] = useState([]);
 
-// console.log(Allroles)
+  // console.log(Allroles)
 
   useEffect(() => {
     fetchProfileData();
@@ -52,7 +53,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (desiredJobRole) {
-      const normalizedFetchedRole = desiredJobRole.toLowerCase(); 
+      const normalizedFetchedRole = desiredJobRole.toLowerCase();
 
       let matchedTemplate = null;
 
@@ -61,14 +62,14 @@ export default function Dashboard() {
           const template = Allroles[roleKey];
           if (template.relevantTitles.includes(normalizedFetchedRole)) {
             matchedTemplate = template;
-            break; 
+            break;
           }
         }
       }
       // console.log(matchedTemplate)
       if (matchedTemplate) {
         setSuggestedSkills(matchedTemplate.requiredSkills);
-                // console.log("Matching template found. Suggested Skills:", matchedTemplate.requiredSkills);
+        // console.log("Matching template found. Suggested Skills:", matchedTemplate.requiredSkills);
 
         // console.log(suggestedSkills)
       } else {
@@ -94,8 +95,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={styles.outerCard}>
-      <h1>Dashboard</h1>
+    <Container maxWidth="md" sx={{ mt: 4 }} >     <h1>Dashboard</h1>
       <h2> Hello 👋, {dummyProfile.name}</h2>
       <ProfileSummary profileScore={profileScore}></ProfileSummary>
       <TrendingKeywordsSection suggestedSkills={suggestedSkills} alreadySkills={alreadySkills}></TrendingKeywordsSection>
@@ -103,14 +103,7 @@ export default function Dashboard() {
 
       <div >
       </div>
-    </div>
+    </Container>
   )
 }
 
-const styles = {
-  outerCard: {
-    width: '90vw',
-    margin: 'auto',
-
-  }
-}
