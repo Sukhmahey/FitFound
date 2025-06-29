@@ -1,4 +1,6 @@
 import React from 'react'
+import { Box, Typography, Paper, Container,Divider } from '@mui/material';
+
 
 function TrendingKeywordsSection({suggestedSkills=[], alreadySkills=[]}) {
 
@@ -26,49 +28,41 @@ function TrendingKeywordsSection({suggestedSkills=[], alreadySkills=[]}) {
     // ]
 
   return (
-    <div>
-      <h2>Trending Keywords</h2>
-      <ul className='keywordsContainer' style={styles.keywordsContainer}>
-        {suggestedSkills.map((item, indx) => {
-          const isNew = !alreadySet.has(item.toLowerCase());
-          return (
-            <li
-              key={indx}
-              className='listItems'
-              style={{
-                ...styles.listItems,
-                backgroundColor: isNew ? 'tomato' : 'darkgray',
-                color: 'white',
-              }}
-            >
-              {item}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    
+    
+     <Box>
+      <Divider className=' mb-4'></Divider>
+              <Typography variant="h4" gutterBottom>Trending Keywords</Typography>
+
+       <Box my={4} p={1} border={1} borderColor="gray.200" rounded="md" shadow="lg" borderRadius={2}>
+          <Box component="ul" sx={{ display: 'flex', flexWrap: 'wrap', listStyle: 'none', p: 3, m: 0 }}>
+            {suggestedSkills.map((item, indx) => {
+              const isNew = !alreadySkills.some(skill => skill.toLowerCase() === item.toLowerCase());
+              return (
+                <Box
+                  component="li"
+                  key={indx}
+                  sx={{
+                    backgroundColor: isNew ? 'tomato' : 'darkgray',
+                    color: 'white',
+                    px: 2,
+                    py: 1,
+                    m: 0.5,
+                    borderRadius: 2,
+                    fontSize: 14
+                  }}
+                >
+                  {item}
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+     </Box>
+
   )
 }
 
 export default TrendingKeywordsSection
 
-const styles = {
-    keywordsContainer: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        listStyle: 'none',
-        padding: '2rem',
-        gap: '1rem',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: '1rem',
-        border: '1px solid #ccc',
-        padding: '2rem'
-    },
-    listItems:{
-        backgroundColor: 'darkgray',
-        padding: '1rem',
 
-    }
-}

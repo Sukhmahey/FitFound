@@ -1,7 +1,8 @@
 import React from 'react'
 import { useEffect } from 'react';
+import { Box, Button, Container, Paper, Typography } from '@mui/material';
 
-function ProfileSummary({profileScore}) {
+function ProfileSummary({ profileScore }) {
 
     // const [profileScore, setProfileScore] = React.useState(0);
     const [profileScoreRemark, setProfileScoreRemark] = React.useState('');
@@ -26,62 +27,70 @@ function ProfileSummary({profileScore}) {
 
 
     return (
-        <div className='cardsContainer' style={styles.cardsContainer}>
-            <div className='card' style={styles.card}>
-                <h4>Profile Completion</h4>
-                <span className='roundBox' style={styles.roundBox}>{profileScore}%</span>
-                <p>{profileScoreRemark}</p>
-            </div>
-            <div className='card' style={styles.card}>
-                <h4>Appearance</h4>
-                <span className='roundBox' style={styles.roundBox}>{appearanceScore}%</span>
-                <p>In last 7 days</p>
-            </div>
-            <div className='card' style={styles.card}>
-                <h4>Profile Completion</h4>
-                <span className='roundBox' style={styles.roundBox}>{invitationScore}</span>
-                <p>In last 7 days</p>
-            </div>
-        </div>
+        <Box display="flex" justifyContent="space-between" gap={2} flexWrap="wrap" my={3} borderRadius={40}>
+            <Paper elevation={3} sx={{ p: 2, flex: 1, minWidth: 200, textAlign: 'center' }}>
+                <Typography variant="h6">Profile Completion</Typography>
+                <Box
+                    sx={{
+                        width: '5rem',
+                        height: '5rem',
+                        borderRadius: '50%',
+                        backgroundColor: 'gray',
+                        color: 'black',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        fontSize: 24,
+                        fontWeight: 'bold',
+                        mx: 'auto',
+                        my: 1,
+                    }}
+                >
+                    {profileScore}%
+                </Box>
+                <Typography variant="body2" align="center">{profileScoreRemark}</Typography>
+            </Paper>
+
+            <Paper elevation={3} sx={{ p: 2, flex: 1, minWidth: 200, textAlign: 'center' }}>
+                <Typography variant="h6">Appearance</Typography>
+                <Box sx={{
+                    width: '5rem',
+                    height: '5rem',
+                    borderRadius: '50%',
+                    backgroundColor: 'gray',
+                    color: 'black',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    mx: 'auto',
+                    my: 1,
+                }}>{appearanceScore}%</Box>
+                <Typography variant="body2">In last 7 days</Typography>
+            </Paper>
+            <Paper elevation={3} sx={{ p: 2, flex: 1, minWidth: 200, textAlign: 'center' }}>
+                <Typography variant="h6">Invitations</Typography>
+                <Box sx={{
+                    width: '5rem',
+                    height: '5rem',
+                    borderRadius: '50%',
+                    backgroundColor: 'gray',
+                    color: 'black',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    mx: 'auto',
+                    my: 1,
+                }}>{invitationScore}</Box>
+                <Typography variant="body2">In last 7 days</Typography>
+            </Paper>
+        </Box>
     )
 }
 
 export default ProfileSummary
 
 
-
-const styles = {
-    cardsContainer: {
-        display: 'grid',
-
-        justifyContent: 'space-between',
-        padding: '20px',
-        gridTemplateColumns: '1fr 1fr 1fr'
-    },
-    card: {
-
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-
-
-        margin: '4rem',
-        padding: '2rem',
-        border: '1px solid black',
-        borderRadius: '10px',
-        backgroundColor: 'darkgray',
-
-    },
-    roundBox: {
-
-        width: '5rem',
-        height: '5rem',
-        borderRadius: '50%',
-        backgroundColor: 'white',
-        color: 'black',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-
-    }
-}
