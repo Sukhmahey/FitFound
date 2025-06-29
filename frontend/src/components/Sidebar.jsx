@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
+import { employerApi } from '../services/api';
 
 const Sidebar = () => {
+    const [userProfile, setUserProfile] = useState({});
     const { user } = useAuth();
     console.log(user);
 
@@ -16,6 +19,21 @@ const Sidebar = () => {
         navigate(newPath);
     };
 
+    useEffect(() => {
+        // TODO: VALIDATE THE ROLE
+        // Getting the user profile by ID
+        employerApi.getEmployerProfile(user.userId)
+        .then( result => {
+          setUserProfile(result.data);
+          console.log(result.data);
+        })
+        .catch( error => {
+          console.log(error);
+        });
+      }, []);
+
+      
+
     return (
         <div>
             <div>
@@ -23,7 +41,13 @@ const Sidebar = () => {
             </div>
 
             <div>
-                <div>Logo here</div>
+                <div><img src={userProfile.companyLogo}
+                        style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                    }}></img></div>
                 <div>Anna Paul</div>
             </div>
 
