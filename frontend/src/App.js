@@ -12,6 +12,7 @@ import EmployerProfile from "./pages/employer/Profile";
 import MyProfile from "./pages/candidate/MyProfile";
 import EmployerSearch from "./pages/employer/Search";
 import EmployerSearchResults from "./pages/employer/SearchResults";
+import EmployerConnections from "./pages/employer/Connections";
 import Unauthorized from "./pages/Unauthorized";
 import MainLayout from "./components/MainLayout";
 
@@ -99,6 +100,14 @@ function App() {
         element={
           <ProtectedRoute role="employer">
             <EmployerSearchResults />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employer/connections"
+        element={
+          <ProtectedRoute role="employer">
+            <EmployerConnections />
           </ProtectedRoute>
         }
       />
