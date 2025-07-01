@@ -810,61 +810,66 @@ exports.markVerified = async (req, res) => {
   }
 };
 
+
+
 exports.getDashboardMainRoleCounts = async (req, res) => {
   try {
+
+    const rolesForDashboard = [
+      "Frontend Developer",
+      "Backend Developer",
+      "Full Stack Developer",
+      "UI Designer",
+      "UX Designer",
+    ];
+
     const counts = await Candidate.aggregate([
       {
+
+        $unwind: "$jobPreference.desiredJobTitle",
+      },
+      {
+        // Filter the documents to include only the desired job titles
         $match: {
-          "jobPreference.mainRole": {
-            $in: [
-              "Frontend Developer",
-              "Backend Developer",
-              "Full Stack Developer",
-              "UI/UX Designer",
-              "UI Designer",
-              "UX Designer",
-            ],
-          },
+          "jobPreference.desiredJobTitle": { $in: rolesForDashboard },
         },
       },
       {
+
         $group: {
-          _id: "$jobPreference.mainRole",
-          count: { $sum: 1 },
+          _id: "$jobPreference.desiredJobTitle", 
+          count: { $sum: 1 }, // Count the number of documents for each title
         },
       },
       {
+        // Reshape the output document
         $project: {
-          _id: 0,
-          role: "$_id",
-          count: 1,
+          _id: 0, 
+          role: "$_id", 
+          count: 1, // Include the count
         },
       },
       {
+
         $sort: { role: 1 },
       },
     ]);
 
-    const allRoles = [
-      "Frontend Developer",
-      "Backend Developer",
-      "Full Stack Developer",
-      "UI/UX Designer",
-      "Project Manager",
-    ];
 
-    const finalCounts = allRoles.map((role) => {
+    const finalCounts = rolesForDashboard.map((role) => {
       const found = counts.find((item) => item.role === role);
       return { role, count: found ? found.count : 0 };
     });
 
     res.status(200).json(finalCounts);
   } catch (error) {
-    handleError(
-      res,
-      error,
-      "Failed to retrieve candidate main role counts",
-      500
-    );
+
+
+    console.error("Error in getDashboardMainRoleCounts:", error);
+    res.status(500).json({
+      message: "Failed to retrieve candidate main role counts",
+      error: error.message,
+    });
+
   }
 };
