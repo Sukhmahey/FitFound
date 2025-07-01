@@ -50,6 +50,7 @@ const Signup = () => {
           .then((result) => {
             login(result.data);
             setResponseMessage("User registered successful");
+            localStorage.setItem("userId", firebaseUser.uid);
 
             navigate(
               role === "candidate"
@@ -76,27 +77,38 @@ const Signup = () => {
 
   return (
     <div className="container bg-light mt-3">
-
       <div className="row p-3">
-
         {/* FitFount texts */}
         <div className="col-md-6 d-flex justify-content-center align-items-center">
-            <div className="text-center">
-                <h1>FitFound</h1>
-                <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
-            </div> 
+          <div className="text-center">
+            <h1>FitFound</h1>
+            <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
+          </div>
         </div>
 
         {/* Login Form */}
         <div className="col-md-6">
-
           <div className="text-center">
             <span className="text-muted">Sign up as</span>
           </div>
 
           <div className="d-flex gap-3 mt-2 mb-2">
-            <button onClick={ (e) => handleOnclickRole(e) } type="button" id="candidate" className="btn btn-primary w-50">Candidate</button>
-            <button onClick={ (e) => handleOnclickRole(e) } type="button" className="btn btn-secondary w-50" id="employer">Employer</button>
+            <button
+              onClick={(e) => handleOnclickRole(e)}
+              type="button"
+              id="candidate"
+              className="btn btn-primary w-50"
+            >
+              Candidate
+            </button>
+            <button
+              onClick={(e) => handleOnclickRole(e)}
+              type="button"
+              className="btn btn-secondary w-50"
+              id="employer"
+            >
+              Employer
+            </button>
           </div>
 
           <form onSubmit={handleSignUpClick}>
@@ -116,7 +128,9 @@ const Signup = () => {
             </label> */}
 
             <div className="mb-3">
-              <label htmlFor="email" className="form-label">Email</label>
+              <label htmlFor="email" className="form-label">
+                Email
+              </label>
               <input
                 type="email"
                 className="form-control"
@@ -130,7 +144,9 @@ const Signup = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="password" className="form-label">Password</label>
+              <label htmlFor="password" className="form-label">
+                Password
+              </label>
               <input
                 type="password"
                 className="form-control"
@@ -142,9 +158,11 @@ const Signup = () => {
                 required
               />
             </div>
-            
+
             <div className="mb-3">
-              <label htmlFor="" className="form-label">Confirm Password</label>
+              <label htmlFor="" className="form-label">
+                Confirm Password
+              </label>
               <input
                 type="password"
                 className="form-control"
@@ -156,8 +174,6 @@ const Signup = () => {
                 required
               />
             </div>
-
-            
 
             {role === "employer" && (
               <>
@@ -178,7 +194,7 @@ const Signup = () => {
             )}
 
             <div>
-              <input type="submit" className="form-control" value="Sign up" />  
+              <input type="submit" className="form-control" value="Sign up" />
             </div>
           </form>
           <div>{responseMessage}</div>
