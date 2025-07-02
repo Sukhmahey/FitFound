@@ -29,6 +29,9 @@ const Unauthorized = () => {
           <p>
             <strong>Firebase UID:</strong> {user.userId}
           </p>
+          <p>
+            <strong>profile ID:</strong> {user.profileId || "N/A"}
+          </p>
           {/* <p> all info of user </p> {user} */}
         </div>
       )}
