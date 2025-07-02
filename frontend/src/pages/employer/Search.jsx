@@ -36,29 +36,6 @@ const dummyobj1 = {
   requiredWorkAuthorization: ["Work Permit"],
 };
 
-const dummyObject = {
-  employerId: "uakvb65lGWfOqbsEix2dUvOL1nH2",
-  jobTitle: "FrontEnd Developer",
-  jobDescription:
-    "Anderson Vacations is an established and respected Canadian tour operator and part of a diverse Western Canadian group of travel companies. We excel in creating and customizing independent and group tour packages across captivating destinations such as Canada, Australia, New Zealand, Tahiti, and Fiji's idyllic South Pacific islands. Additionally, we offer a unique selection of fully escorted small group tours to extraordinary locations within Canada.\n\nWith our expertise in Canada, our product range encompasses every Province and Territory in the country, providing the opportunity for one-of-a-kind, tailored itineraries in each locale. Beyond the well-known tourist destinations, we pride ourselves in exploring the less-travelled, hidden gems and specialize in offering authentic local experiences, including immersive Indigenous cultural encounters.\n\nSince we design, develop, manage, and operate our own tours, we are more familiar with the intricacies of our product than anyone else. This also means that we require sophisticated front and back-end systems to support the complex processes that allow us to provide a high-value travel experience to several thousand travellers each year.\n\nWe are an enthusiastic, passionate, and welcoming team, eager to welcome a dynamic and creative Junior/Intermediate Full-Stack Developer to our ranks. We are looking for a person based in Vancouver.\n\nResponsibilities:\n\nDeveloping responsive websites and web-based applications.\nDeployment and cross-browser testing for Quality Assurance.\nOngoing maintenance, development, bug fixes and customization.\nDocumenting website source code and applications.\nProviding IT Support and Troubleshooting\nInstalling hardware/software components\nMust Haves (min 2 yrs.):\n\nPHP\nJavaScript\nMySQL\nHTML5\nCSS3\nJSON\nXML\nNice To Haves:\n\nPhotoshop\nIllustrator\nLinux\nWindows\nNetworking\nRequirements:\n\nCandidate must have a legal work status or be a Canadian Permanent Resident or Canadian citizen.\nCompleted at least 2 academic years.\nAbility to write scalable, maintainable and well-documented code.\nSelf-motivated with the ability to multitask and work under pressure with tight deadlines.\nStrong problem-solving and troubleshooting skills.\nOutstanding attention to detail and quality control.\nKnowledge of website usability, conversion optimization, analytics, email marketing, and search engine optimization is not optional but an asset.\nIf you meet the requirements, please send your resume with examples of web development work and a cover letter stating salary expectations.\n\nJob Type: Full-time\n\nPay: From $55,000.00 per year\n\nBenefits:\n\nDental care\nExtended health care\nFlexible language requirement:\n\nFrench not required\nSchedule:\n\nMonday to Friday\nExperience:\n\nJavaScript: 2 years (required)\nPHP: 2 years (required)\nMySQL: 2 years (required)\nHTML5: 2 years (required)\nCSS3: 2 years (required)",
-  requiredSkills: [
-    {
-      skill: "HTML",
-      yearsOfExperience: 0,
-      level: "junior",
-    },
-  ],
-  mustHaveCriteria: "NA",
-  salaryRange: {
-    min: "20",
-    max: "40",
-    perHour: true,
-    perYear: false,
-  },
-  location: "Canada",
-  jobType: "fullTime",
-};
-
 const Search = () => {
   const [searchQuery, setSearchQuery] = useState({
     title: "",
@@ -73,6 +50,8 @@ const Search = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const userId = localStorage.getItem("userId") || "";
 
   console.log("searchQuery", searchQuery);
   const onChangeInputFiels = (value, type) => {
@@ -96,15 +75,13 @@ const Search = () => {
 
   const handleSubmit = async () => {
     const paramObj = {
-      employerId: "uakvb65lGWfOqbsEix2dUvOL1nH2",
+      employerId: userId,
       jobTitle: searchQuery.title,
       jobDescription: searchQuery.jobDescription,
       requiredSkills: [
-        {
-          skill: searchQuery.skills,
-          yearsOfExperience: 0,
-          level: "junior",
-        },
+        ...searchQuery.skills.split(",").map((skill) => ({
+          skill: skill.trim().charAt(0).toUpperCase() + skill.trim().slice(1),
+        })),
       ],
       mustHaveCriteria: "NA",
       salaryRange: {
@@ -115,14 +92,14 @@ const Search = () => {
       },
       location: searchQuery.location,
       jobType: searchQuery.jobType,
+      workEnvironment: "remote",
+      requiredWorkAuthorization: ["PR Citizen", "Work Permit"],
     };
 
-    console.log("Param Object", dummyobj1);
-
-    const dataParams = dummyobj1;
+    console.log("Param Object", paramObj);
 
     try {
-      // await employerApi.saveJob("uakvb65lGWfOqbsEix2dUvOL1nH2", dummyobj1);
+      await employerApi.saveJob(paramObj);
       const candidateList = await employerApi
         .getAllCandidates()
         .then(async (data) => {
@@ -215,11 +192,9 @@ const Search = () => {
                 onChangeInputFiels(e.target.value, "jobType");
               }}
             >
-              <MenuItem value={"remote"}>Remote</MenuItem>
-              <MenuItem value={"fullTime"}>Full-time</MenuItem>
-              <MenuItem value={"partTime"}>Part-time</MenuItem>
+              <MenuItem value={"full-time"}>Full-time</MenuItem>
+              <MenuItem value={"part-time"}>Part-time</MenuItem>
               <MenuItem value={"contract"}>Contract</MenuItem>
-              <MenuItem value={"freelance"}>Freelance</MenuItem>
               <MenuItem value={"internship"}>Internship</MenuItem>
             </Select>
           </FormControl>
