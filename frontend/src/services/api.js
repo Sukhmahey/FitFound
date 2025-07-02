@@ -38,6 +38,10 @@ export const candidateApi = {
   getProfileByUserId: (userId) => api.get(`/candidates/user/${userId}`),
 };
 
+export const jobVerificationApi = {
+  verifyJob: (data) => api.post("/verification-requests", data),
+}
+
 // employer endpoints
 export const employerApi = {
   addEmployerProfile: (userId, data) =>
