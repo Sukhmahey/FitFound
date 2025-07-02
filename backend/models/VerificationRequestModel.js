@@ -24,14 +24,22 @@ const VerificationRequestSchema = new Schema(
       type: String,
 
       trim: true,
-
-      required: true,
     },
 
     employmentDates: {
-      startDate: { type: Date, required: true },
+      startDate: {
+        type: String,
+        match: /^(0[1-9]|1[0-2])-(\d{4})$/,
+        trim: true,
+        required: true,
+      },
 
-      endDate: { type: Date },
+      endDate: {
+        type: Date,
+        type: String,
+        match: /^(0[1-9]|1[0-2])-(\d{4})$/,
+        trim: true,
+      },
     },
 
     status: {

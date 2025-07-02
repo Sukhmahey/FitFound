@@ -5,10 +5,17 @@ const JobSchema = new Schema(
   {
     employerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     jobTitle: { type: String, minLength: 6, maxLength: 60 },
-    jobDescription: { type: String, minLength: 12},
+    jobDescription: { type: String, minLength: 12 },
     requiredSkills: [
       {
         skill: { type: String, minLength: 2, maxLength: 60 },
+      },
+    ],
+    topMatchedCandidates: [
+
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Candidate", // This links to your Candidate model
       },
     ],
     mustHaveCriteria: { type: String },

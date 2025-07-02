@@ -14,6 +14,7 @@ import EmployerSearch from "./pages/employer/Search";
 import EmployerSearchResults from "./pages/employer/SearchResults";
 import EmployerConnections from "./pages/employer/Connections";
 import Unauthorized from "./pages/Unauthorized";
+import ExperienceVerificationReqPage from "./pages/candidate/ExperienceVerificationReqPage";
 import MainLayout from "./components/MainLayout";
 
 function App() {
@@ -30,6 +31,14 @@ function App() {
         element={
           <ProtectedRoute role="candidate">
             <CandidateOnboarding />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/candidate/badge-verification"
+        element={
+          <ProtectedRoute role="candidate">
+            <ExperienceVerificationReqPage></ExperienceVerificationReqPage>
           </ProtectedRoute>
         }
       />
