@@ -97,7 +97,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="Unauthorized" element={<Unauthorized />} />
+      
     </Routes>
   );
 }
