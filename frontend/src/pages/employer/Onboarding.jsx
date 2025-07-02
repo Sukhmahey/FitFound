@@ -1,5 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
+import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
+
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,23 +19,68 @@ const EmployerOnboarding = () => {
   const userId = user?.userId;
   const methods = useForm();
   const [formSection, setFormSection] = useState("details"); // the other is contact
-  
+  const [logoUrl, setLogoUrl] = useState("");
+  const [detailsIsActive, setDetailsIsActive] = useState(true);
+  const [contactIsActive, setContactIsActive] = useState(false);
+  let profilePictureUrl;
 
-  // const handleFormSectionClick = (e) => {
-  //   setFormSection(e.target.id);
-  //   console.log(e.target.id);
-  // };
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+
+  useEffect(() => {
+      setAppGeneralInfo({ pageTitle: "Onboarding"});
+  }, []);
+  
 
   const onSubmit = (data) => {
     if (formSection == "details") {
+      // Tabs css
+      setDetailsIsActive(false);
+      setContactIsActive(true);
+
+      // save the logo and profile picture
+      if (data.companyLogo) {
+        const logoFile = data.companyLogo["0"];
+        const logoFileName = setFileName(data.companyName + "-logo");
+        const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
+
+        // console.log(logoFile);
+        // return;
+
+        addFile(logoFilePath, logoFile);
+        setLogoUrl(getUlrFile(logoFilePath));
+
+        console.log(logoUrl);
+      }
+      else {
+        return;
+      }
+
       setFormSection('contact');
     }
     
     if (formSection == "contact") {
+      // Tabs css
+      setDetailsIsActive(false);
+      setContactIsActive(true);
+
+      console.log(data);
+
+      if (data.profilePicture) {
+        const profileFile = data.profilePicture["0"];
+        const profileFileName = setFileName(data.companyName + "-profile-picture");
+        const profileFilePath = `profile-picture/${Date.now()}-${profileFileName}`;
+
+        addFile(profileFilePath, profileFile);
+        profilePictureUrl= getUlrFile(profileFilePath);
+        console.log(profilePictureUrl);
+      }
+      else {
+        return;
+      }
 
       const employerProfile = {
         userId: userId,
-        companyLogo: "https://example.com/logo.png", //data.companyLogo,
+        companyLogo: logoUrl,
         companyName: data.companyName,
         establishedYear: data.establishedYear,
         businessRegisteredNumber: data.businessRegisteredNumber,
@@ -38,7 +90,7 @@ const EmployerOnboarding = () => {
         companyWebsite: data.companyWebsite,
         companyDescription: data.companyDescription,
         contactInfo: {
-          profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
+          profilePicture: profilePictureUrl,
           firstName: data.firstName,
           middleName: data.middleName,
           lastName: data.lastName,
@@ -66,10 +118,15 @@ const EmployerOnboarding = () => {
 
   return (
     <div>
-      
       <div>
-        <div>Organisation Details</div>
-        <div>Primary Contact</div>
+        <ul className="nav nav-underline">
+          <li className="nav-item">
+            <a className={`nav-link ${detailsIsActive ? 'active' : 'disabled'}`} aria-current="page" href="#">Organisation Details</a>
+          </li>
+          <li className="nav-item">
+            <a className={`nav-link ${contactIsActive ? 'active' : 'disabled'}`} aria-disabled="true">Primary Contact</a>
+          </li>
+        </ul>
       </div>
 
       <FormProvider {...methods}>

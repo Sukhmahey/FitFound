@@ -35,6 +35,7 @@ const Login = () => {
             .then((result) => {
               if (result.data.userId) {
                 login(result.data);
+                localStorage.setItem("userId", result?.data?.userId);
                 console.log("login function", result.data);
                 setResponseMessage("User logged in successful");
                 console.log(responseMessage);
@@ -115,13 +116,12 @@ const Login = () => {
   return (
     <div className="container bg-light mt-3">
       <div className="row p-3">
-
         {/* FitFount texts */}
         <div className="col-md-6 d-flex justify-content-center align-items-center">
-            <div className="text-center">
-                <h1>FitFound</h1>
-                <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
-            </div> 
+          <div className="text-center">
+            <h1>FitFound</h1>
+            <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
+          </div>
         </div>
 
         {/* Login Form */}
@@ -131,8 +131,22 @@ const Login = () => {
           </div>
 
           <div className="d-flex gap-3 mt-2 mb-2">
-            <button onClick={ (e) => handleOnclickRole(e) } type="button" id="candidate" className="btn btn-primary w-50">Candidate</button>
-            <button onClick={ (e) => handleOnclickRole(e) } type="button" className="btn btn-secondary w-50" id="employer">Employer</button>
+            <button
+              onClick={(e) => handleOnclickRole(e)}
+              type="button"
+              id="candidate"
+              className="btn btn-primary w-50"
+            >
+              Candidate
+            </button>
+            <button
+              onClick={(e) => handleOnclickRole(e)}
+              type="button"
+              className="btn btn-secondary w-50"
+              id="employer"
+            >
+              Employer
+            </button>
           </div>
 
           {/* <div className="btn-group gap-4 text-center" >
@@ -149,7 +163,9 @@ const Login = () => {
 
           <form onSubmit={handleEmailLogin}>
             <div className="mb-3">
-              <label htmlFor="email" className="form-label">Email</label>
+              <label htmlFor="email" className="form-label">
+                Email
+              </label>
               <input
                 type="email"
                 className="form-control"
@@ -164,7 +180,9 @@ const Login = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="password" className="form-label">Password</label>
+              <label htmlFor="password" className="form-label">
+                Password
+              </label>
               <input
                 type="password"
                 name="password"
@@ -176,12 +194,13 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div className="text-end"><span>I forgot my password</span></div>
+              <div className="text-end">
+                <span>I forgot my password</span>
+              </div>
             </div>
 
             <div>
               <input type="submit" className="form-control" value="Login" />
-              
             </div>
           </form>
 
@@ -194,13 +213,14 @@ const Login = () => {
 
           <div>
             {/* <button>Continue with LinkedIn</button> */}
-            <button onClick={handleGoogleLogin} className="form-control">Continue with Google</button>
+            <button onClick={handleGoogleLogin} className="form-control">
+              Continue with Google
+            </button>
           </div>
-          <div className="text-center" onClick={handleSignupClick}><a href="#">Are you new?  Create an Account</a></div>
-          
-
+          <div className="text-center" onClick={handleSignupClick}>
+            <a href="#">Are you new? Create an Account</a>
+          </div>
         </div>
-
       </div>
     </div>
   );

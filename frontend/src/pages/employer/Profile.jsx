@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
+import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 import CompanyInfo from './onboardingSteps/CompanyInfo';
 import UserContactInfo from './onboardingSteps/UserContactInfo';
@@ -15,16 +18,35 @@ const EmployerProfile = () => {
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
   const [userProfile, setUserProfile] = useState({});
+  const [logoUrl, setLogoUrl] = useState("");
+  let profilePictureUrl;
+  const [detailsIsActive, setDetailsIsActive] = useState(true);
+  const [contactIsActive, setContactIsActive] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+  
+    useEffect(() => {
+        setAppGeneralInfo({ pageTitle: "My Profile"});
+    }, []);
 
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
+    
+    console.log(e.target.id);
 
     // when the user changes the form section
     if (e.target.id == "details") {
       methods.reset(companyInfo);
+
+      setDetailsIsActive(true);
+      setContactIsActive(false);
     }
     else {
       methods.reset(contactInfo);
+
+      setDetailsIsActive(false);
+      setContactIsActive(true);
     }
   };
 
@@ -50,6 +72,22 @@ const EmployerProfile = () => {
     let employerProfile;
     
     if (formSection == "details") {
+      
+      // saving the logo url
+      // if (data.companyLogo) {
+      //   const logoFile = data.companyLogo["0"];
+      //   const logoFileName = setFileName(data.companyName + "-logo");
+      //   const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
+
+      //   addFile(logoFilePath, logoFile);
+      //   setLogoUrl(getUlrFile(logoFilePath));
+
+      //   console.log(logoUrl);
+      // }
+      // else {
+      //   return;
+      // }
+
       employerProfile = {
         userId: userId,
         companyLogo: "https://example.com/logo.png", //data.companyLogo,
@@ -66,6 +104,7 @@ const EmployerProfile = () => {
       setCompanyInfo(data);
     }
     else {
+
       let newContactInfo = {
         profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
         firstName: data.firstName,
@@ -89,20 +128,46 @@ const EmployerProfile = () => {
       employerApi.updateEmployerProfile(userId, employerProfile)
       .then( result => {
         console.log(result);
+        setMessage(`Success: Info saved.`);
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+          setMessage('');
+        }, 5000);
+
       })
       .catch( error => {
         console.log(error);
+        setMessage(`Error: Info not saved.`);
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+          setMessage('');
+        }, 5000);
       });
+      
     
   };
 
   return (
     <div>
-      
       <div>
+        <ul className="nav nav-underline">
+          <li className="nav-item">
+            <a className={`nav-link ${detailsIsActive ? 'active' : ''}`} aria-current="page" 
+            id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</a>
+          </li>
+          <li className="nav-item">
+            <a className={`nav-link ${contactIsActive ? 'active' : ''}`} aria-disabled="true"
+            id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</a>
+          </li>
+        </ul>
+      </div>
+
+      <div id="message">{ message }</div>
+
+      {/* <div>
         <div id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</div>
         <div id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</div>
-      </div>
+      </div> */}
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
