@@ -1,7 +1,7 @@
 import { useFormContext } from "react-hook-form";
 
 const UserContactInfo = () => {
-    const { register } = useFormContext();
+    const { register, watch } = useFormContext();
 
     return (
         <div className="container">
@@ -11,6 +11,12 @@ const UserContactInfo = () => {
                     <div className="mb-3">
                         <label htmlFor="profilePicture" className="form-label">Profile Picture</label>
                         <input type="file" {...register("profilePicture")} className="form-control form-control-sm" name="profilePicture" id="profilePicture" />
+                        { watch('profilePicture') && (
+                                <div>
+                                <p></p>
+                                <img src={ watch('profilePicture') } alt="Vista previa" style={{ maxWidth: '100px', maxHeight: '100px' }} />
+                                </div>
+                            )}
                     </div>
                 </div>
             </div>

@@ -36,6 +36,7 @@ export const candidateApi = {
   updateJobPreference: (userId, data) =>
     api.patch(`/candidates/${userId}/job-preference`, data),
   getProfileByUserId: (userId) => api.get(`/candidates/user/${userId}`),
+  getDashboardMainRoleCounts: () => api.get(`/candidates/dashboard-main-role-counts`)
 };
 
 export const jobVerificationApi = {
