@@ -6,7 +6,11 @@ const interactionController = require("../controllers/InteractionController");
 
 // --- General Interaction Management ---
 
+router.get("/", interactionController.getAllInteractions);
+
 // POST: Employer initiates an interaction (sends outreach)
+
+
 // Body: { candidateId, employerId, jobId, outreachMessage }
 router.post("/", interactionController.createInteraction);
 

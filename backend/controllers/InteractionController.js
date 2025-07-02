@@ -1,7 +1,7 @@
 // backend/controllers/InteractionController.js
 
 const Interaction = require("../models/InteractionModel");
-const Candidate = require("../models/CandidateModel");
+const Candidate = require("../models/CandidateModel"); // Keep this if used elsewhere or for populating Candidate data
 
 const handleError = (res, error, message, status = 500) => {
   console.error(
@@ -23,16 +23,14 @@ exports.createInteraction = async (req, res) => {
       candidateId,
       employerId,
       jobId,
-      finalStatus: "none",
+      finalStatus: "none", // Checks for an *active* interaction
     });
 
     if (existingInteraction) {
-      return res
-        .status(409)
-        .json({
-          message:
-            "An active interaction already exists for this candidate and job.",
-        });
+      return res.status(409).json({
+        message:
+          "An active interaction already exists for this candidate and job.",
+      });
     }
 
     const newInteraction = new Interaction({
@@ -40,7 +38,7 @@ exports.createInteraction = async (req, res) => {
       employerId,
       jobId,
       outreachMessage,
-      shortlisted: true,
+      shortlisted: true, // Assuming initiating means shortlisting
     });
 
     const savedInteraction = await newInteraction.save();
@@ -67,6 +65,7 @@ exports.getInteractionById = async (req, res) => {
       return res.status(404).json({ message: "Interaction not found." });
     }
 
+    // Anonymization logic (as per your existing code)
     let candidateDataForResponse = interaction.candidateId.toObject();
     if (!interaction.candidateConsentToReveal) {
       candidateDataForResponse = {
@@ -96,6 +95,59 @@ exports.getInteractionById = async (req, res) => {
   }
 };
 
+// NEW: Get all interactions with optional query filters (e.g., ?finalStatus=hired)
+exports.getAllInteractions = async (req, res) => {
+  try {
+    // Destructure all expected query parameters
+    const {
+      finalStatus,
+      employerId,
+      candidateId,
+      shortlisted,
+      interviewStatus,
+    } = req.query;
+
+    let filter = {}; // Build dynamic filter object
+
+    // Apply finalStatus filter
+    if (finalStatus) {
+      filter.finalStatus = finalStatus;
+    }
+    // Apply employerId filter
+    if (employerId) {
+      filter.employerId = employerId;
+    }
+    // Apply candidateId filter
+    if (candidateId) {
+      filter.candidateId = candidateId;
+    }
+    // Apply shortlisted filter (convert string 'true'/'false' to boolean)
+    if (shortlisted !== undefined) {
+      filter.shortlisted = shortlisted === "true";
+    }
+    // Apply nested interview status filter
+    if (interviewStatus) {
+      filter["interview.status"] = interviewStatus;
+    }
+
+    const interactions = await Interaction.find(filter)
+      // Populate essential related data for context
+      .populate(
+        "candidateId",
+        "personalInfo.firstName personalInfo.lastName personalInfo.email"
+      ) // Get basic candidate info
+      .populate("employerId", "companyName") // Get employer's company name
+      .populate("jobId", "jobTitle") // Get the job title
+      .sort({ createdAt: -1 }) // Sort by creation date, newest first
+      .lean(); // Use .lean() for faster query performance when not modifying returned documents
+
+    // Return 200 OK with an empty array if no interactions match the filters
+    res.status(200).json(interactions);
+  } catch (error) {
+    handleError(res, error, "Failed to fetch interactions", 500);
+  }
+};
+
 exports.getInteractionsByCandidateId = async (req, res) => {
   const { candidateId } = req.params;
   const { status } = req.query;
@@ -117,7 +169,7 @@ exports.getInteractionsByCandidateId = async (req, res) => {
       { finalStatus: { $in: ["hired", "rejected", "withdrawn"] } },
     ];
   } else {
-    filter.finalStatus = { $ne: "withdrawn" };
+    filter.finalStatus = { $ne: "withdrawn" }; // Default for candidate, exclude 'withdrawn' from default view
   }
 
   try {
@@ -135,14 +187,26 @@ exports.getInteractionsByCandidateId = async (req, res) => {
 
 exports.getInteractionsByEmployerId = async (req, res) => {
   const { employerId } = req.params;
-  const { status } = req.query;
-
+  const { status, consentStatus } = req.query; 
   let filter = { employerId };
   if (status === "active") {
-    filter.finalStatus = { $in: ["none", "pending", "scheduled", "completed"] };
+
+    filter.finalStatus = { $in: ["none"] }; 
+    filter["interview.status"] = {
+      $in: ["none", "pending", "scheduled", "completed"],
+    }; // Include all active interview stages
   } else if (status === "concluded") {
     filter.finalStatus = { $in: ["hired", "rejected", "withdrawn"] };
   }
+
+
+  if (consentStatus === "accepted") {
+
+    filter.candidateConsentToReveal = true;
+  } else if (consentStatus === "pending") {
+    
+    filter.candidateConsentToReveal = false; 
+  } 
 
   try {
     const interactions = await Interaction.find(filter)
@@ -167,7 +231,7 @@ exports.getInteractionsByEmployerId = async (req, res) => {
             portfolio: candidateDataForResponse.portfolio,
             education: candidateDataForResponse.education,
             jobPreference: candidateDataForResponse.jobPreference,
-            profileScore: candidateDataForResponse.profileScore,
+            profileScore: candidateDataForResponse.profileScore, 
           };
           delete candidateDataForResponse.personalInfo;
           delete candidateDataForResponse.basicInfo.phoneNumber;
@@ -203,6 +267,8 @@ exports.updateCandidateConsent = async (req, res) => {
     if (consent === true) {
       update.consentGivenAt = new Date();
     }
+
+
     if (consent === false) {
       update.finalStatus = "withdrawn";
     }
@@ -233,11 +299,9 @@ exports.updateInterviewDetails = async (req, res) => {
   const updates = req.body;
 
   if (!updates || Object.keys(updates).length === 0) {
-    return res
-      .status(400)
-      .json({
-        message: "Request body must contain interview fields to update.",
-      });
+    return res.status(400).json({
+      message: "Request body must contain interview fields to update.",
+    });
   }
 
   try {
@@ -258,7 +322,7 @@ exports.updateInterviewDetails = async (req, res) => {
       return res.status(404).json({ message: "Interaction not found." });
     }
 
-    res.status(200).json(updatedInteraction.interview);
+    res.status(200).json(updatedInteraction.interview); 
   } catch (error) {
     handleError(
       res,
