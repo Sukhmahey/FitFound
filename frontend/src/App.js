@@ -64,15 +64,25 @@ function App() {
         />
 
         <Route
-          path="/employer/profile"
+          path="profile"
           element={<EmployerProfile />}
         />
 
         <Route
-          path="/employer/dashboard"
+          path="dashboard"
           element={<EmployerDashboard />
           }
         />
+
+        <Route
+          path="search"
+          element={ <EmployerSearch />}
+        />
+
+      <Route
+        path="/employer/connections"
+        element={<EmployerConnections />}
+      />
 
       </Route>
 
@@ -87,14 +97,7 @@ function App() {
         }
       />
       
-      <Route
-        path="/employer/search"
-        element={
-          <ProtectedRoute role="employer">
-            <EmployerSearch />
-          </ProtectedRoute>
-        }
-      />
+      
       <Route
         path="/employer/searchResults"
         element={
@@ -103,14 +106,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/employer/connections"
-        element={
-          <ProtectedRoute role="employer">
-            <EmployerConnections />
-          </ProtectedRoute>
-        }
-      />
+      
     </Routes>
   );
 }
