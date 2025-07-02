@@ -25,7 +25,7 @@ const VerificationRequestSchema = new Schema(
 
       trim: true,
 
-      required: true,
+
     },
 
     employmentDates: {
