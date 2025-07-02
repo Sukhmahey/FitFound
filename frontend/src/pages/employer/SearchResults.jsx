@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
+import { TextField, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+
+import { employerApi } from "../../services/api";
 import {
   Box,
   Typography,
@@ -28,7 +32,7 @@ const candidates = new Array(10).fill({
   phone: "+1 (123) 456-7890",
 });
 
-const CandidateCard = ({ data, onViewDetails }) => (
+const CandidateCard = ({ data, onViewDetails, sendVerificationRequest }) => (
   <Paper
     elevation={3}
     sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", borderRadius: 3 }}
@@ -75,7 +79,11 @@ const CandidateCard = ({ data, onViewDetails }) => (
       >
         View Details
       </Button>
-      <Button variant="outlined" size="small">
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => sendVerificationRequest()}
+      >
         Send Invitation
       </Button>
     </Stack>
@@ -128,7 +136,18 @@ const SearchResults = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [candidateList, setCandidateList] = useState([]);
-  const candidates = useSelector((state) => state.search.candidates); // 🔹 Get from Redux
+  const [searchField, setSearchField] = useState("");
+  const candidates = useSelector((state) => state.search.candidates);
+
+  const sendVerificationRequest = async () => {
+    await employerApi.sendConnectionRequest({
+      candidateId: "685f24f147f18e8115e90687",
+      employerId: "685f24c547f18e8115e90685",
+      jobId: "685f274047f18e8115e90694",
+      outreachMessage:
+        "Your profile matches our Data Analyst opening. Would you be interested in learning more about Alpha Solutions Group?",
+    });
+  };
 
   useEffect(() => {
     console.log("Candidates", candidates);
@@ -147,23 +166,21 @@ const SearchResults = () => {
 
   return (
     <Box sx={{ p: 4, minHeight: "100vh" }}>
-      {/* Search Bar */}
-      <Box
-        sx={{
-          border: "1px solid black",
-          borderRadius: 5,
-          p: 1.5,
-          mb: 3,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          bgcolor: "white",
-          maxWidth: 600,
+      <TextField
+        variant="outlined"
+        size="small"
+        fullWidth
+        placeholder="Search"
+        value={searchField}
+        onChange={(e) => setSearchField(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
         }}
-      >
-        <Typography fontWeight="bold">Full Stack Backend Developer</Typography>
-        {/* <Box>🔍 ⚙️</Box> */}
-      </Box>
+      />
 
       {/* Scrollable Container */}
       <Box
@@ -174,7 +191,12 @@ const SearchResults = () => {
         }}
       >
         {candidates.map((c, _id) => (
-          <CandidateCard key={_id} data={c} onViewDetails={handleViewDetails} />
+          <CandidateCard
+            key={_id}
+            data={c}
+            onViewDetails={handleViewDetails}
+            sendVerificationRequest={sendVerificationRequest}
+          />
         ))}
       </Box>
 

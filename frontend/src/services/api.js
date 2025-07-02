@@ -40,7 +40,7 @@ export const candidateApi = {
 
 export const jobVerificationApi = {
   verifyJob: (data) => api.post("/verification-requests", data),
-}
+};
 
 // employer endpoints
 export const employerApi = {
@@ -51,12 +51,18 @@ export const employerApi = {
     api.patch(`/employers/${userId}/profile`, data),
   updateEmployerContactInfo: (userId, data) =>
     api.patch(`/employers/${userId}/profile`, data),
-  saveJob: (id, data) => api.post(`/jobs`, data),
+  saveJob: (data) => api.post(`/jobs`, data),
   getAllCandidates: () => api.get(`/candidates`),
   getSearchedCandidates: (data) =>
     api.get(
       `/candidates?title=${data.title}&jobType=${data.jobType}&location=${data.location}&salaryFrom=${data.salaryFrom}&salaryTo=${data.salaryTo}&jobDescriptionKeywords=${data.jobDescription}&workStatus=${data.workStatus}&skills=${data.skills}`
     ),
+
+  sendConnectionRequest: (data) => api.post(`/interactions`, data),
+  fetchCurrentEmployees: (employerId) =>
+    api.get(`/interactions?employerId=${employerId}&finalStatus=hired`),
+  fetchAcceptedCandidates: (employerId) =>
+    api.get(`/interactions/employer/${employerId}?consentStatus=accepted`),
 };
 
 export { api };
