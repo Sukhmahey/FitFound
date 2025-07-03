@@ -12,6 +12,8 @@ import EducationStep from './onboardingSteps/EducationStep';
 import JobPreferenceStep from './onboardingSteps/JobPreferenceStep';
 import ProfileSetupOption from './onboardingSteps/ProfileSetupOption';
 import InfoConfirmationPage from './onboardingSteps/InfoConfirmationPage';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import Dashboard from './Dashboard';
 import {
   Box,
@@ -30,6 +32,9 @@ export default function CandidateOnboarding() {
 
   const [stepIndex, setStepIndex] = useState(0);
   const [confirmedData, setConfirmedData] = useState(null);
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackMsg, setSnackMsg] = useState('');
+  const [snackSeverity, setSnackSeverity] = useState('success');
   const [formData, setFormData] = useState({
     personalInfo: {
       firstName: '',
@@ -66,7 +71,7 @@ export default function CandidateOnboarding() {
       }
     }
   });
-  
+
 
   const handleManual = () => setStepIndex(1);
   const handleUpload = () => setStepIndex(14);
@@ -115,7 +120,9 @@ export default function CandidateOnboarding() {
         setStepIndex(7);
       } else if (stepIndex === 7) {
         await candidateApi.updateJobPreference(userId, formData.jobPreference);
-        alert("Profile saved successfully!");
+        setSnackMsg("Profile saved successfully!");
+        setSnackSeverity("success");
+        setSnackOpen(true);
         navigate('/candidate/dashboard');
 
         // setStepIndex(99);
@@ -124,11 +131,13 @@ export default function CandidateOnboarding() {
       }
     } catch (err) {
       console.error("Failed to submit:", err);
-      alert("Submission failed.");
+      setSnackMsg("Submission failed.");
+      setSnackSeverity("error");
+      setSnackOpen(true);
     }
   };
 
-  
+
 
   const handlePrevBtn = () => {
     if (stepIndex > 0 && stepIndex < 99) setStepIndex(stepIndex - 1);
@@ -143,23 +152,26 @@ export default function CandidateOnboarding() {
       }
     }));
   };
-
-const steps = [
-  'Personal Information',
-  'Basic Information',
-  'Skill set',
-  'Work Experience',
-  'Portfolio Details',
-  'Education',
-  'Job Preference',
-];
+const handleSnackClose = (event, reason) => {
+  if (reason === 'clickaway') return; 
+  setSnackOpen(false);
+};
+  const steps = [
+    'Personal Information',
+    'Basic Information',
+    'Skill set',
+    'Work Experience',
+    'Portfolio Details',
+    'Education',
+    'Job Preference',
+  ];
 
   const renderStep = () => {
     switch (stepIndex) {
       case 0:
         return <ProfileSetupOption onManualClick={handleManual} onUploadClick={handleUpload} />;
       case 1:
-        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} userEmail={userEmail}/>;
+        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} userEmail={userEmail} />;
       case 2:
         return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} />;
       case 3:
@@ -174,7 +186,7 @@ const steps = [
         return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} />;
       case 7:
         return <JobPreferenceStep data={formData.jobPreference} onUpdate={(data) => updateFormData('jobPreference', data)} />;
-        
+
       case 99:
         return <InfoConfirmationPage data={confirmedData} />;
       default:
@@ -184,15 +196,25 @@ const steps = [
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
-      { stepIndex>0 && stepIndex < 90 && stepIndex !== 14 &&<Box sx={{ width: '100%' }}>
-      <Stepper activeStep={stepIndex-1} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-    </Box>}
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} sx={{ width: '100%' }}>
+          {snackMsg}
+        </MuiAlert>
+      </Snackbar>
+      {stepIndex > 0 && stepIndex < 90 && stepIndex !== 14 && <Box sx={{ width: '100%' }}>
+        <Stepper activeStep={stepIndex - 1} alternativeLabel>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>}
       {/* <div>Onboarding</div> */}
       {/* {stepIndex < 90 && stepIndex !== 14 && (<h2>({stepIndex + 1}/8)</h2>)} */}
       {renderStep()}
