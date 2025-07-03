@@ -28,46 +28,49 @@ function App() {
 
       {/* Candidate Routes */}
       <Route
-        path="/candidate/onboarding"
+        path="/candidate"
         element={
-          <ProtectedRoute role="candidate">
+        <ProtectedRoute role="candidate">
+          <MainLayout />
+        </ProtectedRoute>
+        }
+      >
+        <Route
+          path="onboarding"
+          element={
             <CandidateOnboarding />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/candidate/badge-verification"
-        element={
-          <ProtectedRoute role="candidate">
-            <ExperienceVerificationReqPage></ExperienceVerificationReqPage>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/candidate/dashboard"
-        element={
-          <ProtectedRoute role="candidate">
-            <CandidateDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/candidate/profile"
-        element={
-          <ProtectedRoute role="candidate">
-            <MyProfile></MyProfile>
-          </ProtectedRoute>
-        }
-      />
+          }
+        />
 
-      <Route
-        path="/candidate/connections"
-        element={
-          <ProtectedRoute role="candidate">
+        <Route
+          path="dashboard"
+          element={
+            <CandidateDashboard />
+          }
+        />
+
+        <Route
+          path="/candidate/profile"
+          element={
+            <MyProfile></MyProfile>
+          }
+        />
+
+        <Route
+          path="/candidate/connections"
+          element={
             <CandidateConnections />
-          </ProtectedRoute>
-        }
-      />
+          }
+        />
+
+        <Route
+          path="/candidate/badge-verification"
+          element={
+            <ExperienceVerificationReqPage></ExperienceVerificationReqPage>
+          }
+        />
+
+      </Route>
 
       {/* Employer Routes */}
       <Route
