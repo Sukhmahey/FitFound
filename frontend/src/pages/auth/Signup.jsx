@@ -175,7 +175,7 @@ const Signup = () => {
               />
             </div>
 
-            {role === "employer" && (
+            {/* {role === "employer" && (
               <>
                 <input
                   type="text"
@@ -191,7 +191,7 @@ const Signup = () => {
                   required
                 />
               </>
-            )}
+            )} */}
 
             <div>
               <input type="submit" className="form-control" value="Sign up" />
