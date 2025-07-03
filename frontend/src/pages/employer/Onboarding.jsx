@@ -37,9 +37,11 @@ const EmployerOnboarding = () => {
       setDetailsIsActive(false);
       setContactIsActive(true);
 
+      console.log(data);
+
       // save the logo and profile picture
       if (data.companyLogo) {
-        const logoFile = data.companyLogo["0"];
+        const logoFile = data.companyLogo;
         const logoFileName = setFileName(data.companyName + "-logo");
         const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
 
