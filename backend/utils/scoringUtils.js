@@ -32,7 +32,8 @@ const roleTemplates = {
   "btech",
   "mtech",
   "m.sc. it",
-  "p.d.d. web and mobile app development and design"
+  "p.d.d. web and mobile app development and design",
+  "Post-Degree Diploma in Web and Mobile App Design and Development"
 ]
   },
   "backend developer": {
@@ -62,7 +63,8 @@ const roleTemplates = {
   "btech",
   "mtech",
   "m.sc. it",
-  "p.d.d. web and mobile app development and design"
+  "p.d.d. web and mobile app development and design",
+  "Post-Degree Diploma in Web and Mobile App Design and Development"
 ],
     certificateKeywords: [
       "backend",
@@ -100,7 +102,8 @@ const roleTemplates = {
   "btech",
   "mtech",
   "m.sc. it",
-  "p.d.d. web and mobile app development and design"
+  "p.d.d. web and mobile app development and design",
+  "Post-Degree Diploma in Web and Mobile App Design and Development"
 ],
     certificateKeywords: [
       "fullstack",
@@ -137,6 +140,7 @@ const roleTemplates = {
       "cognitive psychology",
       "interaction design",
       "ux design",
+      "Post-Degree Diploma in Web and Mobile App Design and Development"
     ],
     certificateKeywords: [
       "ux design",
@@ -170,6 +174,7 @@ const roleTemplates = {
       "visual communication",
       "fine arts",
       "web design",
+      "Post-Degree Diploma in Web and Mobile App Design and Development"
     ],
     certificateKeywords: [
       "ui design",
