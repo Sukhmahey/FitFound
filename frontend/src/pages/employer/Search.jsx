@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
+import { useAuth } from "../../contexts/AuthContext";
 
 import { scoreCandidates } from "./GenerateCandidateScore";
 
@@ -17,23 +18,26 @@ import {
 import { employerApi } from "../../services/api";
 
 const dummyobj1 = {
-  employerId: "uakvb65lGWfOqbsEix2dUvOL1nH2",
-  jobTitle: "FrontEnd Developer",
+  employerId: "68659ec4901fec3956f9280f",
+  jobTitle: "FullStack Developer",
   jobDescription:
-    "Anderson Vacations is an established and respected Canadian tour operator and part of a diverse Western Canadian group of travel companies. We excel in creating and customizing independent and group tour packages across captivating destinations such as Canada, Australia, New Zealand, Tahiti, and Fiji's idyllic South Pacific islands. Additionally, we offer a unique selection of fully escorted small group tours to extraordinary locations within Canada.\n\nWith our expertise in Canada, our product range encompasses every Province and Territory in the country, providing the opportunity for one-of-a-kind, tailored itineraries in each locale. Beyond the well-known tourist destinations, we pride ourselves in exploring the less-travelled, hidden gems and specialize in offering authentic local experiences, including immersive Indigenous cultural encounters.\n\nSince we design, develop, manage, and operate our own tours, we are more familiar with the intricacies of our product than anyone else. This also means that we require sophisticated front and back-end systems to support the complex processes that allow us to provide a high-value travel experience to several thousand travellers each year.\n\nWe are an enthusiastic, passionate, and welcoming team, eager to welcome a dynamic and creative Junior/Intermediate Full-Stack Developer to our ranks. We are looking for a person based in Vancouver.\n\nResponsibilities:\n\nDeveloping responsive websites and web-based applications.\nDeployment and cross-browser testing for Quality Assurance.\nOngoing maintenance, development, bug fixes and customization.\nDocumenting website source code and applications.\nProviding IT Support and Troubleshooting\nInstalling hardware/software components\nMust Haves (min 2 yrs.):\n\nPHP\nJavaScript\nMySQL\nHTML5\nCSS3\nJSON\nXML\nNice To Haves:\n\nPhotoshop\nIllustrator\nLinux\nWindows\nNetworking\nRequirements:\n\nCandidate must have a legal work status or be a Canadian Permanent Resident or Canadian citizen.\nCompleted at least 2 academic years.\nAbility to write scalable, maintainable and well-documented code.\nSelf-motivated with the ability to multitask and work under pressure with tight deadlines.\nStrong problem-solving and troubleshooting skills.\nOutstanding attention to detail and quality control.\nKnowledge of website usability, conversion optimization, analytics, email marketing, and search engine optimization is not optional but an asset.\nIf you meet the requirements, please send your resume with examples of web development work and a cover letter stating salary expectations.\n\nJob Type: Full-time\n\nPay: From $55,000.00 per year\n\nBenefits:\n\nDental care\nExtended health care\nFlexible language requirement:\n\nFrench not required\nSchedule:\n\nMonday to Friday\nExperience:\n\nJavaScript: 2 years (required)\nPHP: 2 years (required)\nMySQL: 2 years (required)\nHTML5: 2 years (required)\nCSS3: 2 years (required)",
+    'Job Title: Junior React Developer\nLocation: [Your Location or "Remote"]\nJob Type: Full-Time / Part-Time / Contract\nExperience Level: Entry-Level (0–2 years)\n\nAbout the Role:\nWe are looking for a motivated and detail-oriented Junior React Developer to join our growing development team. In this role, you will help build and maintain responsive, user-friendly web applications using React.js. You’ll work closely with designers, product managers, and senior developers to turn design mockups into interactive, high-performance web interfaces.\n\nKey Responsibilities:\n\nDevelop and maintain front-end features using React.js\n\nCollaborate with team members in writing clean, maintainable code\n\nConvert Figma or design files into reusable React components\n\nIntegrate RESTful APIs and handle asynchronous data\n\nAssist in debugging, testing, and optimizing code for performance\n\nParticipate in code reviews and team meetings\n\nRequired Skills & Qualifications:\n\nBasic understanding of React.js and its core principles (JSX, components, props, state, lifecycle)\n\nProficiency in HTML5, CSS3, and JavaScript (ES6+)\n\nFamiliarity with version control systems (e.g., Git)\n\nUnderstanding of responsive and mobile-first design\n\nWillingness to learn and grow in a fast-paced environment\n\nGood communication and teamwork skills\n\nPreferred (Not Required):\n\nExperience with tools like Redux, Next.js, or Tailwind CSS\n\nExposure to backend technologies (Node.js, Express)\n\nUnderstanding of testing frameworks (Jest, React Testing Library)\n\nPerks & Benefits:\n\nFlexible work hours and remote work options\n\nLearning and mentorship opportunities\n\nFriendly, collaborative team environment\n\nCompetitive salary based on experience\n\n',
   requiredSkills: [
-    { skill: "JavaScript", yearsOfExperience: 0, level: "junior" },
+    {
+      skill: "Html",
+    },
   ],
-  mustHaveCriteria: "Experience with microservices",
+  mustHaveCriteria: "NA",
   salaryRange: {
-    min: 20,
-    max: 30,
+    min: "19",
+    max: "31",
+    perHour: true,
     perYear: false,
   },
   location: "Vancouver",
-  jobType: "full-time",
-  workEnvironment: "hybrid",
-  requiredWorkAuthorization: ["Work Permit"],
+  jobType: "part-time",
+  workEnvironment: "remote",
+  requiredWorkAuthorization: ["PR Citizen", "Work Permit"],
 };
 
 const Search = () => {
@@ -50,8 +54,11 @@ const Search = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useAuth();
 
-  const userId = localStorage.getItem("userId") || "";
+  console.log("Hereee", user);
+
+  const userId = user.profileId;
 
   console.log("searchQuery", searchQuery);
   const onChangeInputFiels = (value, type) => {
@@ -99,7 +106,7 @@ const Search = () => {
     console.log("Param Object", paramObj);
 
     try {
-      await employerApi.saveJob(paramObj);
+      const employerDD = await employerApi.saveJob(dummyobj1);
       const candidateList = await employerApi
         .getAllCandidates()
         .then(async (data) => {
@@ -107,10 +114,24 @@ const Search = () => {
             data.data.slice(0, 3),
             dummyobj1.jobDescription
           );
+
+          console.log(
+            "ID's Array",
+            scoredC,
+            (scoredC || []).map((element) => {
+              return element._id;
+            })
+          );
+
+          await employerApi.saveTopCandidates(employerDD?.data._id, {
+            topMatchedCandidates: (scoredC || []).map((element) => {
+              return element._id;
+            }),
+          });
           console.log("scoredC", scoredC);
           dispatch(setSearchForm(dummyobj1));
           dispatch(setCandidates(scoredC));
-          navigate("/employer/searchResults");
+          navigate(`/employer/searchResults?jobId=${employerDD?.data._id}`);
         });
 
       console.log("Candidate List", candidateList);

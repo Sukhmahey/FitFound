@@ -15,6 +15,7 @@ import {
   Stack,
 } from "@mui/material";
 import { employerApi } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 const employees = new Array(4).fill({
   username: "XYZ",
@@ -51,58 +52,72 @@ const TabPanel = ({ children, value, index }) => {
   return value === index ? <Box p={2}>{children}</Box> : null;
 };
 
-const TaskCard = ({ name, designation, location, manager, fromDate }) => (
-  <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        backgroundColor: "#f5f5f5",
-        borderRadius: 2,
-        p: 2,
-      }}
-    >
-      <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
-      <Box>
-        <Typography variant="body1">
-          <strong>UserName:</strong> {name}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Designation:</strong> {designation}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Work Location:</strong> {location}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Managed By:</strong> {manager}
-        </Typography>
-      </Box>
-    </Box>
+const TaskCard = ({ task }) => {
+  console.log("Taskk", task);
 
-    <Box sx={{ mt: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Work Authorization Badge
-      </Typography>
-      <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
-        <Typography>
-          <strong>{designation}</strong>
-        </Typography>
-        <Typography>From {fromDate} To “Current”</Typography>
-        <Typography>Roles ------</Typography>
-        <Box sx={{ mt: 2 }}>
-          <Button variant="outlined">Verify</Button>
+  const verifyRequest = async () => {
+    await employerApi.verifyTask(task?._id);
+  };
+
+  return (
+    <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: "#f5f5f5",
+          borderRadius: 2,
+          p: 2,
+        }}
+      >
+        <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
+        <Box>
+          <Typography variant="body1">
+            <strong>UserName:</strong>{" "}
+            {task?.candidateId?.personalInfo?.firstName}
+          </Typography>
+          {/* <Typography variant="body1">
+            <strong>Designation:</strong> {designation}
+          </Typography> */}
         </Box>
       </Box>
-    </Box>
-  </Card>
-);
+
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Work Authorization Badge
+        </Typography>
+        <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
+          {/* <Typography>
+            <strong>{task?.employmentDates?.startDate}</strong>
+          </Typography> */}
+          <Typography>
+            From {task?.employmentDates?.startDate} To “Current”
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            <Button
+              onClick={() => {
+                verifyRequest();
+              }}
+              variant="outlined"
+            >
+              Verify
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    </Card>
+  );
+};
 
 const Connections = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [currentEmployee, setCurrentEmployee] = useState([]);
+  const [pendingTasks, setPendingTasks] = useState([]);
   const [acceptedCandidates, setAcceptedCandidates] = useState([]);
-  const userId = localStorage.getItem("userId");
+  const { user } = useAuth();
+
+  const userId = user?.profileId;
 
   const handleTabChange = (e, newValue) => {
     setTabIndex(newValue);
@@ -114,13 +129,26 @@ const Connections = () => {
     const acceptedCandidates = await employerApi.fetchAcceptedCandidates(
       userId
     );
-    setAcceptedCandidates(acceptedCandidates?.data);
-    console.log("employee Data", employeeData);
+    const pendingCandidates = await employerApi.fetchPendingRequests(userId);
+    const pendingTasks = await employerApi.fetchEmployerTasks(userId);
+    setPendingTasks(
+      (pendingTasks?.data || []).filter((emp) => emp?.status != "verified")
+    );
+    setAcceptedCandidates(
+      (acceptedCandidates?.data || []).filter(
+        (emp) => emp.finalStatus != "hired"
+      )
+    );
+    console.log("pendingTasks", pendingTasks);
   };
 
   useEffect(() => {
     getCurrentEmployees(userId);
   }, []);
+
+  const hireCandidate = async (id) => {
+    await employerApi.setCandidateToHired(id);
+  };
 
   return (
     <Box sx={{ width: "100%", typography: "body1", p: 2 }}>
@@ -202,7 +230,7 @@ const Connections = () => {
             pr: 1,
           }}
         >
-          {employees.map((emp, index) => (
+          {acceptedCandidates.map((emp, index) => (
             <Card
               key={index}
               sx={{
@@ -219,17 +247,24 @@ const Connections = () => {
                   <strong>UserName:</strong> {emp.username}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Designation:</strong> {emp.designation}
+                  <strong>Designation:</strong> {emp?.jobId?.jobTitle}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Work Location:</strong> {emp.location}
+                  <strong>Work Location:</strong> {emp?.jobId?.location}
                 </Typography>
-                <Typography variant="body2">
+                {/* <Typography variant="body2">
                   <strong>Managed By:</strong> {emp.manager}
-                </Typography>
+                </Typography> */}
               </CardContent>
               <Box>
-                <Button variant="outlined">Hired</Button>
+                <Button
+                  onClick={() => {
+                    hireCandidate(emp?._id);
+                  }}
+                  variant="outlined"
+                >
+                  Hired
+                </Button>
                 <Button variant="outlined">View Details</Button>
               </Box>
             </Card>
@@ -242,8 +277,8 @@ const Connections = () => {
             Current Employees
           </Typography>
           <Stack spacing={3}>
-            {employeeList.map((emp, index) => (
-              <TaskCard key={index} {...emp} />
+            {pendingTasks.map((emp, index) => (
+              <TaskCard key={index} task={emp} />
             ))}
           </Stack>
         </Box>
