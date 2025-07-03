@@ -45,7 +45,7 @@ useEffect(() => {
     }
 }, [user]);
 
-console.log(userProfile)
+
 
       
 
