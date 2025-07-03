@@ -55,10 +55,6 @@ const CompanyInfo = () => {
     }
   };
 
-  const setFileValue = (file) => {
-    setValue('companyLogo', file);
-  };
-
     return (
         <div className="container">
 

@@ -68,7 +68,7 @@ const EmployerOnboarding = () => {
       console.log(data);
 
       if (data.profilePicture) {
-        const profileFile = data.profilePicture["0"];
+        const profileFile = data.profilePicture;
         const profileFileName = setFileName(data.companyName + "-profile-picture");
         const profileFilePath = `profile-picture/${Date.now()}-${profileFileName}`;
 
