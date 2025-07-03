@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import { employerApi } from '../services/api';
+import { candidateApi } from "../services/api";
 
 const Sidebar = () => {
     const [userProfile, setUserProfile] = useState({});
@@ -19,18 +20,32 @@ const Sidebar = () => {
         navigate(newPath);
     };
 
-    useEffect(() => {
-        // TODO: VALIDATE THE ROLE
-        // Getting the user profile by ID
+    // useEffect(() => {
+    //     // TODO: VALIDATE THE ROLE
+    //     // Getting the user profile by ID
+    //     employerApi.getEmployerProfile(user.userId)
+    //     .then( result => {
+    //       setUserProfile(result.data);
+    //       console.log(result.data);
+    //     })
+    //     .catch( error => {
+    //       console.log(error);
+    //     });
+    //   }, []);
+
+useEffect(() => {
+    if (user?.role === 'employer') {
         employerApi.getEmployerProfile(user.userId)
-        .then( result => {
-          setUserProfile(result.data);
-          console.log(result.data);
-        })
-        .catch( error => {
-          console.log(error);
-        });
-      }, []);
+            .then(result => setUserProfile(result.data))
+            .catch(error => console.log(error));
+    } else if (user?.role === 'candidate') {
+        candidateApi.getProfileByUserId(user.userId)
+            .then(result => setUserProfile(result.data))
+            .catch(error => console.log(error));
+    }
+}, [user]);
+
+console.log(userProfile)
 
       
 
@@ -48,9 +63,19 @@ const Sidebar = () => {
                         borderRadius: '50%',
                         objectFit: 'cover'
                     }}></img></div>
-                <div>Anna Paul</div>
-            </div>
+                <div>
+                    {user?.role === 'candidate' && userProfile?.personalInfo?.firstName && (
+                        <h5>{userProfile.personalInfo.firstName}</h5>
+                    )}
 
+                    {/* //Sindy Here you can add employer hr name === please update according to your object please */}
+                    {user?.role === 'employer'&& (
+                        <h5>Anna Paul</h5>
+                    )}
+
+                </div>
+            </div>
+{/* personalInfo.firstName */}
             <nav>
                 <ul>
                     <li><button onClick={() => goTo('dashboard')}>Dashboard</button></li>
