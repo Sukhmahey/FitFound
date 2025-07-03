@@ -812,50 +812,60 @@ exports.markVerified = async (req, res) => {
 
 
 
+
 exports.getDashboardMainRoleCounts = async (req, res) => {
   try {
-
+    // 1. Update rolesForDashboard to use lowercase for consistency
     const rolesForDashboard = [
-      "Frontend Developer",
-      "Backend Developer",
-      "Full Stack Developer",
-      "UI Designer",
-      "UX Designer",
+      "frontend developer", // Changed to lowercase
+      "backend developer",
+      "full stack developer",
+      "ui designer",
+      "ux designer",
     ];
 
     const counts = await Candidate.aggregate([
       {
-
+        // Unwind to deconstruct the array of desiredJobTitle
         $unwind: "$jobPreference.desiredJobTitle",
       },
       {
-        // Filter the documents to include only the desired job titles
-        $match: {
-          "jobPreference.desiredJobTitle": { $in: rolesForDashboard },
+        // NEW: Convert the desiredJobTitle from the database to lowercase
+        // This ensures case-insensitive matching with rolesForDashboard
+        $addFields: {
+          "jobPreference.desiredJobTitleLower": {
+            $toLower: "$jobPreference.desiredJobTitle",
+          },
         },
       },
       {
-
+        // Filter the documents to include only the desired job titles (now case-insensitive)
+        $match: {
+          "jobPreference.desiredJobTitleLower": { $in: rolesForDashboard }, // Use the lowercase rolesForDashboard
+        },
+      },
+      {
+        // Group by the lowercase job title to count occurrences
         $group: {
-          _id: "$jobPreference.desiredJobTitle", 
+          _id: "$jobPreference.desiredJobTitleLower", // Group by the lowercase version
           count: { $sum: 1 }, // Count the number of documents for each title
         },
       },
       {
-        // Reshape the output document
+        // Reshape the output document to rename _id to role
         $project: {
-          _id: 0, 
-          role: "$_id", 
+          _id: 0, // Exclude the default _id
+          role: "$_id", // Rename _id to role
           count: 1, // Include the count
         },
       },
       {
-
+        // Sort the results by role name
         $sort: { role: 1 },
       },
     ]);
 
-
+    // Ensure all roles from rolesForDashboard are present, even if their count is 0
     const finalCounts = rolesForDashboard.map((role) => {
       const found = counts.find((item) => item.role === role);
       return { role, count: found ? found.count : 0 };
@@ -863,13 +873,10 @@ exports.getDashboardMainRoleCounts = async (req, res) => {
 
     res.status(200).json(finalCounts);
   } catch (error) {
-
-
-    console.error("Error in getDashboardMainRoleCounts:", error);
+    console.error("Error fetching dashboard main role counts:", error); // Added error logging
     res.status(500).json({
-      message: "Failed to retrieve candidate main role counts",
+      message: "Failed to fetch dashboard main role counts",
       error: error.message,
     });
-
   }
 };
