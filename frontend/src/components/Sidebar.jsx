@@ -8,7 +8,7 @@ import { candidateApi } from "../services/api";
 const Sidebar = () => {
     const [userProfile, setUserProfile] = useState({});
     const { user } = useAuth();
-    console.log(user);
+    // console.log(user);
 
     const location = useLocation();
     const navigate = useNavigate();

@@ -43,20 +43,16 @@ const CompanyInfo = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (file && file.type.startsWith("image/")) {
+        setValue("companyLogo", file, { shouldValidate: true });
       const reader = new FileReader();
       reader.onloadend = () => {
         setImageSrc(reader.result);
+        
       };
       reader.readAsDataURL(file);
-
       console.log(file);
-      setFileValue(file);
     }
-  };
-
-  const setFileValue = (file) => {
-    setValue('companyLogo', file);
   };
 
     return (
@@ -68,14 +64,17 @@ const CompanyInfo = () => {
                     <label htmlFor="companyLogo">
                         Company logo
                         <div style={styles.wrapper}>
-                            <input type="file" style={styles.input} {...register("companyLogo")} name="companyLogo" id="companyLogo" 
-                            // onChange={(e) => {
-                            //     handleImageChange(e);                    
-                            //     register("companyLogo").onChange(e);
-                            // }} 
+                            <input type="file" accept="image/*" style={styles.input}
+                                // {...register("companyLogo")}
+                                name="companyLogo"
+                                id="companyLogo"
+                                
+                                onChange={(e) => {
+                                    handleImageChange(e); // Set preview
+                                }} 
                             />
                             <div style={styles.iconContainer}>
-                                <img src = {imageSrc ? imageSrc : watch('companyLogo') } style={styles.image} />
+                                <img src = {imageSrc || watch('companyLogo') } style={styles.image} />
                                 <span style={styles.arrow}>⬆</span>
                             </div>
                         </div>

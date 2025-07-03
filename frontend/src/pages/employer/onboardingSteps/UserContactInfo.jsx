@@ -43,21 +43,17 @@ const UserContactInfo = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (file && file.type.startsWith("image/")) {
+        setValue("profilePicture", file, { shouldValidate: true });
       const reader = new FileReader();
       reader.onloadend = () => {
         setImageSrc(reader.result);
+        
       };
       reader.readAsDataURL(file);
-
       console.log(file);
-      setFileValue(file);
     }
   };
-
-    const setFileValue = (file) => {
-        setValue('profilePicture', file);
-    };
 
     return (
         <div className="container">
@@ -66,14 +62,13 @@ const UserContactInfo = () => {
                 <label htmlFor="profilePicture">
                     Profile Picture
                     <div style={styles.wrapper}>
-                        <input type="file" style={styles.input} {...register("profilePicture")} name="profilePicture" id="profilePicture" 
-                        // onChange={(e) => {
-                        //     handleImageChange(e);                    
-                        //     register("companyLogo").onChange(e);
-                        // }} 
+                        <input type="file" style={styles.input} name="profilePicture" id="profilePicture" 
+                            onChange={(e) => {
+                                handleImageChange(e); // Set preview
+                            }} 
                         />
                         <div style={styles.iconContainer}>
-                            <img src = {imageSrc ? imageSrc : watch('profilePicture') } style={styles.image} />
+                            <img src = {imageSrc || watch('profilePicture') } style={styles.image} />
                             <span style={styles.arrow}>⬆</span>
                         </div>
                     </div>
