@@ -138,14 +138,14 @@ export default function WorkExperienceStep({ data = [], onUpdate }) {
                 <MenuItem value="senior">Senior</MenuItem>
               </Select>
             </FormControl>
-            <TextField
+            {/* <TextField
               label="Remark From Employer"
               multiline
               rows={3}
               variant="outlined"
               value={exp.remarkFromEmployer}
               onChange={(e) => handleChange(index, 'remarkFromEmployer', e.target.value)}
-            />
+            /> */}
 
             <Box>
               <h6 className='text-decoration-underline'>Achievements</h6>

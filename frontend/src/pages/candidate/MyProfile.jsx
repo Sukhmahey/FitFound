@@ -16,7 +16,9 @@ import {
   Tab,
   Button,
   CircularProgress,
-  Container
+  Container,
+  Alert,
+  AlertTitle
 } from '@mui/material';
 
 export default function MyProfile() {
@@ -24,6 +26,8 @@ export default function MyProfile() {
   const userId = user?.userId;
   const [activeTab, setActiveTab] = useState('Personal');
   const [formData, setFormData] = useState(null);
+  const [submitStatus, setSubmitStatus] = useState('');
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +42,18 @@ export default function MyProfile() {
     fetchData();
   }, [userId]);
 
+
+
+ useEffect(() => {
+  setSubmitStatus(''); 
+
+  const timer = setTimeout(() => {
+    setSubmitStatus('');
+  }, 5000); 
+
+  return () => clearTimeout(timer);
+}, [activeTab]);
+
   const updateFormData = (section, data) => {
     setFormData((prev) => ({
       ...prev,
@@ -48,9 +64,14 @@ export default function MyProfile() {
   const handleUpdate = async () => {
     try {
       await candidateApi.updateProfile(userId, formData);
+      setSubmitStatus('success');
+      
     } catch (err) {
       console.error('Failed to update profile:', err);
+      setSubmitStatus('error');
     }
+        
+
   };
 
   if (!formData) {
@@ -72,6 +93,7 @@ export default function MyProfile() {
   ];
 
   const renderTab = () => {
+    
     switch (activeTab) {
       case 'Personal':
         return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
@@ -116,6 +138,26 @@ export default function MyProfile() {
           Update Profile
         </Button>
       </Box>
+      <Box>
+                      {submitStatus === 'success' && (
+                          <Box mt={2}>
+                              <Alert severity="success">
+                                  <AlertTitle>Success</AlertTitle>
+                                  Your request has been submitted successfully.
+                              </Alert>
+                          </Box>
+                      )}
+      
+                      {submitStatus === 'error' && (
+                          <Box mt={2}>
+                              <Alert severity="error">
+                                  <AlertTitle>Error</AlertTitle>
+                                  Something went wrong. Please try again later.
+                              </Alert>
+                          </Box>
+                      )}
+      
+                  </Box>
     </Container>
   );
 }

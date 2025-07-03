@@ -49,7 +49,7 @@ export default function BasicInfoStep({ data, onUpdate }) {
           value={data.bio}
           onChange={handleChange}
         />
-        <TextField
+        {/* <TextField
           name="additionalInfo"
           id="outlined-multiline-static"
             label="Additional Info"
@@ -57,7 +57,7 @@ export default function BasicInfoStep({ data, onUpdate }) {
             rows={4}
           value={data.additionalInfo}
           onChange={handleChange}
-        />
+        /> */}
       </div>
     </div>
   );

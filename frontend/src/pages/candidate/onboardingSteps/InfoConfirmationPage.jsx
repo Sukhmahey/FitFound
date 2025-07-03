@@ -240,7 +240,7 @@ export default function InfoConfirmationPage({ data }) {
             <TextField label="Work Status" value={form.basicInfo.workStatus} onChange={e => handleNestedChange('basicInfo', 'workStatus', e.target.value)} />
             <TextField label="Language" value={form.basicInfo.language} onChange={e => handleNestedChange('basicInfo', 'language', e.target.value)} />
             <TextField label="Bio" multiline rows={3} value={form.basicInfo.bio} onChange={e => handleNestedChange('basicInfo', 'bio', e.target.value)} />
-            <TextField label="Additional Info" multiline rows={3} value={form.basicInfo.additionalInfo} onChange={e => handleNestedChange('basicInfo', 'additionalInfo', e.target.value)} />
+            {/* <TextField label="Additional Info" multiline rows={3} value={form.basicInfo.additionalInfo} onChange={e => handleNestedChange('basicInfo', 'additionalInfo', e.target.value)} /> */}
           </Box>
 
           {/* Skills */}
@@ -366,11 +366,11 @@ export default function InfoConfirmationPage({ data }) {
                       <MenuItem value="senior">Senior</MenuItem>
                     </Select>
                   </FormControl>
-                  <TextField fullWidth label="Remark From Employer" multiline rows={2} value={we.remarkFromEmployer} onChange={e => {
+                  {/* <TextField fullWidth label="Remark From Employer" multiline rows={2} value={we.remarkFromEmployer} onChange={e => {
                     const updated = [...form.workExperience];
                     updated[i].remarkFromEmployer = e.target.value;
                     setForm({ ...form, workExperience: updated });
-                  }} />
+                  }} /> */}
                   <TextField type="month" fullWidth label="Start Date" InputLabelProps={{ shrink: true }} value={we.startDate} onChange={e => {
                     const updated = [...form.workExperience];
                     updated[i].startDate = e.target.value;
