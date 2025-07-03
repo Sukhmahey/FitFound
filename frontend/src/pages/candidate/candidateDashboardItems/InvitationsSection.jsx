@@ -1,79 +1,88 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
+import { candidateApi } from '../../../services/api';
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Stack,
+  List,
+  ListItem,
+  ListItemText,
+} from '@mui/material';
 
-function InvitationsSection() {
+export default function InvitationsSection() {
+  const [invitations, setInvitations] = useState([]);
+  const { user } = useAuth();
+  const profileId = user?.profileId;
 
-    const invitationArray = [
-        {id: 1, EName: 'Manoj' , CName:'Deloitte', Date: '2022-01-01'},
-        {id: 2, EName: 'Rahul' , CName:'Accenture' , Date: '2022-01-02'},
-        {id: 3, EName: 'Rohan' , CName:'Infosys', Date: '2022-01-03'},
-    ]
+  useEffect(() => {
+    const fetchInvitations = async () => {
+      try {
+        const response = await candidateApi.fetchInteractions(profileId);
+        console.log(response.data)
+        const filtered = response.data
+          .filter((obj) => obj.candidateConsentToReveal === false)
+          .map((obj) => ({
+            invitationId: obj._id,
+            employerId: obj.employerId._id,
+            employerName: obj.employerId.companyName,
+            outreachMessage: obj.outreachMessage,
+            job: obj.jobId,
+            date: new Date(obj.updatedAt).toLocaleDateString(),
+          }));
+        setInvitations(filtered);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    if (profileId) fetchInvitations();
+  }, [profileId]);
+
+  const Details = ({ e }) =>{
+    console.log(e);
+
+  };
 
   return (
-    <div>
-        <h1>Invitations</h1>
-        <div className="invitations-container" style={styles.invitationsContainer}>
-            <ul className='invitationList' style={styles.invitationList}>
-                {invitationArray.map((invitation) => (
-            <li key={invitation.id} className='invitationItem' style={styles.ListItems}>
-              <div className='invitationDetails' style={styles.invitationDetails}>
-                  <span><strong>{invitation.EName}</strong> is inviting you to connect</span>
-                  <span><strong>{invitation.CName}</strong> </span>
-                  <span>{invitation.Date}</span>
-              </div>
-              <button className='listButton' style={styles.listButton}>Details</button>
-
-            </li>
+    <Box mt={4}>
+      <Typography variant="h5" gutterBottom>
+        Invitations
+      </Typography>
+      <Box p={2} border="1px solid #ccc" borderRadius={2}>
+        <List>
+          {invitations.map((invitation) => (
+            <Paper sx={{ mb: 2, p: 2, borderRadius: 2 }} key={invitation.invitationId}>
+                <ListItem
+                  elevation={2}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Stack spacing={0.5}>
+                    <Typography fontWeight="bold">
+                      {invitation.employerName} is inviting you to connect
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {invitation.date}
+                    </Typography>
+                  </Stack>
+                  <Button variant="outlined" color="primary" onClick={(invitation)=>Details}>
+                    Details
+                  </Button>
+                </ListItem>
+            </Paper>
           ))}
-            </ul>
-        </div>
-    </div>
-  )
-}
-
-export default InvitationsSection
-
-const styles = {
-    invitationsContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '20px',
-        border: '1px solid #ccc',
-        borderRadius: '10px',
-    },
-    invitationList:{
-        listStyle: 'none',
-        padding: '20px',
-        margin: 'auto',
-        width: '80%',
-        display: 'flex',
-        flexDirection: 'column'
-
-    },
-    ListItems:{
-
-        backgroundColor: '#f0f0f0',
-        padding: '2rem',
-        margin: '10px',
-        borderRadius: '10px',
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    invitationDetails:{
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    listButton:{
-        backgroundColor: 'white',
-        color: 'black',
-        padding: '0.5rem 2rem',
-        border: 'none',
-        borderRadius: '1rem',
-        cursor: 'pointer',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        
-    }
-
-
+        </List>
+        {invitations.length === 0 && (
+          <Typography textAlign="center" color="text.secondary">
+            No invitations yet.
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
 }

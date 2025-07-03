@@ -36,7 +36,13 @@ export const candidateApi = {
   updateJobPreference: (userId, data) =>
     api.patch(`/candidates/${userId}/job-preference`, data),
   getProfileByUserId: (userId) => api.get(`/candidates/user/${userId}`),
-  getDashboardMainRoleCounts: () => api.get(`/candidates/dashboard-main-role-counts`)
+  getDashboardMainRoleCounts: () => api.get(`/candidates/dashboard-main-role-counts`),
+fetchInteractions: (candidateId) =>
+    api.get(`/interactions/candidate/${candidateId}`),
+setConsent: (interactionId, consent) =>
+  api.patch(`/interactions/${interactionId}/consent`, { consent }),
+  
+
 };
 
 export const jobVerificationApi = {

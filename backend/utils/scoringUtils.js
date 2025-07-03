@@ -181,6 +181,101 @@ const roleTemplates = {
   },
 };
 
+// function calculateProfileScore(candidate, desiredRole) {
+//   const normalizedDesiredRole = desiredRole?.toLowerCase();
+//   const template = roleTemplates[normalizedDesiredRole];
+
+//   if (!template) {
+//     return 0;
+//   }
+
+//   let score = 0;
+
+//   const WEIGHTS = {
+//     SKILLS: 25,
+//     CERTIFICATES: 10,
+//     WORK_EXPERIENCE_TITLE: 20,
+//     EDUCATION_FIELD: 15,
+//     BIO_AND_PORTFOLIO: 10,
+//     BASIC_INFO_COMPLETENESS: 20,
+//   };
+
+//   const candidateSkills =
+//     candidate.skills?.map((s) => s.skill?.toLowerCase()) || [];
+//   const skillMatches = candidateSkills.filter((skill) =>
+//     template.requiredSkills.includes(skill)
+//   );
+//   if (template.requiredSkills.length > 0) {
+//     score +=
+//       (skillMatches.length / template.requiredSkills.length) * WEIGHTS.SKILLS;
+//   }
+
+//   const certs = candidate.certificates || [];
+//   const matchedCerts = certs.filter((cert) =>
+//     template.certificateKeywords.some((keyword) =>
+//       cert.toLowerCase().includes(keyword)
+//     )
+//   );
+//   if (certs.length === 0) {
+//     score += 0;
+//   } else if (matchedCerts.length > 0) {
+//     score += Math.min(
+//       (matchedCerts.length / template.certificateKeywords.length) *
+//         WEIGHTS.CERTIFICATES,
+//       WEIGHTS.CERTIFICATES
+//     );
+//   } else {
+//     score += 1;
+//   }
+
+//   const hasMatchingJobTitle = candidate.workHistory?.some((job) =>
+//     template.relevantTitles.includes(job.jobTitle?.toLowerCase())
+//   );
+//   score += hasMatchingJobTitle ? WEIGHTS.WORK_EXPERIENCE_TITLE : 0;
+
+//   // const eduField = candidate.education?.[0]?.fieldOfStudy?.toLowerCase() || "";
+//   // const eduMatch = template.relevantDegrees.includes(eduField);
+//   // score += eduMatch ? WEIGHTS.EDUCATION_FIELD : 0;
+
+
+// const credential = candidate.education?.[0]?.credentials?.toLowerCase() || "";
+// const degreeMatch = template.relevantDegrees.some(degree =>
+//   credential.includes(degree.toLowerCase())
+// );
+// score += degreeMatch ? WEIGHTS.EDUCATION_FIELD : 0;
+
+//   const hasBio =
+//     !!candidate.basicInfo?.bio && candidate.basicInfo.bio.length > 50;
+//   const hasPortfolioWebsite =
+//     !!candidate.portfolio?.socialLinks?.personalPortfolioWebsite;
+//   const hasLinkedin = !!candidate.portfolio?.socialLinks?.linkedin;
+
+//   if (hasBio && (hasPortfolioWebsite || hasLinkedin)) {
+//     score += WEIGHTS.BIO_AND_PORTFOLIO;
+//   } else if (hasBio || hasPortfolioWebsite || hasLinkedin) {
+//     score += WEIGHTS.BIO_AND_PORTFOLIO / 2;
+//   }
+
+//   const hasPhoneNumber = !!candidate.basicInfo?.phoneNumber;
+//   const hasLanguage = !!candidate.basicInfo?.language;
+//   const hasEmail = !!candidate.personalInfo?.email;
+
+//   if (hasPhoneNumber && hasLanguage && hasEmail) {
+//     score += WEIGHTS.BASIC_INFO_COMPLETENESS;
+//   } else if (hasPhoneNumber || hasLanguage || hasEmail) {
+//     score += WEIGHTS.BASIC_INFO_COMPLETENESS / 2;
+//   }
+
+//   return Math.max(0, Math.min(100, Math.round(score)));
+// }
+
+// module.exports = {
+//   roleTemplates,
+//   calculateProfileScore,
+// };
+
+
+
 function calculateProfileScore(candidate, desiredRole) {
   const normalizedDesiredRole = desiredRole?.toLowerCase();
   const template = roleTemplates[normalizedDesiredRole];
@@ -192,12 +287,11 @@ function calculateProfileScore(candidate, desiredRole) {
   let score = 0;
 
   const WEIGHTS = {
-    SKILLS: 25,
-    CERTIFICATES: 10,
+    SKILLS: 30, 
     WORK_EXPERIENCE_TITLE: 20,
     EDUCATION_FIELD: 15,
     BIO_AND_PORTFOLIO: 10,
-    BASIC_INFO_COMPLETENESS: 20,
+    BASIC_INFO_COMPLETENESS: 25, 
   };
 
   const candidateSkills =
@@ -210,39 +304,17 @@ function calculateProfileScore(candidate, desiredRole) {
       (skillMatches.length / template.requiredSkills.length) * WEIGHTS.SKILLS;
   }
 
-  const certs = candidate.certificates || [];
-  const matchedCerts = certs.filter((cert) =>
-    template.certificateKeywords.some((keyword) =>
-      cert.toLowerCase().includes(keyword)
-    )
-  );
-  if (certs.length === 0) {
-    score += 0;
-  } else if (matchedCerts.length > 0) {
-    score += Math.min(
-      (matchedCerts.length / template.certificateKeywords.length) *
-        WEIGHTS.CERTIFICATES,
-      WEIGHTS.CERTIFICATES
-    );
-  } else {
-    score += 1;
-  }
-
   const hasMatchingJobTitle = candidate.workHistory?.some((job) =>
     template.relevantTitles.includes(job.jobTitle?.toLowerCase())
   );
   score += hasMatchingJobTitle ? WEIGHTS.WORK_EXPERIENCE_TITLE : 0;
 
-  // const eduField = candidate.education?.[0]?.fieldOfStudy?.toLowerCase() || "";
-  // const eduMatch = template.relevantDegrees.includes(eduField);
-  // score += eduMatch ? WEIGHTS.EDUCATION_FIELD : 0;
-
-
-const credential = candidate.education?.[0]?.credentials?.toLowerCase() || "";
-const degreeMatch = template.relevantDegrees.some(degree =>
-  credential.includes(degree.toLowerCase())
-);
-score += degreeMatch ? WEIGHTS.EDUCATION_FIELD : 0;
+  const credential =
+    candidate.education?.[0]?.credentials?.toLowerCase() || "";
+  const degreeMatch = template.relevantDegrees.some((degree) =>
+    credential.includes(degree.toLowerCase())
+  );
+  score += degreeMatch ? WEIGHTS.EDUCATION_FIELD : 0;
 
   const hasBio =
     !!candidate.basicInfo?.bio && candidate.basicInfo.bio.length > 50;
