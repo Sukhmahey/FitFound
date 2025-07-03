@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { candidateApi } from '../../../services/api';
+import InvitationSectionDialogbox from './InvitationSectionDialogbox';
 import {
   Box,
   Typography,
@@ -14,6 +15,9 @@ import {
 
 export default function InvitationsSection() {
   const [invitations, setInvitations] = useState([]);
+    const [open, setOpen] = React.useState(false);
+    const [selectedInvitation, setSelectedInvitation] = React.useState(null);
+  
   const { user } = useAuth();
   const profileId = user?.profileId;
 
@@ -40,8 +44,11 @@ export default function InvitationsSection() {
     if (profileId) fetchInvitations();
   }, [profileId]);
 
-  const detailsBtn = ({ id }) =>{
-    console.log(id);
+  const detailsBtn = (invitation) =>{
+    console.log(invitation);
+    setSelectedInvitation(invitation);
+    setOpen(true);
+    
 
   };
 
@@ -70,7 +77,7 @@ export default function InvitationsSection() {
                       {invitation.date}
                     </Typography>
                   </Stack>
-                  <Button variant="outlined" color="primary" onClick={() => detailsBtn(invitation.invitationId)}>
+                  <Button variant="outlined" color="primary" onClick={() => detailsBtn(invitation)}>
                     Details
                   </Button>
                 </ListItem>
@@ -83,6 +90,13 @@ export default function InvitationsSection() {
           </Typography>
         )}
       </Box>
+      {selectedInvitation && (
+        <InvitationSectionDialogbox
+          invitation={selectedInvitation}
+          open={open}
+          setOpen={setOpen}
+        />
+      )}
     </Box>
   );
 }

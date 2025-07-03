@@ -22,6 +22,7 @@ export default function ExperienceVerificationReqPage() {
     const [companyNames, setCompanyNames] = useState([]);
     const [workHistory, setWorkHistory] = useState([]);
     const [submitStatus, setSubmitStatus] = useState('');
+    const [jobRole, setJobRole] = useState('');
 
     const { user } = useAuth();
     const userId = user?.userId;
@@ -53,9 +54,10 @@ export default function ExperienceVerificationReqPage() {
                     company.companyName.toLowerCase() === selectedCompany.toLowerCase()
             );
             if (companyDetails) {
-                // console.log('Selected company details:', companyDetails);
+                console.log('Selected company details:', companyDetails);
                 setStartDate(companyDetails.startDate);
                 setEndDate(companyDetails.endDate);
+                setJobRole(companyDetails.jobTitle);
             }
         }
     }, [selectedCompany]);
@@ -67,6 +69,7 @@ export default function ExperienceVerificationReqPage() {
             companyName: selectedCompany,
             startDate: startDate,
             endDate: endDate,
+            position: jobRole
         }
         try {
             const res = await jobVerificationApi.verifyJob(dataBody);
