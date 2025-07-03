@@ -38,7 +38,7 @@ exports.createInteraction = async (req, res) => {
       employerId,
       jobId,
       outreachMessage,
-      shortlisted: true, // Assuming initiating means shortlisting
+      shortlisted: true, 
     });
 
     const savedInteraction = await newInteraction.save();
@@ -65,7 +65,7 @@ exports.getInteractionById = async (req, res) => {
       return res.status(404).json({ message: "Interaction not found." });
     }
 
-    // Anonymization logic (as per your existing code)
+
     let candidateDataForResponse = interaction.candidateId.toObject();
     if (!interaction.candidateConsentToReveal) {
       candidateDataForResponse = {
@@ -174,7 +174,10 @@ exports.getInteractionsByCandidateId = async (req, res) => {
 
   try {
     const interactions = await Interaction.find(filter)
-      .populate("employerId", "companyName")
+      .populate(
+        "employerId",
+        "companyName companyDescription contactInfo.firstName"
+      )
       .populate("jobId", "jobTitle location salaryRange jobType")
       .sort({ createdAt: -1 })
       .lean();

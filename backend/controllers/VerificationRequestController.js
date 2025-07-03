@@ -60,8 +60,9 @@ exports.getVerificationRequestsForEmployer = async (req, res) => {
       .populate({
         path: "candidateId",
         model: "Candidate",
+
         select:
-          "personalInfo.firstName personalInfo.lastName personalInfo.email basicInfo.profilePicture",
+          "personalInfo.firstName personalInfo.lastName personalInfo.email",
       })
       .exec();
 
@@ -74,6 +75,36 @@ exports.getVerificationRequestsForEmployer = async (req, res) => {
     });
   }
 };
+
+
+exports.getVerificationRequestsForCandidate = async (req, res) => {
+  try {
+    const { candidateId } = req.params; // Get candidateId from URL parameters
+    const { status } = req.query; // Optional: filter by status (pending, verified, declined)
+
+    const query = { candidateId };
+    if (status) {
+      query.status = status;
+    }
+
+    const requests = await VerificationRequest.find(query)
+      .populate({
+        path: "employerProfileId",
+        model: "EmployerProfile",
+        select: "companyName contactInfo.firstName",
+      })
+      .exec();
+
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error("Error fetching verification requests for candidate:", error);
+    res.status(500).json({
+      message: "Failed to fetch verification requests for candidate",
+      error: error.message,
+    });
+  }
+};
+
 
 exports.updateVerificationRequestStatus = async (req, res) => {
   try {
