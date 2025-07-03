@@ -14,7 +14,7 @@ import {
   IconButton,
   Stack,
 } from "@mui/material";
-import { employerApi } from "../../services/api";
+import { candidateApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 
 const employees = new Array(4).fill({
@@ -52,67 +52,12 @@ const TabPanel = ({ children, value, index }) => {
   return value === index ? <Box p={2}>{children}</Box> : null;
 };
 
-const TaskCard = ({ task }) => {
-  console.log("Taskk", task);
-
-  const verifyRequest = async () => {
-    await employerApi.verifyTask(task?._id);
-  };
-
-  return (
-    <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#f5f5f5",
-          borderRadius: 2,
-          p: 2,
-        }}
-      >
-        <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
-        <Box>
-          <Typography variant="body1">
-            <strong>UserName:</strong>{" "}
-            {task?.candidateId?.personalInfo?.firstName}
-          </Typography>
-          {/* <Typography variant="body1">
-            <strong>Designation:</strong> {designation}
-          </Typography> */}
-        </Box>
-      </Box>
-
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Work Authorization Badge
-        </Typography>
-        <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
-          {/* <Typography>
-            <strong>{task?.employmentDates?.startDate}</strong>
-          </Typography> */}
-          <Typography>
-            From {task?.employmentDates?.startDate} To “Current”
-          </Typography>
-          <Box sx={{ mt: 2 }}>
-            <Button
-              onClick={() => {
-                verifyRequest();
-              }}
-              variant="outlined"
-            >
-              Verify
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-    </Card>
-  );
-};
-
 const Connections = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [search, setSearch] = useState("");
-  const [currentEmployee, setCurrentEmployee] = useState([]);
+  const [pending, setPending] = useState([]);
+  const [accepted, setAccepted] = useState([]);
+  const [archived, setArchived] = useState([]);
 
   const { user } = useAuth();
 
@@ -122,18 +67,51 @@ const Connections = () => {
     setTabIndex(newValue);
   };
 
+  console.log("pending", pending, accepted, archived);
+
   const getCurrentEmployees = async (userId) => {
-    const employeeData = await employerApi.fetchCurrentEmployees(userId);
-    // console.log("pendingTasks", pendingTasks);
+    const candidateData = await candidateApi.fetchInteractions(userId);
+
+    setPending(
+      (candidateData?.data || []).filter(
+        (candidate) =>
+          !candidate?.candidateConsentToReveal &&
+          candidate?.finalStatus != "rejected"
+      )
+    );
+
+    setAccepted(
+      (candidateData?.data || []).filter(
+        (candidate) =>
+          candidate?.candidateConsentToReveal &&
+          candidate?.finalStatus == "hired"
+      )
+    );
+
+    setArchived(
+      (candidateData?.data || []).filter(
+        (candidate) =>
+          !candidate?.candidateConsentToReveal &&
+          candidate?.finalStatus == "rejected"
+      )
+    );
+  };
+
+  const acceptInvitation = async (id) => {
+    await candidateApi.acceptInvitation(id).then(() => {
+      getCurrentEmployees();
+    });
+  };
+
+  const declineInvitation = async (id) => {
+    await candidateApi.declineInvitation(id).then(() => {
+      getCurrentEmployees();
+    });
   };
 
   useEffect(() => {
     getCurrentEmployees(userId);
   }, []);
-
-  const hireCandidate = async (id) => {
-    await employerApi.setCandidateToHired(id);
-  };
 
   return (
     <Box sx={{ width: "100%", typography: "body1", p: 2 }}>
@@ -145,7 +123,6 @@ const Connections = () => {
           <Tab label="Archived" />
         </Tabs>
       </AppBar>
-
       {/* Search */}
       <Box my={2}>
         <TextField
@@ -165,7 +142,6 @@ const Connections = () => {
         />
       </Box>
 
-      {/* Tab Panel */}
       <TabPanel value={tabIndex} index={0}>
         <Box
           sx={{
@@ -174,7 +150,7 @@ const Connections = () => {
             pr: 1,
           }}
         >
-          {currentEmployee.map((emp, index) => (
+          {pending.map((emp, index) => (
             <Card
               key={index}
               sx={{
@@ -188,16 +164,113 @@ const Connections = () => {
               <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
               <CardContent sx={{ flexGrow: 1, p: 0 }}>
                 <Typography variant="subtitle1">
-                  <strong>UserName:</strong> {emp.username}
+                  <strong>UserName:</strong> {emp?.employerId?.companyName}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Designation:</strong> {emp.designation}
+                  <strong>Designation:</strong>{" "}
+                  {emp?.employerId?.contactInfo?.designation}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Work Location:</strong> {emp.location}
+                  <strong>Sent By:</strong>{" "}
+                  {emp?.employerId?.contactInfo?.firstName}
+                </Typography>
+              </CardContent>
+              <Box>
+                <Button variant="outlined">View Details</Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    acceptInvitation(emp._id);
+                  }}
+                >
+                  Accept
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    declineInvitation(emp._id);
+                  }}
+                >
+                  Decline
+                </Button>
+              </Box>
+            </Card>
+          ))}
+        </Box>
+      </TabPanel>
+
+      <TabPanel value={tabIndex} index={1}>
+        <Box
+          sx={{
+            maxHeight: "70vh",
+            overflowY: "auto",
+            pr: 1,
+          }}
+        >
+          {accepted.map((emp, index) => (
+            <Card
+              key={index}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: 2,
+                p: 2,
+                borderRadius: 2,
+              }}
+            >
+              <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
+              <CardContent sx={{ flexGrow: 1, p: 0 }}>
+                <Typography variant="subtitle1">
+                  <strong>UserName:</strong> {emp?.employerId?.companyName}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Managed By:</strong> {emp.manager}
+                  <strong>Designation:</strong>{" "}
+                  {emp?.employerId?.contactInfo?.designation}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Sent By:</strong>{" "}
+                  {emp?.employerId?.contactInfo?.firstName}
+                </Typography>
+              </CardContent>
+              <Box>
+                <Button variant="outlined">View Details</Button>
+              </Box>
+            </Card>
+          ))}
+        </Box>
+      </TabPanel>
+
+      <TabPanel value={tabIndex} index={2}>
+        <Box
+          sx={{
+            maxHeight: "70vh",
+            overflowY: "auto",
+            pr: 1,
+          }}
+        >
+          {archived.map((emp, index) => (
+            <Card
+              key={index}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: 2,
+                p: 2,
+                borderRadius: 2,
+              }}
+            >
+              <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
+              <CardContent sx={{ flexGrow: 1, p: 0 }}>
+                <Typography variant="subtitle1">
+                  <strong>UserName:</strong> {emp?.employerId?.companyName}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Designation:</strong>{" "}
+                  {emp?.employerId?.contactInfo?.designation}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Sent By:</strong>{" "}
+                  {emp?.employerId?.contactInfo?.firstName}
                 </Typography>
               </CardContent>
               <Box>

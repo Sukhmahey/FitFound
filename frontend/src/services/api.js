@@ -42,6 +42,10 @@ export const candidateApi = {
     api.get(`/interactions/candidate/${candidateId}`),
   setConsent: (interactionId, consent) =>
     api.patch(`/interactions/${interactionId}/consent`, { consent }),
+  acceptInvitation: (interactionId) =>
+    api.patch(`/interactions/${interactionId}/consent`, { consent: true }),
+  declineInvitation: (interactionId) =>
+    api.patch(`/interactions/${interactionId}`, { finalStatus: "rejected" }),
 };
 
 export const jobVerificationApi = {
