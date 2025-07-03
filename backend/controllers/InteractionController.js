@@ -176,7 +176,7 @@ exports.getInteractionsByCandidateId = async (req, res) => {
     const interactions = await Interaction.find(filter)
       .populate(
         "employerId",
-        "companyName companyDescription contactInfo.firstName"
+        "companyName companyDescription contactInfo"
       )
       .populate("jobId", "jobTitle location salaryRange jobType")
       .sort({ createdAt: -1 })
