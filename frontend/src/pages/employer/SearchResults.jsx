@@ -5,6 +5,8 @@ import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 import { employerApi } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -139,11 +141,17 @@ const SearchResults = () => {
   const [searchField, setSearchField] = useState("");
   const candidates = useSelector((state) => state.search.candidates);
 
-  const sendVerificationRequest = async () => {
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const jobId = searchParams.get("jobId");
+
+  const userId = user.profileId;
+  const sendVerificationRequest = async (id) => {
+    console.log("jahsjhdskajhdfkjs", id, userId, jobId);
     await employerApi.sendConnectionRequest({
-      candidateId: "685f24f147f18e8115e90687",
-      employerId: "685f24c547f18e8115e90685",
-      jobId: "685f274047f18e8115e90694",
+      candidateId: id,
+      employerId: userId,
+      jobId: jobId,
       outreachMessage:
         "Your profile matches our Data Analyst opening. Would you be interested in learning more about Alpha Solutions Group?",
     });
@@ -190,14 +198,17 @@ const SearchResults = () => {
           pr: 1,
         }}
       >
-        {candidates.map((c, _id) => (
-          <CandidateCard
-            key={_id}
-            data={c}
-            onViewDetails={handleViewDetails}
-            sendVerificationRequest={sendVerificationRequest}
-          />
-        ))}
+        {candidates.map((c, _id) => {
+          console.log("CCC", c);
+          return (
+            <CandidateCard
+              key={_id}
+              data={c}
+              onViewDetails={handleViewDetails}
+              sendVerificationRequest={() => sendVerificationRequest(c?._id)}
+            />
+          );
+        })}
       </Box>
 
       {/* Modal */}

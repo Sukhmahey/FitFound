@@ -36,13 +36,12 @@ export const candidateApi = {
   updateJobPreference: (userId, data) =>
     api.patch(`/candidates/${userId}/job-preference`, data),
   getProfileByUserId: (userId) => api.get(`/candidates/user/${userId}`),
-  getDashboardMainRoleCounts: () => api.get(`/candidates/dashboard-main-role-counts`),
-fetchInteractions: (candidateId) =>
+  getDashboardMainRoleCounts: () =>
+    api.get(`/candidates/dashboard-main-role-counts`),
+  fetchInteractions: (candidateId) =>
     api.get(`/interactions/candidate/${candidateId}`),
-setConsent: (interactionId, consent) =>
-  api.patch(`/interactions/${interactionId}/consent`, { consent }),
-  
-
+  setConsent: (interactionId, consent) =>
+    api.patch(`/interactions/${interactionId}/consent`, { consent }),
 };
 
 export const jobVerificationApi = {
@@ -60,6 +59,7 @@ export const employerApi = {
     api.patch(`/employers/${userId}/profile`, data),
   saveJob: (data) => api.post(`/jobs`, data),
   getAllCandidates: () => api.get(`/candidates`),
+  getCandidateById: () => api.get(`/candidates/user/6865bb2908ba7790a41621b3`),
   getSearchedCandidates: (data) =>
     api.get(
       `/candidates?title=${data.title}&jobType=${data.jobType}&location=${data.location}&salaryFrom=${data.salaryFrom}&salaryTo=${data.salaryTo}&jobDescriptionKeywords=${data.jobDescription}&workStatus=${data.workStatus}&skills=${data.skills}`
@@ -70,6 +70,17 @@ export const employerApi = {
     api.get(`/interactions?employerId=${employerId}&finalStatus=hired`),
   fetchAcceptedCandidates: (employerId) =>
     api.get(`/interactions/employer/${employerId}?consentStatus=accepted`),
+  fetchPendingRequests: (employerId) =>
+    api.get(`/interactions?employerId=${employerId}&status=active`),
+  fetchEmployerTasks: (employerId) =>
+    api.get(`/verification-requests/employer/${employerId}`),
+  verifyTask: (taskId) =>
+    api.patch(`/verification-requests/${taskId}`, { is_verified: true }),
+  setCandidateToHired: (interactionId) =>
+    api.patch(`/interactions/${interactionId}/final-status`, {
+      status: "hired",
+    }),
+  saveTopCandidates: (jobId, data) => api.patch(`/jobs/${jobId}`, data),
 };
 
 export { api };
