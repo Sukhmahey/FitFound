@@ -2,12 +2,12 @@ import React from 'react'
 import { useEffect } from 'react';
 import { Box, Button, Container, Paper, Typography } from '@mui/material';
 
-function ProfileSummary({ profileScore }) {
+function ProfileSummary({ profileScore, invitationCount }) {
 
     // const [profileScore, setProfileScore] = React.useState(0);
     const [profileScoreRemark, setProfileScoreRemark] = React.useState('');
     const [appearanceScore, setAppearanceScore] = React.useState(85);
-    const [invitationScore, setInvitationScore] = React.useState(10);
+    // const [invitationScore, setInvitationScore] = React.useState(10);
 
 
 
@@ -66,7 +66,7 @@ function ProfileSummary({ profileScore }) {
                     fontWeight: 'bold',
                     mx: 'auto',
                     my: 1,
-                }}>{appearanceScore}%</Box>
+                }}>{invitationCount*3}</Box>
                 <Typography variant="body2">In last 7 days</Typography>
             </Paper>
             <Paper elevation={3} sx={{ p: 2, flex: 1, minWidth: 200, textAlign: 'center' }}>
@@ -84,7 +84,7 @@ function ProfileSummary({ profileScore }) {
                     fontWeight: 'bold',
                     mx: 'auto',
                     my: 1,
-                }}>{invitationScore}</Box>
+                }}>{invitationCount}</Box>
                 <Typography variant="body2">In last 7 days</Typography>
             </Paper>
         </Box>

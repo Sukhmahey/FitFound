@@ -46,9 +46,9 @@ export default function InvitationSectionDialogbox({ invitation, open, setOpen }
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => handleClose(false)}>Disagree</Button>
+        <Button onClick={() => handleClose(false)}>Close</Button>
         <Button onClick={() => handleClose(true)} autoFocus>
-          Agree
+          Accept
         </Button>
       </DialogActions>
     </Dialog>

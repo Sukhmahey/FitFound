@@ -12,7 +12,7 @@ import {
   ListItem,
 } from '@mui/material';
 
-export default function InvitationsSection() {
+export default function InvitationsSection({setInvitationCount}) {
   const [invitations, setInvitations] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState(null);
@@ -24,17 +24,21 @@ export default function InvitationsSection() {
     const fetchInvitations = async () => {
       try {
         const response = await candidateApi.fetchInteractions(profileId);
+        console.log(response.data);
+        const unfiltered = response.data;
         const filtered = response.data
           .filter((obj) => obj.candidateConsentToReveal === false)
           .map((obj) => ({
             invitationId: obj._id,
             employerId: obj.employerId._id,
+            contactPerson: obj.employerId.contactInfo.firstName,
             employerName: obj.employerId.companyName,
             outreachMessage: obj.outreachMessage,
             job: obj.jobId,
             date: new Date(obj.updatedAt).toLocaleDateString(),
           }));
         setInvitations(filtered);
+        setInvitationCount(unfiltered.length)
       } catch (error) {
         console.error(error);
       }
@@ -59,8 +63,11 @@ export default function InvitationsSection() {
                 }}
               >
                 <Stack spacing={0.5}>
+                  <Typography>
+                    {invitation.contactPerson} is inviting you to connect
+                  </Typography>
                   <Typography fontWeight="bold">
-                    {invitation.employerName} is inviting you to connect
+                    {invitation.employerName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {invitation.date}

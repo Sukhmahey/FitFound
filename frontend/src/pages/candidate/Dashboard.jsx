@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [desiredJobRole, setDesiredJobRole] = useState("");
   const [suggestedSkills, setSuggestedSkills] = useState([]);
   const [alreadySkills, setAlreadySkills] = useState([]);
+  const [invitationCount, setInvitationCount] = useState(0);
 
   // console.log(Allroles)
 
@@ -97,9 +98,9 @@ export default function Dashboard() {
   return (
     <Container maxWidth="md" sx={{ mt: 4 }} >     <h1>Dashboard</h1>
       <h2> Hello 👋, {dummyProfile.name}</h2>
-      <ProfileSummary profileScore={profileScore}></ProfileSummary>
+      <ProfileSummary profileScore={profileScore} invitationCount={invitationCount}></ProfileSummary>
       <TrendingKeywordsSection suggestedSkills={suggestedSkills} alreadySkills={alreadySkills}></TrendingKeywordsSection>
-      <InvitationsSection></InvitationsSection>
+      <InvitationsSection setInvitationCount={setInvitationCount}></InvitationsSection>
 
       <div >
       </div>
