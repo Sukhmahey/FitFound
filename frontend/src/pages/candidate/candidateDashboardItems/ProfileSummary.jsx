@@ -66,7 +66,7 @@ function ProfileSummary({ profileScore, invitationCount }) {
                     fontWeight: 'bold',
                     mx: 'auto',
                     my: 1,
-                }}>{invitationCount*3}</Box>
+                }}>{invitationCount}</Box>
                 <Typography variant="body2">In last 7 days</Typography>
             </Paper>
             <Paper elevation={3} sx={{ p: 2, flex: 1, minWidth: 200, textAlign: 'center' }}>
