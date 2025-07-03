@@ -78,6 +78,7 @@ exports.getVerificationRequestsForEmployer = async (req, res) => {
 
 
 exports.getVerificationRequestsForCandidate = async (req, res) => {
+
   try {
     const { candidateId } = req.params; // Get candidateId from URL parameters
     const { status } = req.query; // Optional: filter by status (pending, verified, declined)
@@ -91,7 +92,7 @@ exports.getVerificationRequestsForCandidate = async (req, res) => {
       .populate({
         path: "employerProfileId",
         model: "EmployerProfile",
-        select: "companyName contactInfo.firstName",
+        select: "companyName contactInfo.firstName", 
       })
       .exec();
 
@@ -105,29 +106,17 @@ exports.getVerificationRequestsForCandidate = async (req, res) => {
   }
 };
 
-
 exports.updateVerificationRequestStatus = async (req, res) => {
   try {
     const { requestId } = req.params;
-    // Changed 'role' to 'position' here
-    const { is_verified, position, declineReason, companyName } = req.body;
+    // Only destructure 'is_verified' and 'declineReason' as per employer's input
+    const { is_verified, declineReason } = req.body;
 
     const updateData = {
-      actionDate: new Date(),
+      actionDate: new Date(), // Always set actionDate on an update
     };
 
-    if (companyName) {
-      const employer = await EmployerProfile.findOne({
-        companyName: companyName,
-      });
-      if (!employer) {
-        return res.status(404).json({
-          message: `Employer with company name "${companyName}" not found. Cannot update employer ID.`,
-        });
-      }
-      updateData.employerProfileId = employer._id;
-    }
-
+    // Validate and set the new status based on 'is_verified'
     if (is_verified !== undefined) {
       let newStatus;
       if (is_verified === true) {
@@ -135,35 +124,33 @@ exports.updateVerificationRequestStatus = async (req, res) => {
       } else if (is_verified === false) {
         newStatus = "declined";
       } else {
+        // If 'is_verified' is provided but not a boolean
         return res.status(400).json({
           message: "Invalid 'is_verified' value. Must be true or false.",
         });
       }
       updateData.status = newStatus;
 
+      // Handle declineReason only if status is 'declined'
       if (newStatus === "declined") {
-        updateData.declineReason = declineReason;
+        updateData.declineReason = declineReason || null; // Use provided reason or set to null
       } else {
-        updateData.declineReason = null;
+        updateData.declineReason = null; // Clear decline reason if status is not declined
       }
-    }
-
-    // Now checking for 'position' directly
-    if (position !== undefined) {
-      updateData.position = position; // Directly using 'position' from req.body
-    }
-
-    if (Object.keys(updateData).length === 1 && updateData.actionDate) {
+    } else {
+      // If 'is_verified' is not provided, which is the primary action for this endpoint
       return res.status(400).json({
         message:
-          "No valid fields provided for update (status, position, companyName).",
+          "Missing 'is_verified' field in the request body. Cannot update status.",
       });
     }
+
+    
 
     const updatedRequest = await VerificationRequest.findByIdAndUpdate(
       requestId,
       updateData,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // 'new: true' returns the updated document
     );
 
     if (!updatedRequest) {
