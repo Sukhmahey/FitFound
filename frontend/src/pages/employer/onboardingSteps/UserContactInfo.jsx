@@ -1,12 +1,86 @@
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const UserContactInfo = () => {
-    const { register, watch } = useFormContext();
+    const { register, watch, setValue } = useFormContext();
+    const [imageSrc, setImageSrc] = useState( null );
+
+    const styles = {
+        wrapper: {
+        display: "block",
+        width: "120px",
+        height: "120px",
+        border: "2px dashed #999",
+        borderRadius: "8px",
+        cursor: "pointer",
+        position: "relative",
+        overflow: "hidden"
+        },
+        input: {
+        display: "none"
+        },
+        iconContainer: {
+        width: "100%",
+        height: "100%",
+        display: "grid",
+        placeContent: "center",
+        position: "relative"
+        },
+        image: {
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+        opacity: 0.8
+        },
+        arrow: {
+        position: "absolute",
+        bottom: "8px",
+        right: "8px",
+        fontSize: "20px",
+        color: "#333"
+        }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      console.log(file);
+      setFileValue(file);
+    }
+  };
+
+    const setFileValue = (file) => {
+        setValue('profilePicture', file);
+    };
 
     return (
         <div className="container">
 
-            <div className="row">
+            <div>
+                <label htmlFor="profilePicture">
+                    Profile Picture
+                    <div style={styles.wrapper}>
+                        <input type="file" style={styles.input} {...register("profilePicture")} name="profilePicture" id="profilePicture" 
+                        // onChange={(e) => {
+                        //     handleImageChange(e);                    
+                        //     register("companyLogo").onChange(e);
+                        // }} 
+                        />
+                        <div style={styles.iconContainer}>
+                            <img src = {imageSrc ? imageSrc : watch('profilePicture') } style={styles.image} />
+                            <span style={styles.arrow}>⬆</span>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            {/* <div className="row">
                 <div className="col-md-6">
                     <div className="mb-3">
                         <label htmlFor="profilePicture" className="form-label">Profile Picture</label>
@@ -19,7 +93,7 @@ const UserContactInfo = () => {
                             )}
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             <div className="row">
 
