@@ -16,4 +16,9 @@ router.patch(
   verificationRequestController.updateVerificationRequestStatus
 );
 
+router.get(
+  "/candidate/:candidateId",
+  verificationRequestController.getVerificationRequestsForCandidate
+);
+
 module.exports = router;
