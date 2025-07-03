@@ -1,4 +1,5 @@
 import React from 'react'
+import { useAuth } from '../../../contexts/AuthContext';
 
 import { useState } from 'react';
 import {
@@ -16,13 +17,18 @@ import {
 const ResumeParserKey = process.env.REACT_APP_ResumeParserKey;
 
 function ResumeParsing({ setStep, setConfirmedData }) {
+
+  const { user } = useAuth();
+    const userId = user?.userId;
+    const userEmail = user?.email;
+
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [finalData, setFinalData] = useState({});
   const [uploadedFile, setUploadedFile] = useState(false);
 
 
-  const extractEmail = (text) => text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/)?.[0] || '';
+  const extractEmail = (text) => text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/)?.[0] || userEmail || '';
   const extractPhone = (text) => text.match(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/)?.[0] || '';
 
   const extractName = (text) => {
