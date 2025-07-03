@@ -1,53 +1,56 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { candidateApi } from '../../../services/api';
 
-export default function InvitationSectionDialogbox({invitation}) {
-  const [open, setOpen] = React.useState(false);
+export default function InvitationSectionDialogbox({ invitation, open, setOpen }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const consentUpdate = async () => {
+    try {
+      const response = await candidateApi.setConsent(invitation.invitationId, true);
+      console.log('Consent updated:', response);
+    } catch (error) {
+      console.error('Consent update failed:', error);
+    }
   };
 
-  const handleClose = () => {
+  const handleClose = async (agree = false) => {
     setOpen(false);
+    if (agree) {
+      await consentUpdate();
+    }
   };
 
   return (
-    <React.Fragment>
-       <Button variant="outlined" onClick={handleClickOpen}>
+    <Dialog
+      open={open}
+      onClose={() => handleClose(false)}
+      aria-labelledby="responsive-dialog-title"
+    >
+      <DialogTitle id="responsive-dialog-title">
         {invitation.employerName}
-      </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
-      >
-        <DialogTitle id="responsive-dialog-title">
-          {"Use Google's location service?"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {invitation.outreachMessage}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose}>
-            Disagree
-          </Button>
-          <Button onClick={handleClose} autoFocus>
-            Agree
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {invitation.outreachMessage}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => handleClose(false)}>Disagree</Button>
+        <Button onClick={() => handleClose(true)} autoFocus>
+          Agree
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

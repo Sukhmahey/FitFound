@@ -10,14 +10,13 @@ import {
   Stack,
   List,
   ListItem,
-  ListItemText,
 } from '@mui/material';
 
 export default function InvitationsSection() {
   const [invitations, setInvitations] = useState([]);
-    const [open, setOpen] = React.useState(false);
-    const [selectedInvitation, setSelectedInvitation] = React.useState(null);
-  
+  const [open, setOpen] = useState(false);
+  const [selectedInvitation, setSelectedInvitation] = useState(null);
+
   const { user } = useAuth();
   const profileId = user?.profileId;
 
@@ -25,7 +24,6 @@ export default function InvitationsSection() {
     const fetchInvitations = async () => {
       try {
         const response = await candidateApi.fetchInteractions(profileId);
-        console.log(response.data)
         const filtered = response.data
           .filter((obj) => obj.candidateConsentToReveal === false)
           .map((obj) => ({
@@ -44,14 +42,6 @@ export default function InvitationsSection() {
     if (profileId) fetchInvitations();
   }, [profileId]);
 
-  const detailsBtn = (invitation) =>{
-    console.log(invitation);
-    setSelectedInvitation(invitation);
-    setOpen(true);
-    
-
-  };
-
   return (
     <Box mt={4}>
       <Typography variant="h5" gutterBottom>
@@ -61,26 +51,32 @@ export default function InvitationsSection() {
         <List>
           {invitations.map((invitation) => (
             <Paper sx={{ mb: 2, p: 2, borderRadius: 2 }} key={invitation.invitationId}>
-                <ListItem
-                  elevation={2}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
+              <ListItem
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Stack spacing={0.5}>
+                  <Typography fontWeight="bold">
+                    {invitation.employerName} is inviting you to connect
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {invitation.date}
+                  </Typography>
+                </Stack>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => {
+                    setSelectedInvitation(invitation);
+                    setOpen(true);
                   }}
                 >
-                  <Stack spacing={0.5}>
-                    <Typography fontWeight="bold">
-                      {invitation.employerName} is inviting you to connect
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {invitation.date}
-                    </Typography>
-                  </Stack>
-                  <Button variant="outlined" color="primary" onClick={() => detailsBtn(invitation)}>
-                    Details
-                  </Button>
-                </ListItem>
+                  Details
+                </Button>
+              </ListItem>
             </Paper>
           ))}
         </List>
@@ -90,6 +86,7 @@ export default function InvitationsSection() {
           </Typography>
         )}
       </Box>
+
       {selectedInvitation && (
         <InvitationSectionDialogbox
           invitation={selectedInvitation}
