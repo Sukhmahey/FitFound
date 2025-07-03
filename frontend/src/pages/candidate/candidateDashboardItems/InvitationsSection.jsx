@@ -40,8 +40,8 @@ export default function InvitationsSection() {
     if (profileId) fetchInvitations();
   }, [profileId]);
 
-  const Details = ({ e }) =>{
-    console.log(e);
+  const detailsBtn = ({ id }) =>{
+    console.log(id);
 
   };
 
@@ -70,7 +70,7 @@ export default function InvitationsSection() {
                       {invitation.date}
                     </Typography>
                   </Stack>
-                  <Button variant="outlined" color="primary" onClick={(invitation)=>Details}>
+                  <Button variant="outlined" color="primary" onClick={() => detailsBtn(invitation.invitationId)}>
                     Details
                   </Button>
                 </ListItem>
