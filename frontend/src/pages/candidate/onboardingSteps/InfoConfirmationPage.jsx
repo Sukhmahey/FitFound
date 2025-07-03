@@ -428,7 +428,7 @@ export default function InfoConfirmationPage({ data }) {
 
             <Box display="flex" flexDirection="column" gap={3} border="1px solid #ccc" borderRadius={2} p={2} mb={2}>
 
-              <h6>Desired Job Titles</h6>
+              {/* <h6>Desired Job Titles</h6>
               {form.jobPreference.desiredJobTitle.map((title, i) => (
                 <TextField
                   key={i}
@@ -454,7 +454,29 @@ export default function InfoConfirmationPage({ data }) {
                   ...prev.jobPreference,
                   desiredJobTitle: [...prev.jobPreference.desiredJobTitle, '']
                 }
-              }))}>+ Add Desired Job Title</Button>
+              }))}>+ Add Desired Job Title</Button> */}
+              <FormControl fullWidth>
+                <InputLabel>Desired Role</InputLabel>
+                <Select
+                  value={form.jobPreference.desiredJobTitle?.[0] || ''}
+                  onChange={(e) =>
+                    setForm(prev => ({
+                      ...prev,
+                      jobPreference: {
+                        ...prev.jobPreference,
+                        desiredJobTitle: [e.target.value]
+                      }
+                    }))
+                  }
+                >
+                  <MenuItem value="">Select job role</MenuItem>
+                  {["frontend developer", "backend developer", "fullstack developer", "ux designer", "ui designer"].map(role => (
+                    <MenuItem key={role} value={role}>
+                      {role}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
 
             <Box display="flex" flexDirection="column" gap={3}>

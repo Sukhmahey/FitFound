@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  TextField,
   Button,
   Select,
   MenuItem,
@@ -10,30 +9,36 @@ import {
   Stack,
   Chip,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  TextField
 } from '@mui/material';
 
-export default function JobPreferenceStep({ data, onUpdate }) {
-  const [title, setTitle] = useState('');
+const predefinedJobTitles = [
+  "frontend developer",
+  "backend developer",
+  "fullstack developer",
+  "ux designer",
+  "ui designer"
+];
 
-  const addTitle = () => {
-    if (title.trim()) {
+export default function JobPreferenceStep({ data, onUpdate }) {
+  const [selectedRole, setSelectedRole] = useState(data.desiredJobTitle?.[0] || '');
+
+  const handleChange = (event, newRole) => {
+    if (newRole) {
+      setSelectedRole(newRole);
       onUpdate({
         ...data,
-        desiredJobTitle: [...(data.desiredJobTitle || []), title.trim()]
+        desiredJobTitle: newRole
       });
-      setTitle('');
     }
   };
 
-  const removeTitle = (index) => {
-    const updated = [...(data.desiredJobTitle || [])];
-    updated.splice(index, 1);
-    onUpdate({ ...data, desiredJobTitle: updated });
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleSalaryChange = (e) => {
+    const { name, value, checked, type } = e.target;
     if (name === 'perHour' || name === 'perYear') {
       onUpdate({
         ...data,
@@ -60,40 +65,23 @@ export default function JobPreferenceStep({ data, onUpdate }) {
       <h4>Job Preferences</h4>
       <div className="d-flex flex-column w-75 mx-auto gap-4">
 
-        {/* Desired Job Titles Input */}
-        <Box className="d-flex gap-2 align-items-center">
-          <TextField
-            label="Enter Desired Job Title"
-            variant="outlined"
-            fullWidth
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addTitle();
-              }
-            }}
-          />
-          <Button variant="contained" color="primary" onClick={addTitle}>
-            Add
-          </Button>
-        </Box>
-
-        {/* Display Added Job Titles */}
-        <Stack direction="row" spacing={1} flexWrap="wrap">
-          {(data.desiredJobTitle || []).map((t, index) => (
-            <Chip
-              key={index}
-              label={t}
-              onDelete={() => removeTitle(index)}
-              color="primary"
-              sx={{ marginBottom: 1 }}
-            />
+        {/*selectable role */}
+        <Typography variant="subtitle1">Select Your Preferred Job Role</Typography>
+        <ToggleButtonGroup
+          value={selectedRole}
+          exclusive
+          onChange={handleChange}
+          fullWidth
+          color="primary"
+        >
+          {predefinedJobTitles.map((role) => (
+            <ToggleButton key={role} value={role} sx={{ textTransform: 'capitalize' }}>
+              {role}
+            </ToggleButton>
           ))}
-        </Stack>
+        </ToggleButtonGroup>
 
-        {/* Job Type Selection */}
+        {/* Job Type Dropdown */}
         <FormControl fullWidth>
           <InputLabel id="job-type-label">Job Type</InputLabel>
           <Select
@@ -101,7 +89,7 @@ export default function JobPreferenceStep({ data, onUpdate }) {
             name="jobType"
             value={data.jobType}
             label="Job Type"
-            onChange={handleChange}
+            onChange={handleSalaryChange}
           >
             <MenuItem value="">Select Job Type</MenuItem>
             <MenuItem value="Remote">Remote</MenuItem>
@@ -122,7 +110,7 @@ export default function JobPreferenceStep({ data, onUpdate }) {
             name="min"
             label="Minimum Salary"
             value={data.salaryExpectation?.min || ''}
-            onChange={handleChange}
+            onChange={handleSalaryChange}
             InputProps={{ startAdornment: <span>$</span> }}
           />
           <Box className="d-flex gap-4">
@@ -131,7 +119,7 @@ export default function JobPreferenceStep({ data, onUpdate }) {
                 <Checkbox
                   name="perHour"
                   checked={data.salaryExpectation?.perHour || false}
-                  onChange={handleChange}
+                  onChange={handleSalaryChange}
                 />
               }
               label="Per Hour"
@@ -141,7 +129,7 @@ export default function JobPreferenceStep({ data, onUpdate }) {
                 <Checkbox
                   name="perYear"
                   checked={data.salaryExpectation?.perYear || false}
-                  onChange={handleChange}
+                  onChange={handleSalaryChange}
                 />
               }
               label="Per Year"
