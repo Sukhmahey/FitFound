@@ -13,6 +13,8 @@ const Sidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
+    
+
     const goTo = (newSegment) => {
         const segments = location.pathname.split('/');
         segments[segments.length - 1] = newSegment;
@@ -20,30 +22,27 @@ const Sidebar = () => {
         navigate(newPath);
     };
 
-    // useEffect(() => {
-    //     // TODO: VALIDATE THE ROLE
-    //     // Getting the user profile by ID
-    //     employerApi.getEmployerProfile(user.userId)
-    //     .then( result => {
-    //       setUserProfile(result.data);
-    //       console.log(result.data);
-    //     })
-    //     .catch( error => {
-    //       console.log(error);
-    //     });
-    //   }, []);
+const excludedPaths = ['/candidate/onboarding'];
+
 
 useEffect(() => {
-    if (user?.role === 'employer') {
-        employerApi.getEmployerProfile(user.userId)
-            .then(result => setUserProfile(result.data))
-            .catch(error => console.log(error));
-    } else if (user?.role === 'candidate') {
-        candidateApi.getProfileByUserId(user.userId)
-            .then(result => setUserProfile(result.data))
-            .catch(error => console.log(error));
-    }
-}, [user]);
+  if (!user) return;
+
+  const shouldSkipApi = excludedPaths.some(path => location.pathname.startsWith(path));
+  if (shouldSkipApi) return;
+
+  if (user.role === 'employer') {
+    employerApi.getEmployerProfile(user.userId)
+      .then(result => setUserProfile(result.data))
+      .catch(error => console.log(error));
+  } else if (user.role === 'candidate') {
+    candidateApi.getProfileByUserId(user.userId)
+      .then(result => setUserProfile(result.data))
+      .catch(error => console.log(error));
+  }
+}, [user, location.pathname]);
+  const shouldHideSidebar = excludedPaths.some(path => location.pathname.startsWith(path));
+  if (shouldHideSidebar) return null;
 
 
 
