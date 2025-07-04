@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
+import { useNavigate } from 'react-router-dom';
+
 import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
 
@@ -18,6 +20,7 @@ const EmployerOnboarding = () => {
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
+  const navigate = useNavigate();
   const [formSection, setFormSection] = useState("details"); // the other is contact
   const [logoUrl, setLogoUrl] = useState("");
   const [detailsIsActive, setDetailsIsActive] = useState(true);
@@ -110,6 +113,8 @@ const EmployerOnboarding = () => {
       employerApi.addEmployerProfile(userId, employerProfile)
       .then( result => {
         console.log(result);
+        // navigate('employer/dashboard');
+
       })
       .catch( error => {
         console.log(error);
