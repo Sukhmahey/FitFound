@@ -52,6 +52,8 @@ export const candidateApi = {
 
 export const jobVerificationApi = {
   verifyJob: (data) => api.post("/verification-requests", data),
+  getVerificationStatus: (candidateId) =>
+ api.get(`/verification-requests/candidate/${candidateId}`),
 };
 
 // employer endpoints
