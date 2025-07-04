@@ -81,7 +81,12 @@ useEffect(() => {
                     <li><button onClick={() => goTo('profile')}>My Profile</button></li>
 
                     {user.role === 'candidate' && (
-                        <li><button onClick={() => goTo('ingsights')}>Ingsights</button></li>
+                        <span>
+                            <li><button onClick={() => goTo('ingsights')}>Ingsights</button></li>
+                            <li><button onClick={() => goTo('badge-verification')}>Badge Verification</button></li>
+
+                        </span>
+                        
                     )}
 
                     {user.role === 'employer' && (
