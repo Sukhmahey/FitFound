@@ -1,6 +1,8 @@
+
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { candidateApi } from '../../services/api';
+import { candidateApi, jobVerificationApi } from '../../services/api';
 
 import PersonalInfoStep from './onboardingSteps/PersonalInfoStep';
 import BasicInfoStep from './onboardingSteps/BasicInfoStep';
@@ -24,40 +26,72 @@ import {
 export default function MyProfile() {
   const { user } = useAuth();
   const userId = user?.userId;
+
   const [activeTab, setActiveTab] = useState('Personal');
   const [formData, setFormData] = useState(null);
   const [submitStatus, setSubmitStatus] = useState('');
-  
+  const [verificationCompany, setVerificationCompany] = useState([]);
 
+  // Fetch candidate profile
   useEffect(() => {
+    if (!userId) return;
+
     const fetchData = async () => {
       try {
         const response = await candidateApi.getProfileByUserId(userId);
         setFormData(response.data);
-        console.log(response.data)
+        console.log('Candidate Profile:', response.data);
       } catch (err) {
         console.error('Failed to load profile:', err);
       }
     };
+
     fetchData();
   }, [userId]);
 
+  // Fetch verification status
+  useEffect(() => {
+    if (!userId) return;
 
+    const fetchVerificationData = async () => {
+      try {
+        const response = await jobVerificationApi.getVerificationStatus(userId);
+        console.log('Verification API Response:', response.data);
 
- useEffect(() => {
-  setSubmitStatus(''); 
+        const companyArray = response.data.map((company) => ({
+          company: company?.employerProfileId?.companyName || 'Unknown',
+          status: company.status,
+        }));
 
-  const timer = setTimeout(() => {
+        setVerificationCompany(companyArray);
+      } catch (error) {
+        console.error('Failed to load verification data:', error);
+      }
+    };
+
+    fetchVerificationData();
+  }, [userId]);
+
+  // Debug state changes to verificationCompany
+  useEffect(() => {
+    console.log('Updated verificationCompany:', verificationCompany);
+  }, [verificationCompany]);
+
+  // Reset submit status on tab change
+  useEffect(() => {
     setSubmitStatus('');
-  }, 5000); 
 
-  return () => clearTimeout(timer);
-}, [activeTab]);
+    const timer = setTimeout(() => {
+      setSubmitStatus('');
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [activeTab]);
 
   const updateFormData = (section, data) => {
     setFormData((prev) => ({
       ...prev,
-      [section]: Array.isArray(prev[section]) ? data : { ...prev[section], ...data }
+      [section]: Array.isArray(prev?.[section]) ? data : { ...prev?.[section], ...data },
     }));
   };
 
@@ -65,13 +99,10 @@ export default function MyProfile() {
     try {
       await candidateApi.updateProfile(userId, formData);
       setSubmitStatus('success');
-      
     } catch (err) {
       console.error('Failed to update profile:', err);
       setSubmitStatus('error');
     }
-        
-
   };
 
   if (!formData) {
@@ -93,7 +124,6 @@ export default function MyProfile() {
   ];
 
   const renderTab = () => {
-    
     switch (activeTab) {
       case 'Personal':
         return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
@@ -102,7 +132,7 @@ export default function MyProfile() {
       case 'Skills':
         return <SkillsStep data={formData.skills} onUpdate={(data) => updateFormData('skills', data)} />;
       case 'Work':
-        return <WorkExperienceStep data={formData.workHistory} onUpdate={(data) => updateFormData('workHistory', data)} />;
+        return <WorkExperienceStep data={formData.workHistory} onUpdate={(data) => updateFormData('workHistory', data)} verificationCompany={verificationCompany} />;
       case 'Education':
         return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} />;
       case 'Job':
@@ -138,26 +168,24 @@ export default function MyProfile() {
           Update Profile
         </Button>
       </Box>
-      <Box>
-                      {submitStatus === 'success' && (
-                          <Box mt={2}>
-                              <Alert severity="success">
-                                  <AlertTitle>Success</AlertTitle>
-                                  Your request has been submitted successfully.
-                              </Alert>
-                          </Box>
-                      )}
-      
-                      {submitStatus === 'error' && (
-                          <Box mt={2}>
-                              <Alert severity="error">
-                                  <AlertTitle>Error</AlertTitle>
-                                  Something went wrong. Please try again later.
-                              </Alert>
-                          </Box>
-                      )}
-      
-                  </Box>
+
+      {submitStatus === 'success' && (
+        <Box mt={2}>
+          <Alert severity="success">
+            <AlertTitle>Success</AlertTitle>
+            Your request has been submitted successfully.
+          </Alert>
+        </Box>
+      )}
+
+      {submitStatus === 'error' && (
+        <Box mt={2}>
+          <Alert severity="error">
+            <AlertTitle>Error</AlertTitle>
+            Something went wrong. Please try again later.
+          </Alert>
+        </Box>
+      )}
     </Container>
   );
 }
