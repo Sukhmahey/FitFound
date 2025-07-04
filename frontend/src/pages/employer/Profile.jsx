@@ -4,7 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
-import { genericFiles, setFileName, addFile, getUlrFile } from "../../utils/supabaseStorage";
+import { updateFileByUrl } from "../../utils/supabaseStorage";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 import CompanyInfo from './onboardingSteps/CompanyInfo';
@@ -73,24 +73,27 @@ const EmployerProfile = () => {
     
     if (formSection == "details") {
       
-      // saving the logo url
-      // if (data.companyLogo) {
-      //   const logoFile = data.companyLogo["0"];
-      //   const logoFileName = setFileName(data.companyName + "-logo");
-      //   const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
+      // updating the logo url
+      if (data.companyLogo) {
+        updateFileByUrl(companyInfo.companyLogo, data.companyLogo);
+        console.log(data.companyLogo);
+        return;
+        // const logoFile = data.companyLogo["0"];
+        // const logoFileName = setFileName(data.companyName + "-logo");
+        // const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
 
-      //   addFile(logoFilePath, logoFile);
-      //   setLogoUrl(getUlrFile(logoFilePath));
+        // addFile(logoFilePath, logoFile);
+        // setLogoUrl(getUlrFile(logoFilePath));
 
-      //   console.log(logoUrl);
-      // }
-      // else {
-      //   return;
-      // }
+        // console.log(logoUrl);
+      }
+      else {
+        return;
+      }
 
       employerProfile = {
         userId: userId,
-        companyLogo: "https://example.com/logo.png", //data.companyLogo,
+        companyLogo: data.companyLogo,
         companyName: data.companyName,
         establishedYear: data.establishedYear,
         businessRegisteredNumber: data.businessRegisteredNumber,
@@ -106,7 +109,7 @@ const EmployerProfile = () => {
     else {
 
       let newContactInfo = {
-        profilePicture: "https://example.com/profile.jpg", // data.profilePicture,
+        profilePicture: data.profilePicture,
         firstName: data.firstName,
         middleName: data.middleName,
         lastName: data.lastName,
