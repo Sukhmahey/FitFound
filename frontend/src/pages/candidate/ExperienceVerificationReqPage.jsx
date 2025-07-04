@@ -25,7 +25,9 @@ export default function ExperienceVerificationReqPage() {
     const [jobRole, setJobRole] = useState('');
 
     const { user } = useAuth();
-    const userId = user?.userId;
+    // const userId = user?.userId;
+        const userId = user?.profileId;
+
 
     useEffect(() => {
         const fetchData = async () => {
