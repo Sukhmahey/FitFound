@@ -14,11 +14,22 @@ import {
 } from '@mui/material';
 
 export default function WorkExperienceStep({ data = [], onUpdate, verificationCompany = [] }) {
+  // const handleChange = (index, field, value) => {
+  //   const updated = [...data];
+  //   updated[index][field] = value;
+  //   onUpdate(updated);
+  // };
   const handleChange = (index, field, value) => {
-    const updated = [...data];
-    updated[index][field] = value;
-    onUpdate(updated);
-  };
+  const updated = [...data];
+  updated[index][field] = value;
+
+  if (field === 'role') {
+    updated[index]['jobTitle'] = value; 
+  }
+
+  onUpdate(updated);
+};
+
 
   const normalizeDate = (dateStr) => {
     if (!dateStr) return '';
@@ -99,12 +110,19 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
               )}
 
               <TextField
-                label="Job Title"
+                label="Role"
                 variant="outlined"
-                value={exp.jobTitle}
-                onChange={(e) => handleChange(index, 'jobTitle', e.target.value)}
+                value={exp.role}
+                onChange={(e) => handleChange(index, 'role', e.target.value)}
                 disabled={isVerified}
               />
+              {/* <TextField
+                label="Job Title"
+                variant="outlined"
+                value={exp.role}
+                onChange={(e) => handleChange(index, 'role', e.target.value)}
+                disabled={isVerified} hidden
+              /> */}
 
               <TextField
                 type="month"
@@ -124,13 +142,6 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 disabled={isVerified}
               />
 
-              <TextField
-                label="Role"
-                variant="outlined"
-                value={exp.role}
-                onChange={(e) => handleChange(index, 'role', e.target.value)}
-                disabled={isVerified}
-              />
 
               <FormControl fullWidth>
                 <InputLabel id={`exp-level-label`}>Experience Level</InputLabel>

@@ -138,7 +138,7 @@ export default function InfoConfirmationPage({ data }) {
       skills: form.skills.map(skill => ({ skill })),
       workHistory: form.workExperience.map(exp => ({
         companyName: exp.companyName,
-        jobTitle: exp.jobTitle,
+        jobTitle: exp.role,
         role: exp.role,
         startDate: formatDate(exp.startDate),
         endDate: formatDate(exp.endDate),
@@ -169,7 +169,7 @@ export default function InfoConfirmationPage({ data }) {
       await candidateApi.updateWorkHistory(userId, {
         workHistory: form.workExperience.map(exp => ({
           companyName: exp.companyName,
-          jobTitle: exp.jobTitle,
+          jobTitle: exp.role,
           role: exp.role,
           startDate: formatDate(exp.startDate),
           endDate: formatDate(exp.endDate),
@@ -348,11 +348,11 @@ export default function InfoConfirmationPage({ data }) {
                     updated[i].role = e.target.value;
                     setForm({ ...form, workExperience: updated });
                   }} />
-                  <TextField fullWidth label="Job Title" value={we.jobTitle} onChange={e => {
+                  {/* <TextField fullWidth label="Job Title" value={we.role} onChange={e => {
                     const updated = [...form.workExperience];
                     updated[i].jobTitle = e.target.value;
                     setForm({ ...form, workExperience: updated });
-                  }} />
+                  }} /> */}
                   <FormControl fullWidth sx={{ mt: 1 }}>
                     <InputLabel>Experience Level</InputLabel>
                     <Select value={we.experienceLevel} label="Experience Level" onChange={e => {
