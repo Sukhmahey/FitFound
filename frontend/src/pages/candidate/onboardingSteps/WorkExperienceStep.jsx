@@ -75,6 +75,8 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
           const status = data.length > 0 && verificationCompany.length > 0
             ? getVerificationStatus(exp.companyName)
             : null;
+            const isVerified = status === 'verified';
+
 
           return (
             <Box
@@ -87,6 +89,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 variant="outlined"
                 value={exp.companyName}
                 onChange={(e) => handleChange(index, 'companyName', e.target.value)}
+                disabled={isVerified}
               />
 
               {status && (
@@ -100,6 +103,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 variant="outlined"
                 value={exp.jobTitle}
                 onChange={(e) => handleChange(index, 'jobTitle', e.target.value)}
+                disabled={isVerified}
               />
 
               <TextField
@@ -108,6 +112,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 InputLabelProps={{ shrink: true }}
                 value={normalizeDate(exp.startDate) || ''}
                 onChange={(e) => handleChange(index, 'startDate', e.target.value)}
+                disabled={isVerified}
               />
 
               <TextField
@@ -116,6 +121,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 InputLabelProps={{ shrink: true }}
                 value={normalizeDate(exp.endDate) || ''}
                 onChange={(e) => handleChange(index, 'endDate', e.target.value)}
+                disabled={isVerified}
               />
 
               <TextField
@@ -123,6 +129,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 variant="outlined"
                 value={exp.role}
                 onChange={(e) => handleChange(index, 'role', e.target.value)}
+                disabled={isVerified}
               />
 
               <FormControl fullWidth>
@@ -131,6 +138,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                   labelId={`exp-level-input`}
                   value={exp.experienceLevel}
                   label="Experience Level"
+                  disabled={isVerified}
                   onChange={(e) => handleChange(index, 'experienceLevel', e.target.value)}
                 >
                   <MenuItem value="">Select</MenuItem>
@@ -146,6 +154,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                   {exp.achievements.map((a, i) => (
                     <TextField
                       key={i}
+                      disabled={isVerified}
                       label={`Achievement ${i + 1}`}
                       variant="outlined"
                       value={a}
@@ -156,6 +165,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 <Button
                   variant="outlined"
                   color="secondary"
+                  disabled={isVerified}
                   onClick={() => addAchievement(index)}
                   sx={{ mt: 2 }}
                 >
@@ -166,6 +176,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
               <Button
                 variant="outlined"
                 color="error"
+                disabled={isVerified}
                 onClick={() => removeExperience(index)}
                 sx={{ mt: 2 }}
               >
