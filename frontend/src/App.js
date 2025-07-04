@@ -89,7 +89,13 @@ function App() {
 
         <Route path="search" element={<EmployerSearch />} />
 
-        <Route path="/employer/connections" element={<EmployerConnections />} />
+        <Route path="connections" element={<EmployerConnections />} />
+
+        <Route
+          path="searchResults"
+          element={<EmployerSearchResults />
+          }
+        />
       </Route>
 
       <Route
@@ -101,14 +107,7 @@ function App() {
         }
       />
 
-      <Route
-        path="/employer/searchResults"
-        element={
-          <ProtectedRoute role="employer">
-            <EmployerSearchResults />
-          </ProtectedRoute>
-        }
-      />
+      
     </Routes>
   );
 }
