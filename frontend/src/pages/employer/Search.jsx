@@ -106,13 +106,13 @@ const Search = () => {
     console.log("Param Object", paramObj);
 
     try {
-      const employerDD = await employerApi.saveJob(dummyobj1);
+      const employerDD = await employerApi.saveJob(paramObj);
       const candidateList = await employerApi
         .getAllCandidates()
         .then(async (data) => {
           const scoredC = await scoreCandidates(
-            data.data.slice(0, 3),
-            dummyobj1.jobDescription
+            data.data,
+            paramObj.jobDescription
           );
 
           console.log(
@@ -129,7 +129,7 @@ const Search = () => {
             }),
           });
           console.log("scoredC", scoredC);
-          dispatch(setSearchForm(dummyobj1));
+          dispatch(setSearchForm(paramObj));
           dispatch(setCandidates(scoredC));
           navigate(`/employer/searchResults?jobId=${employerDD?.data._id}`);
         });

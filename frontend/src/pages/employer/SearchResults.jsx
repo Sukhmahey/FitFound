@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
-import { TextField, InputAdornment } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-
-import { employerApi } from "../../services/api";
-import { useAuth } from "../../contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
+
 import {
+  TextField,
+  InputAdornment,
   Box,
   Typography,
   Button,
@@ -19,78 +16,84 @@ import {
   DialogActions,
 } from "@mui/material";
 
-const candidates = new Array(10).fill({
-  username: "candidate12a2t",
-  specialization: "React",
-  role: "Full Stack Backend Developer",
-  type: "Full Time",
-  date: "June-08-2025",
-  time: "13:33",
-  match: "92%",
-  salary: "$5000-$10,000/month",
-  experience: "4 years",
-  location: "Remote",
-  email: "candidate@example.com",
-  phone: "+1 (123) 456-7890",
-});
+import SearchIcon from "@mui/icons-material/Search";
+import { employerApi } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
 
-const CandidateCard = ({ data, onViewDetails, sendVerificationRequest }) => (
-  <Paper
-    elevation={3}
-    sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", borderRadius: 3 }}
-  >
-    {/* Match % Circle */}
-    <Box
+// Utility to censor names (e.g., Vipul → V***l)
+const censorName = (name) => {
+  if (!name || name.length < 2) return name ?? "-";
+  return name[0] + "*".repeat(name.length - 2) + name[name.length - 1];
+};
+
+const CandidateCard = ({ data, onViewDetails, sendVerificationRequest }) => {
+  const firstName = censorName(data?.personalInfo?.firstName ?? "");
+  const lastName = censorName(data?.personalInfo?.lastName ?? "");
+  const fullName = `${firstName} ${lastName}`;
+
+  return (
+    <Paper
+      elevation={3}
       sx={{
-        width: 80,
-        height: 80,
-        borderRadius: "50%",
-        backgroundColor: "#FADADD",
+        p: 2,
+        mb: 2,
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
-        fontSize: 24,
-        fontWeight: "bold",
-        mr: 3,
+        borderRadius: 3,
       }}
     >
-      {data.matchingScore}%
-    </Box>
-
-    {/* Info Section */}
-    <Box sx={{ flexGrow: 1 }}>
-      <Typography variant="subtitle1">{"-"}</Typography>
-      <Typography variant="body2">
-        Specialization <strong>{data.mainRole}</strong>
-      </Typography>
-      <Typography variant="body2">
-        Role: <strong>{data.mainRole}</strong> • {data.jobType}
-      </Typography>
-    </Box>
-
-    {/* Salary + Actions */}
-    <Stack spacing={1} alignItems="flex-end">
-      <Typography variant="subtitle1" fontWeight="bold">
-        {data.salary}
-      </Typography>
-      <Button
-        variant="contained"
-        size="small"
-        sx={{ bgcolor: "#fdd" }}
-        onClick={() => onViewDetails(data)}
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: "50%",
+          backgroundColor: "#FADADD",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 24,
+          fontWeight: "bold",
+          mr: 3,
+        }}
       >
-        View Details
-      </Button>
-      <Button
-        variant="outlined"
-        size="small"
-        onClick={() => sendVerificationRequest()}
-      >
-        Send Invitation
-      </Button>
-    </Stack>
-  </Paper>
-);
+        {data?.matchingScore ?? "-"}%
+      </Box>
+
+      <Box sx={{ flexGrow: 1 }}>
+        <Typography variant="subtitle1">{fullName}</Typography>
+        <Typography variant="body2">
+          Specialization:{" "}
+          <strong>{data?.personalInfo?.specialization ?? "-"}</strong>
+        </Typography>
+        <Typography variant="body2">
+          Role: <strong>{data?.workHistory?.[0]?.role ?? "-"}</strong> •{" "}
+          {data?.basicInfo?.workStatus ?? "-"}
+        </Typography>
+      </Box>
+
+      <Stack spacing={1} alignItems="flex-end">
+        <Typography variant="subtitle1" fontWeight="bold">
+          ${data?.jobPreference?.salaryExpectation?.min ?? "-"} /hr
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ bgcolor: "#fdd" }}
+          onClick={() => onViewDetails(data)}
+        >
+          View Details
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => sendVerificationRequest(data?._id)}
+        >
+          Send Invitation
+        </Button>
+      </Stack>
+    </Paper>
+  );
+};
 
 const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
   if (!candidate) return null;
@@ -100,7 +103,7 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
       <DialogTitle>Candidate Details</DialogTitle>
       <DialogContent dividers>
         <Typography variant="body1">
-          <strong>Username:</strong> {candidate.username}
+          <strong>Name:</strong> {candidate.username}
         </Typography>
         <Typography variant="body1">
           <strong>Specialization:</strong> {candidate.specialization}
@@ -112,20 +115,41 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
           <strong>Type:</strong> {candidate.type}
         </Typography>
         <Typography variant="body1">
-          <strong>Experience:</strong> {candidate.experience}
+          <strong>Experience Level:</strong> {candidate.experience}
         </Typography>
         <Typography variant="body1">
-          <strong>Location:</strong> {candidate.location}
+          <strong>Salary Expectation:</strong> {candidate.salary}
         </Typography>
-        <Typography variant="body1">
-          <strong>Email:</strong> {candidate.email}
+
+        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+          Work History
         </Typography>
-        <Typography variant="body1">
-          <strong>Phone:</strong> {candidate.phone}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Salary:</strong> {candidate.salary}
-        </Typography>
+        {candidate.workHistory.length > 0 ? (
+          candidate.workHistory.map((job, index) => (
+            <Box
+              key={index}
+              sx={{ mb: 1, pl: 1, borderLeft: "2px solid #ccc" }}
+            >
+              <Typography variant="body2">
+                <strong>Company:</strong> {job.companyName}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Job Title:</strong> {job.jobTitle}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Role:</strong> {job.role}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Duration:</strong> {job.startDate} to {job.endDate}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Experience Level:</strong> {job.experienceLevel}
+              </Typography>
+            </Box>
+          ))
+        ) : (
+          <Typography variant="body2">No work history available.</Typography>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Close</Button>
@@ -137,33 +161,40 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
 const SearchResults = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [candidateList, setCandidateList] = useState([]);
   const [searchField, setSearchField] = useState("");
-  const candidates = useSelector((state) => state.search.candidates);
 
+  const candidates = useSelector((state) => state.search.candidates);
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get("jobId");
+  const userId = user?.profileId;
 
-  const userId = user.profileId;
   const sendVerificationRequest = async (id) => {
-    console.log("jahsjhdskajhdfkjs", id, userId, jobId);
     await employerApi.sendConnectionRequest({
       candidateId: id,
       employerId: userId,
       jobId: jobId,
       outreachMessage:
-        "Your profile matches our Data Analyst opening. Would you be interested in learning more about Alpha Solutions Group?",
+        "Your profile matches our opening. Would you be interested in learning more?",
     });
   };
 
-  useEffect(() => {
-    console.log("Candidates", candidates);
-    setCandidateList(candidates);
-  }, [candidates]);
-
   const handleViewDetails = (candidate) => {
-    setSelectedCandidate(candidate);
+    const firstName = candidate?.personalInfo?.firstName ?? "";
+    const lastName = candidate?.personalInfo?.lastName ?? "";
+    const fullName = `${censorName(firstName)} ${censorName(lastName)}`;
+
+    const normalizedCandidate = {
+      username: fullName,
+      specialization: candidate?.personalInfo?.specialization ?? "-",
+      role: candidate?.workHistory?.[0]?.role ?? "-",
+      experience: candidate?.workHistory?.[0]?.experienceLevel ?? "-",
+      type: candidate?.basicInfo?.workStatus ?? "-",
+      salary: `$${candidate?.jobPreference?.salaryExpectation?.min ?? "-"}/hr`,
+      workHistory: candidate?.workHistory ?? [],
+    };
+
+    setSelectedCandidate(normalizedCandidate);
     setModalOpen(true);
   };
 
@@ -190,28 +221,29 @@ const SearchResults = () => {
         }}
       />
 
-      {/* Scrollable Container */}
-      <Box
-        sx={{
-          maxHeight: "80vh",
-          overflowY: "auto",
-          pr: 1,
-        }}
-      >
-        {candidates.map((c, _id) => {
-          console.log("CCC", c);
-          return (
-            <CandidateCard
-              key={_id}
-              data={c}
-              onViewDetails={handleViewDetails}
-              sendVerificationRequest={() => sendVerificationRequest(c?._id)}
-            />
-          );
-        })}
+      <Box sx={{ maxHeight: "80vh", overflowY: "auto", pr: 1 }}>
+        {candidates?.length > 0 ? (
+          candidates
+            .filter((c) =>
+              `${c.personalInfo?.firstName ?? ""} ${
+                c.personalInfo?.lastName ?? ""
+              }`
+                .toLowerCase()
+                .includes(searchField.toLowerCase())
+            )
+            .map((c, index) => (
+              <CandidateCard
+                key={index}
+                data={c}
+                onViewDetails={handleViewDetails}
+                sendVerificationRequest={() => sendVerificationRequest(c?._id)}
+              />
+            ))
+        ) : (
+          <Typography variant="body2">No candidates found.</Typography>
+        )}
       </Box>
 
-      {/* Modal */}
       <CandidateDetailsModal
         open={modalOpen}
         handleClose={handleClose}
