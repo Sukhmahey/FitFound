@@ -1,3 +1,5 @@
+// NEW: Added modal to display candidate information on 'View Details' click in employer side
+
 import React, { useEffect, useState } from "react";
 import {
   AppBar,
@@ -13,48 +15,20 @@ import {
   Avatar,
   IconButton,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
-
-const employees = new Array(4).fill({
-  username: "XYZ",
-  designation: "FrontEnd Developer",
-  location: "Burnaby",
-  manager: "George (Manager Burnaby)",
-});
-
-const employeeList = [
-  {
-    name: "XYZ",
-    designation: "FrontEnd Developer",
-    location: "Burnaby",
-    manager: "Tom Cruise (Manager Burnaby)",
-    fromDate: "12/3/2015",
-  },
-  {
-    name: "XYZ",
-    designation: "FrontEnd Developer",
-    location: "Burnaby",
-    manager: "Tom Cruise (Manager Burnaby)",
-    fromDate: "12/3/2015",
-  },
-  {
-    name: "XYZ",
-    designation: "FrontEnd Developer",
-    location: "Burnaby",
-    manager: "Tom Cruise (Manager Burnaby)",
-    fromDate: "12/3/2015",
-  },
-];
 
 const TabPanel = ({ children, value, index }) => {
   return value === index ? <Box p={2}>{children}</Box> : null;
 };
 
 const TaskCard = ({ task }) => {
-  console.log("Taskk", task);
-
+  console.log("tasksks", task);
   const verifyRequest = async () => {
     await employerApi.verifyTask(task?._id);
   };
@@ -76,9 +50,6 @@ const TaskCard = ({ task }) => {
             <strong>UserName:</strong>{" "}
             {task?.candidateId?.personalInfo?.firstName}
           </Typography>
-          {/* <Typography variant="body1">
-            <strong>Designation:</strong> {designation}
-          </Typography> */}
         </Box>
       </Box>
 
@@ -87,19 +58,11 @@ const TaskCard = ({ task }) => {
           Work Authorization Badge
         </Typography>
         <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
-          {/* <Typography>
-            <strong>{task?.employmentDates?.startDate}</strong>
-          </Typography> */}
           <Typography>
             From {task?.employmentDates?.startDate} To “Current”
           </Typography>
           <Box sx={{ mt: 2 }}>
-            <Button
-              onClick={() => {
-                verifyRequest();
-              }}
-              variant="outlined"
-            >
+            <Button onClick={verifyRequest} variant="outlined">
               Verify
             </Button>
           </Box>
@@ -117,29 +80,38 @@ const Connections = () => {
   const [acceptedCandidates, setAcceptedCandidates] = useState([]);
   const { user } = useAuth();
 
+  console.log("PendingTaskss", pendingTasks);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+
   const userId = user?.profileId;
 
   const handleTabChange = (e, newValue) => {
     setTabIndex(newValue);
   };
 
+  const handleViewDetails = (candidate) => {
+    setSelectedCandidate(candidate);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedCandidate(null);
+  };
+
   const getCurrentEmployees = async (userId) => {
     const employeeData = await employerApi.fetchCurrentEmployees(userId);
     setCurrentEmployee(employeeData?.data);
-    const acceptedCandidates = await employerApi.fetchAcceptedCandidates(
-      userId
-    );
-    const pendingCandidates = await employerApi.fetchPendingRequests(userId);
-    const pendingTasks = await employerApi.fetchEmployerTasks(userId);
+    const accepted = await employerApi.fetchAcceptedCandidates(userId);
+    const tasks = await employerApi.fetchEmployerTasks(userId);
     setPendingTasks(
-      (pendingTasks?.data || []).filter((emp) => emp?.status != "verified")
+      (tasks?.data || []).filter((emp) => emp?.status !== "verified")
     );
     setAcceptedCandidates(
-      (acceptedCandidates?.data || []).filter(
-        (emp) => emp.finalStatus != "hired"
-      )
+      (accepted?.data || []).filter((emp) => emp.finalStatus !== "hired")
     );
-    console.log("pendingTasks", pendingTasks);
   };
 
   useEffect(() => {
@@ -148,11 +120,19 @@ const Connections = () => {
 
   const hireCandidate = async (id) => {
     await employerApi.setCandidateToHired(id);
+    getCurrentEmployees(userId);
+  };
+
+  const getPersonalInfo = (candidate) => {
+    return (
+      candidate?.candidateProfile?.personalInfo ||
+      candidate?.candidateId?.personalInfo ||
+      {}
+    );
   };
 
   return (
     <Box sx={{ width: "100%", typography: "body1", p: 2 }}>
-      {/* Tabs */}
       <AppBar position="static" color="default" elevation={0}>
         <Tabs value={tabIndex} onChange={handleTabChange} centered>
           <Tab label="Current Employees" />
@@ -161,7 +141,6 @@ const Connections = () => {
         </Tabs>
       </AppBar>
 
-      {/* Search */}
       <Box my={2}>
         <TextField
           variant="outlined"
@@ -170,25 +149,12 @@ const Connections = () => {
           size="small"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                {/* <SearchIcon /> */}
-              </InputAdornment>
-            ),
-          }}
+          InputProps={{ startAdornment: <InputAdornment position="start" /> }}
         />
       </Box>
 
-      {/* Tab Panel */}
       <TabPanel value={tabIndex} index={0}>
-        <Box
-          sx={{
-            maxHeight: "70vh",
-            overflowY: "auto",
-            pr: 1,
-          }}
-        >
+        <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
           {currentEmployee.map((emp, index) => (
             <Card
               key={index}
@@ -203,33 +169,28 @@ const Connections = () => {
               <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
               <CardContent sx={{ flexGrow: 1, p: 0 }}>
                 <Typography variant="subtitle1">
-                  <strong>UserName:</strong> {emp.username}
+                  <strong>UserName:</strong>{" "}
+                  {getPersonalInfo(emp).firstName || emp.username}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Designation:</strong> {emp.designation}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Work Location:</strong> {emp.location}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Managed By:</strong> {emp.manager}
+                  <strong>Designation:</strong> {emp?.jobId?.jobTitle}
                 </Typography>
               </CardContent>
               <Box>
-                <Button variant="outlined">View Details</Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleViewDetails(emp)}
+                >
+                  View Details
+                </Button>
               </Box>
             </Card>
           ))}
         </Box>
       </TabPanel>
+
       <TabPanel value={tabIndex} index={1}>
-        <Box
-          sx={{
-            maxHeight: "70vh",
-            overflowY: "auto",
-            pr: 1,
-          }}
-        >
+        <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
           {acceptedCandidates.map((emp, index) => (
             <Card
               key={index}
@@ -244,7 +205,8 @@ const Connections = () => {
               <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
               <CardContent sx={{ flexGrow: 1, p: 0 }}>
                 <Typography variant="subtitle1">
-                  <strong>UserName:</strong> {emp.username}
+                  <strong>UserName:</strong>{" "}
+                  {getPersonalInfo(emp).firstName || emp.username}
                 </Typography>
                 <Typography variant="body2">
                   <strong>Designation:</strong> {emp?.jobId?.jobTitle}
@@ -252,25 +214,26 @@ const Connections = () => {
                 <Typography variant="body2">
                   <strong>Work Location:</strong> {emp?.jobId?.location}
                 </Typography>
-                {/* <Typography variant="body2">
-                  <strong>Managed By:</strong> {emp.manager}
-                </Typography> */}
               </CardContent>
               <Box>
                 <Button
-                  onClick={() => {
-                    hireCandidate(emp?._id);
-                  }}
+                  onClick={() => hireCandidate(emp?._id)}
                   variant="outlined"
                 >
                   Hired
                 </Button>
-                <Button variant="outlined">View Details</Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleViewDetails(emp)}
+                >
+                  View Details
+                </Button>
               </Box>
             </Card>
           ))}
         </Box>
       </TabPanel>
+
       <TabPanel value={tabIndex} index={2}>
         <Box sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
           <Typography variant="h5" gutterBottom>
@@ -283,6 +246,46 @@ const Connections = () => {
           </Stack>
         </Box>
       </TabPanel>
+
+      <Dialog
+        open={openModal}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Candidate Details
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedCandidate && (
+            <Box>
+              <Typography variant="body2" gutterBottom>
+                <strong>First Name:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).firstName || "N/A"}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Last Name:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).lastName || "N/A"}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Email:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).email || "N/A"}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Status:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).currentStatus || "N/A"}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };
