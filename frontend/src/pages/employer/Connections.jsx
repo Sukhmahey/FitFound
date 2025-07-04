@@ -27,10 +27,11 @@ const TabPanel = ({ children, value, index }) => {
   return value === index ? <Box p={2}>{children}</Box> : null;
 };
 
-const TaskCard = ({ task }) => {
+const TaskCard = ({ task, getCurrentEmployees, userId }) => {
   console.log("tasksks", task);
   const verifyRequest = async () => {
     await employerApi.verifyTask(task?._id);
+    getCurrentEmployees(userId);
   };
 
   return (
@@ -241,7 +242,12 @@ const Connections = () => {
           </Typography>
           <Stack spacing={3}>
             {pendingTasks.map((emp, index) => (
-              <TaskCard key={index} task={emp} />
+              <TaskCard
+                key={index}
+                task={emp}
+                getCurrentEmployees={getCurrentEmployees}
+                userId={userId}
+              />
             ))}
           </Stack>
         </Box>
