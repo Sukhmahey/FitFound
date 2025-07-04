@@ -14,7 +14,6 @@ const Signup = () => {
   const [companyDescription, setCompanyDescription] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const navigate = useNavigate();
-
   const { login } = useAuth();
 
   const handleSignUpClick = (e) => {
@@ -28,11 +27,6 @@ const Signup = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const firebaseUser = userCredential.user;
-        console.log(
-          "User registered successful",
-          firebaseUser.email,
-          firebaseUser.uid
-        );
 
         const userPayload = {
           email: firebaseUser.email,
@@ -49,9 +43,8 @@ const Signup = () => {
           .addUser(userPayload)
           .then((result) => {
             login(result.data);
-            setResponseMessage("User registered successful");
+            setResponseMessage("User registered successfully");
             localStorage.setItem("userId", firebaseUser.uid);
-
             navigate(
               role === "candidate"
                 ? "/candidate/onboarding"
@@ -70,15 +63,13 @@ const Signup = () => {
       });
   };
 
-  const handleOnclickRole = (e) => {
-    setRole(e.target.id);
-    console.log(e.target);
+  const handleRoleClick = (selectedRole) => {
+    setRole(selectedRole);
   };
 
   return (
     <div className="container bg-light mt-3">
       <div className="row p-3">
-        {/* FitFount texts */}
         <div className="col-md-6 d-flex justify-content-center align-items-center">
           <div className="text-center">
             <h1>FitFound</h1>
@@ -86,7 +77,6 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Login Form */}
         <div className="col-md-6">
           <div className="text-center">
             <span className="text-muted">Sign up as</span>
@@ -94,39 +84,26 @@ const Signup = () => {
 
           <div className="d-flex gap-3 mt-2 mb-2">
             <button
-              onClick={(e) => handleOnclickRole(e)}
+              onClick={() => handleRoleClick("candidate")}
               type="button"
-              id="candidate"
-              className="btn btn-primary w-50"
+              className={`btn w-50 ${
+                role === "candidate" ? "btn-primary" : "btn-secondary"
+              }`}
             >
               Candidate
             </button>
             <button
-              onClick={(e) => handleOnclickRole(e)}
+              onClick={() => handleRoleClick("employer")}
               type="button"
-              className="btn btn-secondary w-50"
-              id="employer"
+              className={`btn w-50 ${
+                role === "employer" ? "btn-primary" : "btn-secondary"
+              }`}
             >
               Employer
             </button>
           </div>
 
           <form onSubmit={handleSignUpClick}>
-            {/* <label>
-              Role:
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Select one
-                </option>
-                <option value="candidate">Candidate</option>
-                <option value="employer">Employer</option>
-              </select>
-            </label> */}
-
             <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email
@@ -160,7 +137,7 @@ const Signup = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="" className="form-label">
+              <label htmlFor="confirm-password" className="form-label">
                 Confirm Password
               </label>
               <input
@@ -177,27 +154,40 @@ const Signup = () => {
 
             {/* {role === "employer" && (
               <>
-                <input
-                  type="text"
-                  placeholder="Company Name"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  required
-                />
-                <textarea
-                  placeholder="Company Description"
-                  value={companyDescription}
-                  onChange={(e) => setCompanyDescription(e.target.value)}
-                  required
-                />
+                <div className="mb-3">
+                  <label className="form-label">Company Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Company Name"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Company Description</label>
+                  <textarea
+                    className="form-control"
+                    placeholder="Company Description"
+                    value={companyDescription}
+                    onChange={(e) => setCompanyDescription(e.target.value)}
+                    required
+                  />
+                </div>
               </>
             )} */}
 
             <div>
-              <input type="submit" className="form-control" value="Sign up" />
+              <input
+                type="submit"
+                className="form-control btn btn-success"
+                value="Sign up"
+              />
             </div>
           </form>
-          <div>{responseMessage}</div>
+
+          <div className="mt-2 text-danger">{responseMessage}</div>
         </div>
       </div>
     </div>
