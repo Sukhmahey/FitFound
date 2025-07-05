@@ -7,7 +7,7 @@ import {
   browserLocalPersistence,
 } from "firebase/auth";
 import { auth, provider, signInWithPopup } from "../../services/firebase";
-import { userApi, loginApi } from "../../services/api";
+import { userApi, loginApi, employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 
 const Login = () => {
@@ -17,6 +17,24 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const { login } = useAuth();
+
+  // Navigate base on the role, and if user has employer profile
+  const handleNavigate = (role, userId) => {
+    if (role === "employer") {
+      employerApi.getEmployerProfile(userId)
+      .then(result => {
+        console.log(result);
+        navigate("/employer/dashboard");
+      })
+      .catch(error => {
+        // employer profile not found
+        navigate("/employer/onboarding"); 
+      })
+    }
+    else {
+      navigate("/employer/dashboard");
+    }
+  };
 
   const handleEmailLogin = (e) => {
     e.preventDefault();
@@ -40,11 +58,15 @@ const Login = () => {
                 setResponseMessage("User logged in successful");
                 console.log(responseMessage);
                 console.log("User logged in successful");
-                navigate(
-                  result.data.role === "candidate"
-                    ? "/candidate/dashboard"
-                    : "/employer/dashboard"
-                );
+
+                // handeling navigation
+                handleNavigate(result?.data?.role, result?.data?.userId);
+
+                // navigate(
+                //   result.data.role === "candidate"
+                //     ? "/candidate/dashboard"
+                //     : "/employer/dashboard"
+                // );
               } else {
                 setResponseMessage("User login failed");
               }
