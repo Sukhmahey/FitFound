@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
+import { useNavigate } from 'react-router-dom';
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +12,7 @@ import CompanyInfo from './onboardingSteps/CompanyInfo';
 import UserContactInfo from './onboardingSteps/UserContactInfo';
 
 const EmployerProfile = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
@@ -23,6 +25,7 @@ const EmployerProfile = () => {
   const [detailsIsActive, setDetailsIsActive] = useState(true);
   const [contactIsActive, setContactIsActive] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageClass, setMessageClass] = useState(""); // set the class for messages
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
   
@@ -63,7 +66,7 @@ const EmployerProfile = () => {
 
     })
     .catch( error => {
-      console.log(error);
+      navigate('/employer/onboarding');
     });
   }, []);
 
@@ -123,28 +126,36 @@ const EmployerProfile = () => {
       // save data
       employerApi.updateEmployerProfile(userId, employerProfile)
       .then( result => {
-        console.log(result);
-        setMessage(`Success: Info saved.`);
-        // Hide the message after 3 seconds
+        // console.log(result);
+        
+        // Setting response message
+        setMessage("Your profile has been saved successfuly.");
+        setMessageClass("alert alert-success");
+        // Hide the message after 5 seconds
         setTimeout(() => {
           setMessage('');
+          setMessageClass("");
         }, 5000);
 
       })
       .catch( error => {
         console.log(error);
-        setMessage(`Error: Info not saved.`);
-        // Hide the message after 3 seconds
+        // Setting response message
+        setMessage(error.response.data.details);
+        setMessageClass("alert alert-danger");
+        // Hide the message after 5 seconds
         setTimeout(() => {
           setMessage('');
+          setMessageClass("");
         }, 5000);
       });
-      
-    
   };
 
   return (
     <div>
+
+      <div id="message" className={messageClass}>{ message }</div>
+
       <div>
         <ul className="nav nav-underline">
           <li className="nav-item">
@@ -157,8 +168,6 @@ const EmployerProfile = () => {
           </li>
         </ul>
       </div>
-
-      <div id="message">{ message }</div>
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
