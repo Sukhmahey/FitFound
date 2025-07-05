@@ -58,6 +58,7 @@ export const jobVerificationApi = {
 
 // employer endpoints
 export const employerApi = {
+  getAllEmployers: () => api.get("/employers"),
   addEmployerProfile: (userId, data) =>
     api.post(`/employers/${userId}/profile`, data),
   getEmployerProfile: (userId) => api.get(`/employers/${userId}/profile`),

@@ -26,6 +26,7 @@ import {
 export default function MyProfile() {
   const { user } = useAuth();
   const userId = user?.userId;
+  const profileId = user?.profileId;
 
   const [activeTab, setActiveTab] = useState('Personal');
   const [formData, setFormData] = useState(null);
@@ -55,7 +56,7 @@ export default function MyProfile() {
 
     const fetchVerificationData = async () => {
       try {
-        const response = await jobVerificationApi.getVerificationStatus(userId);
+        const response = await jobVerificationApi.getVerificationStatus(profileId);
         console.log('Verification API Response:', response.data);
 
         const companyArray = response.data.map((company) => ({

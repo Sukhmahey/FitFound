@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const employerProfileController = require("../controllers/EmployerProfileController");
 
+router.get("/", employerProfileController.getAllEmployerProfiles);
 router.post(
   "/:userId/profile",
   employerProfileController.createEmployerProfile
