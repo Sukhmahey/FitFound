@@ -9,6 +9,15 @@ const handleError = (res, error, message, status = 500) => {
   });
 };
 
+exports.getAllEmployerProfiles = async (req, res) => {
+  try {
+    const employers = await EmployerProfile.find();
+    res.status(200).json(employers);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch employers", error: err.message });
+  }
+};
+
 exports.createEmployerProfile = async (req, res) => {
   const { userId } = req.params;
   const profileData = req.body;

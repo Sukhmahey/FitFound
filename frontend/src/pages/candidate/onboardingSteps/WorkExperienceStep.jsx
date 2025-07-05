@@ -166,10 +166,20 @@ const handleChange = (index, field, value) => {
   };
 
 
+  // const getVerificationStatus = (companyName) => {
+  //   const match = verificationCompany.find(v => v.company.toLowerCase() === companyName.toLowerCase());
+  //   return match?.status || null;
+  // };
   const getVerificationStatus = (companyName) => {
-    const match = verificationCompany.find(v => v.company.toLowerCase() === companyName.toLowerCase());
-    return match?.status || null;
-  };
+  if (!companyName) return null;
+  const match = verificationCompany.find(
+    v =>
+      v.company &&
+      v.company.trim().toLowerCase() === companyName.trim().toLowerCase()
+  );
+  return match?.status || null;
+};
+
 
   return (
     <div className="d-flex justify-content-center w-80 flex-column mx-auto">

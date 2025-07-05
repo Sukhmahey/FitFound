@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { candidateApi, jobVerificationApi } from '../../services/api';
+import { candidateApi, jobVerificationApi , employerApi} from '../../services/api';
 import {
     Container,
     Box,
@@ -23,32 +23,44 @@ export default function ExperienceVerificationReqPage() {
     const [workHistory, setWorkHistory] = useState([]);
     const [submitStatus, setSubmitStatus] = useState('');
     const [jobRole, setJobRole] = useState('');
+    const [employerNames, setEmployerNames] = useState([]);
+
 
     const { user } = useAuth();
     const userId = user?.userId;
         const profileId = user?.profileId;
 
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await candidateApi.getProfileByUserId(userId);
-                console.log(response)
-                const history = response.data?.workHistory || [];
 
-                setWorkHistory(history);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const response = await candidateApi.getProfileByUserId(userId);
+      const history = response.data?.workHistory || [];
+      setWorkHistory(history);
 
-                const names = history.map((entry) => entry.companyName).filter(Boolean);
-                setCompanyNames(names);
-            } catch (err) {
-                console.error('Failed to load profile:', err);
-            }
-        };
+      const historyNames = history.map((entry) => entry.companyName).filter(Boolean);
 
-        if (userId) {
-            fetchData();
-        }
-    }, [userId]);
+      const employerRes = await employerApi.getAllEmployers();
+      const employers = employerRes.data || [];
+      const employerNameList = employers.map(emp => emp.companyName.toLowerCase());
+      setEmployerNames(employerNameList);
+
+      const filtered = historyNames.filter(name =>
+        employerNameList.includes(name.toLowerCase())
+      );
+      setCompanyNames(filtered);
+
+    } catch (err) {
+      console.error('Failed to load profile or employers:', err);
+    }
+  };
+
+  if (userId) {
+    fetchData();
+  }
+}, [userId]);
+
 
     useEffect(() => {
         if (selectedCompany && workHistory.length) {
