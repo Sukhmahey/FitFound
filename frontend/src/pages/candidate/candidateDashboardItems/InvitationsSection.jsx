@@ -12,7 +12,7 @@ import {
   ListItem,
 } from '@mui/material';
 
-export default function InvitationsSection({setInvitationCount}) {
+export default function InvitationsSection({ setInvitationCount }) {
   const [invitations, setInvitations] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState(null);
@@ -30,9 +30,9 @@ export default function InvitationsSection({setInvitationCount}) {
           .filter((obj) => obj.candidateConsentToReveal === false)
           .map((obj) => ({
             invitationId: obj._id,
-            employerId: obj.employerId._id,
-            contactPerson: obj.employerId.contactInfo.firstName,
-            employerName: obj.employerId.companyName,
+            employerId: obj.employerId?._id || null,
+            contactPerson: obj.employerId?.contactInfo?.firstName || 'Unknown',
+            employerName: obj.employerId?.companyName || 'Unknown Company',
             outreachMessage: obj.outreachMessage,
             job: obj.jobId,
             date: new Date(obj.updatedAt).toLocaleDateString(),

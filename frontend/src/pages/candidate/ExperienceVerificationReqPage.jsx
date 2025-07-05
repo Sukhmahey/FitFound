@@ -25,14 +25,15 @@ export default function ExperienceVerificationReqPage() {
     const [jobRole, setJobRole] = useState('');
 
     const { user } = useAuth();
-    // const userId = user?.userId;
-        const userId = user?.profileId;
+    const userId = user?.userId;
+        const profileId = user?.profileId;
 
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await candidateApi.getProfileByUserId(userId);
+                console.log(response)
                 const history = response.data?.workHistory || [];
 
                 setWorkHistory(history);
@@ -65,9 +66,9 @@ export default function ExperienceVerificationReqPage() {
     }, [selectedCompany]);
 
     const handleSubmit = async () => {
-        console.log('Submitted:', { userId, selectedCompany, startDate, endDate });
+        console.log('Submitted:', { profileId, selectedCompany, startDate, endDate });
         const dataBody = {
-            candidateId: userId,
+            candidateId: profileId,
             companyName: selectedCompany,
             startDate: startDate,
             endDate: endDate,
