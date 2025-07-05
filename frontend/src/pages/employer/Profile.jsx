@@ -33,7 +33,7 @@ const EmployerProfile = () => {
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
     
-    console.log(e.target.id);
+    // console.log(e.target.id);
 
     // when the user changes the form section
     if (e.target.id == "details") {
@@ -73,7 +73,7 @@ const EmployerProfile = () => {
     
     if (formSection == "details") {
       
-      console.log(typeof data.companyLogo != "string");
+      // console.log(typeof data.companyLogo != "string");
       // updating the logo url
       if (data.companyLogo) {
         updateFileByUrl(companyInfo.companyLogo, data.companyLogo)
@@ -97,6 +97,12 @@ const EmployerProfile = () => {
       setCompanyInfo(data);
     }
     else {
+
+      if (data.profilePicture) {
+        updateFileByUrl(contactInfo.profilePicture, data.profilePicture)
+        .then( result => console.log(result) )
+        .catch( error => console.log(error) );
+      }
 
       let newContactInfo = {
         profilePicture: contactInfo.profilePicture,

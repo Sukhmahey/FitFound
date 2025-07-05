@@ -4,6 +4,13 @@ import { useFormContext } from "react-hook-form";
 const UserContactInfo = () => {
     const { register, watch, setValue } = useFormContext();
     const [imageSrc, setImageSrc] = useState( null );
+    const profilePicture = watch('profilePicture');
+
+    useEffect( () => {
+        if (profilePicture) {
+            setImageSrc(`${profilePicture}?t=${Date.now()}`);
+        }
+    }, [profilePicture]);
 
     const styles = {
         wrapper: {
@@ -48,10 +55,9 @@ const UserContactInfo = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImageSrc(reader.result);
-        
       };
       reader.readAsDataURL(file);
-      console.log(file);
+    //   console.log(file);
     }
   };
 
@@ -62,13 +68,15 @@ const UserContactInfo = () => {
                 <label htmlFor="profilePicture">
                     Profile Picture
                     <div style={styles.wrapper}>
-                        <input type="file" style={styles.input} name="profilePicture" id="profilePicture" 
+                        <input type="file" accept="image/*" style={styles.input} 
+                        name="profilePicture" 
+                        id="profilePicture" 
                             onChange={(e) => {
                                 handleImageChange(e); // Set preview
                             }} 
                         />
                         <div style={styles.iconContainer}>
-                            <img src = {imageSrc || watch('profilePicture') } style={styles.image} />
+                            <img src = {imageSrc} style={styles.image} />
                             <span style={styles.arrow}>⬆</span>
                         </div>
                     </div>
