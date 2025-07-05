@@ -1,6 +1,6 @@
 
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   TextField,
@@ -12,6 +12,8 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { useAuth } from '../../../contexts/AuthContext';
+import { candidateApi } from '../../../services/api';
 
 export default function WorkExperienceStep({ data = [], onUpdate, verificationCompany = [] }) {
   // const handleChange = (index, field, value) => {
@@ -19,17 +21,37 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
   //   updated[index][field] = value;
   //   onUpdate(updated);
   // };
-  const handleChange = (index, field, value) => {
+  const { user } = useAuth();
+  const profileId = user?.profileId;
+  const [hiredCompany, setHiredCompany] = React.useState([]);
+  // const handleChange = (index, field, value) => {
+  //   const updated = [...data];
+  //   updated[index][field] = value;
+
+  //   if (field === 'role') {
+  //     updated[index]['jobTitle'] = value;
+  //   }
+
+  //   onUpdate(updated);
+  // };
+
+const handleChange = (index, field, value) => {
   const updated = [...data];
+
+  // If it's a month input field
+  if (field === 'startDate' || field === 'endDate') {
+    const [year, month] = value.split('-'); // convert YYYY-MM → MM-YYYY
+    value = `${month}-${year}`;
+  }
+
   updated[index][field] = value;
 
   if (field === 'role') {
-    updated[index]['jobTitle'] = value; 
+    updated[index]['jobTitle'] = value;
   }
 
   onUpdate(updated);
 };
-
 
   const normalizeDate = (dateStr) => {
     if (!dateStr) return '';
@@ -66,13 +88,84 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
     ]);
   };
 
+  useEffect(() => {
+    const fetchInvitations = async () => {
+      try {
+        const response = await candidateApi.fetchInteractions(profileId);
+        // console.log(response.data);
+        const unfiltered = response.data;
+
+        const filtered = response.data
+          .filter((obj) => obj.finalStatus === 'hired')
+          .map((obj) => ({
+            invitationId: obj._id,
+            employerId: obj.employerId?._id || null,
+            contactPerson: obj.employerId?.contactInfo?.firstName || 'Unknown',
+            employerName: obj.employerId?.companyName || 'Unknown Company',
+            job: obj.jobId,
+            finalStatus: obj.finalStatus,
+            date: (() => {
+              const d = new Date(obj.updatedAt);
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const year = d.getFullYear();
+              return `${month}-${year}`;
+            })(),
+          }));
+        console.log(unfiltered)
+        setHiredCompany(filtered);
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    if (profileId) fetchInvitations();
+  }, [profileId])
+
+
+
+
+ useEffect(() => {
+  if (hiredCompany.length === 0) return;
+
+  
+
+  const hiredWorkHistory = hiredCompany.map((item) => ({
+    companyName: item.employerName,
+    jobTitle: item.job?.jobTitle || 'Developer',
+    role: item.job?.jobTitle || 'Developer',
+    startDate: item.date || '2024-01',
+    endDate: item.date || '2024-01',
+    achievements: [],
+    experienceLevel: '',
+    remarkFromEmployer: '',
+    fromHiredCompany: true
+  }));
+
+  const existingCompanies = data.map((d) => d.companyName.toLowerCase());
+  const newEntries = hiredWorkHistory.filter(
+    (h) => !existingCompanies.includes(h.companyName.toLowerCase())
+  );
+
+  if (newEntries.length === 0) return;
+
+  const updatedData = [...data, ...newEntries];
+
+
+  onUpdate(updatedData);
+
+
+}, [hiredCompany]);
+
+
+
+
   const removeExperience = (index) => {
     const updated = [...data];
     updated.splice(index, 1);
     onUpdate(updated);
   };
 
-  
+
   const getVerificationStatus = (companyName) => {
     const match = verificationCompany.find(v => v.company.toLowerCase() === companyName.toLowerCase());
     return match?.status || null;
@@ -86,15 +179,33 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
           const status = data.length > 0 && verificationCompany.length > 0
             ? getVerificationStatus(exp.companyName)
             : null;
-            const isVerified = status === 'verified';
+          const isVerified = status === 'verified';
 
 
           return (
+            // <Box
+            //   key={index}
+            //   sx={{ border: '1px solid #ccc', borderRadius: 2, p: 3 }}
+            //   className="d-flex flex-column gap-3"
+            // >
             <Box
-              key={index}
-              sx={{ border: '1px solid #ccc', borderRadius: 2, p: 3 }}
-              className="d-flex flex-column gap-3"
-            >
+  key={index}
+  sx={{
+    border: exp.fromHiredCompany ? '2px solid #fbc02d' : '1px solid #ccc',
+    backgroundColor: exp.fromHiredCompany ? '#fffde7' : '#fff',
+    borderRadius: 2,
+    p: 3
+  }}
+  className="d-flex flex-column gap-3"
+>
+  {exp.fromHiredCompany && (
+    <Typography
+      variant="body2"
+      sx={{ color: '#f57f17', fontWeight: 'bold', mb: 1 }}
+    >
+      ⓘ This work experience was added based on your recent hiring. Kindly ensure all relevant details are accurate and up to date.
+    </Typography>
+  )}
               <TextField
                 label="Company Name"
                 variant="outlined"
