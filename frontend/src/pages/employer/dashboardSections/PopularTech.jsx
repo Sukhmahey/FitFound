@@ -22,7 +22,7 @@ const PopularTech = () => {
             <h4>Popular Technologies (As per interested Candidates)</h4>
             <div className="d-flex justify-content-lg-around flex-wrap gap-6">
                 {roles.map((role) => (
-                        <div className="card">
+                        <div className="card" key={role.role}>
                             <div className="card-body">
                                 <div><span>{role.count}</span></div>
                                 <div>
