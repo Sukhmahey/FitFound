@@ -160,11 +160,6 @@ const EmployerProfile = () => {
 
       <div id="message">{ message }</div>
 
-      {/* <div>
-        <div id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</div>
-        <div id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</div>
-      </div> */}
-
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           { formSection === "details" && (<>

@@ -25,12 +25,23 @@ const EmployerOnboarding = () => {
   const [logoUrl, setLogoUrl] = useState("");
   const [detailsIsActive, setDetailsIsActive] = useState(true);
   const [contactIsActive, setContactIsActive] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageClass, setMessageClass] = useState(""); // set the class for messages
   let profilePictureUrl;
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
 
   useEffect(() => {
       setAppGeneralInfo({ pageTitle: "Onboarding"});
+
+      // Setting initial message
+      setMessage(`You must fill your Employer Profile info.`);
+      setMessageClass("alert alert-warning");
+        // Hide the message after 5 seconds
+        setTimeout(() => {
+          setMessage('');
+          setMessageClass("");
+        }, 5000);
   }, []);
   
 
@@ -39,8 +50,6 @@ const EmployerOnboarding = () => {
       // Tabs css
       setDetailsIsActive(false);
       setContactIsActive(true);
-
-      console.log(data);
 
       // save the logo and profile picture
       if (data.companyLogo) {
@@ -56,9 +65,6 @@ const EmployerOnboarding = () => {
 
         console.log(logoUrl);
       }
-      else {
-        return;
-      }
 
       setFormSection('contact');
     }
@@ -68,8 +74,6 @@ const EmployerOnboarding = () => {
       setDetailsIsActive(false);
       setContactIsActive(true);
 
-      console.log(data);
-
       if (data.profilePicture) {
         const profileFile = data.profilePicture;
         const profileFileName = setFileName(data.companyName + "-profile-picture");
@@ -77,10 +81,7 @@ const EmployerOnboarding = () => {
 
         addFile(profileFilePath, profileFile);
         profilePictureUrl= getUlrFile(profileFilePath);
-        console.log(profilePictureUrl);
-      }
-      else {
-        return;
+
       }
 
       const employerProfile = {
@@ -107,17 +108,36 @@ const EmployerOnboarding = () => {
         }
       };
 
-      console.log(employerProfile);
+
       
       // save data
       employerApi.addEmployerProfile(userId, employerProfile)
       .then( result => {
         console.log(result);
-        // navigate('employer/dashboard');
+        
+        // Setting response message
+        setMessage("Your profile has been saved successfuly.");
+        setMessageClass("alert alert-success");
+        // Hide the message after 5 seconds
+        setTimeout(() => {
+          setMessage('');
+          setMessageClass("");
+          navigate('/employer/dashboard');
+        }, 5000);
+        
 
       })
       .catch( error => {
         console.log(error);
+        
+        // Setting response message
+        setMessage(error.response.data.details);
+        setMessageClass("alert alert-danger");
+        // Hide the message after 5 seconds
+        setTimeout(() => {
+          setMessage('');
+          setMessageClass("");
+        }, 5000);
       });
     }
     
@@ -125,6 +145,8 @@ const EmployerOnboarding = () => {
 
   return (
     <div>
+      <div id="message" className={messageClass}>{ message }</div>
+
       <div>
         <ul className="nav nav-underline">
           <li className="nav-item">
@@ -135,7 +157,7 @@ const EmployerOnboarding = () => {
           </li>
         </ul>
       </div>
-
+      
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           { formSection === "details" && (<>
