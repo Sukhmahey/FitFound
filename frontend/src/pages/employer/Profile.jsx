@@ -33,7 +33,7 @@ const EmployerProfile = () => {
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
     
-    console.log(e.target.id);
+    // console.log(e.target.id);
 
     // when the user changes the form section
     if (e.target.id == "details") {
@@ -73,27 +73,17 @@ const EmployerProfile = () => {
     
     if (formSection == "details") {
       
+      // console.log(typeof data.companyLogo != "string");
       // updating the logo url
       if (data.companyLogo) {
-        updateFileByUrl(companyInfo.companyLogo, data.companyLogo);
-        console.log(data.companyLogo);
-        return;
-        // const logoFile = data.companyLogo["0"];
-        // const logoFileName = setFileName(data.companyName + "-logo");
-        // const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
-
-        // addFile(logoFilePath, logoFile);
-        // setLogoUrl(getUlrFile(logoFilePath));
-
-        // console.log(logoUrl);
-      }
-      else {
-        return;
+        updateFileByUrl(companyInfo.companyLogo, data.companyLogo)
+        .then( result => console.log(result) )
+        .catch( error => console.log(error) );
       }
 
       employerProfile = {
         userId: userId,
-        companyLogo: data.companyLogo,
+        companyLogo: companyInfo.companyLogo,
         companyName: data.companyName,
         establishedYear: data.establishedYear,
         businessRegisteredNumber: data.businessRegisteredNumber,
@@ -108,8 +98,14 @@ const EmployerProfile = () => {
     }
     else {
 
+      if (data.profilePicture) {
+        updateFileByUrl(contactInfo.profilePicture, data.profilePicture)
+        .then( result => console.log(result) )
+        .catch( error => console.log(error) );
+      }
+
       let newContactInfo = {
-        profilePicture: data.profilePicture,
+        profilePicture: contactInfo.profilePicture,
         firstName: data.firstName,
         middleName: data.middleName,
         lastName: data.lastName,
@@ -123,9 +119,6 @@ const EmployerProfile = () => {
       setContactInfo(data);
     }
 
-      
-
-      console.log(employerProfile);
       
       // save data
       employerApi.updateEmployerProfile(userId, employerProfile)

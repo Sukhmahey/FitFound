@@ -3,7 +3,16 @@ import { useFormContext } from "react-hook-form";
 
 const CompanyInfo = () => {
     const { register, watch, setValue } = useFormContext();
-    const [imageSrc, setImageSrc] = useState( null );
+    const [imageSrc, setImageSrc] = useState(  );
+    const companyLogo = watch('companyLogo');
+
+    // console.log(watch('companyLogo'));
+
+    useEffect( () => {
+        if (companyLogo) {
+            setImageSrc(`${companyLogo}?t=${Date.now()}`);
+        }
+    }, [companyLogo]);
 
     const styles = {
         wrapper: {
@@ -48,10 +57,9 @@ const CompanyInfo = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImageSrc(reader.result);
-        
       };
       reader.readAsDataURL(file);
-      console.log(file);
+    //   console.log(file);
     }
   };
 
@@ -74,7 +82,7 @@ const CompanyInfo = () => {
                                 }} 
                             />
                             <div style={styles.iconContainer}>
-                                <img src = {imageSrc || watch('companyLogo') } style={styles.image} />
+                                <img src= { imageSrc } style={styles.image} />
                                 <span style={styles.arrow}>⬆</span>
                             </div>
                         </div>
