@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 
@@ -19,6 +19,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 // Utility to censor names (e.g., Vipul → V***l)
 const censorName = (name) => {
@@ -168,6 +170,12 @@ const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get("jobId");
   const userId = user?.profileId;
+
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+
+  useEffect(() => {
+    setAppGeneralInfo({ pageTitle: "Candidate Search" });
+  }, []);
 
   const sendVerificationRequest = async (id) => {
     await employerApi.sendConnectionRequest({

@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 
 import { employerApi } from "../../services/api";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 const dummyobj1 = {
   employerId: "68659ec4901fec3956f9280f",
@@ -51,6 +52,12 @@ const Search = () => {
     workStatus: "",
     skills: "",
   });
+
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+
+  useEffect(() => {
+    setAppGeneralInfo({ pageTitle: "Candidate Search" });
+  }, []);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();

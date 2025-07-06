@@ -1,6 +1,6 @@
 // NEW: Added modal to display candidate information on 'View Details' click in employer side
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   AppBar,
   Tabs,
@@ -22,6 +22,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 const TabPanel = ({ children, value, index }) => {
   return value === index ? <Box p={2}>{children}</Box> : null;
@@ -82,6 +83,12 @@ const Connections = () => {
   const { user } = useAuth();
 
   console.log("PendingTaskss", pendingTasks);
+
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+
+  useEffect(() => {
+    setAppGeneralInfo({ pageTitle: "Connections" });
+  }, []);
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
