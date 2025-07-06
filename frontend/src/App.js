@@ -17,6 +17,7 @@ import EmployerConnections from "./pages/employer/Connections";
 import Unauthorized from "./pages/Unauthorized";
 import ExperienceVerificationReqPage from "./pages/candidate/ExperienceVerificationReqPage";
 import MainLayout from "./components/MainLayout";
+import SettingsPage from "./pages/candidate/SettingsPage";
 
 function App() {
   return (
@@ -67,6 +68,12 @@ function App() {
           path="/candidate/badge-verification"
           element={
             <ExperienceVerificationReqPage></ExperienceVerificationReqPage>
+          }
+        />
+        <Route
+          path="/candidate/setting"
+          element={
+            <SettingsPage></SettingsPage>
           }
         />
 
