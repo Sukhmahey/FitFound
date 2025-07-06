@@ -32,7 +32,7 @@ const Login = () => {
       })
     }
     else {
-      navigate("/employer/dashboard");
+      navigate("/candidate/dashboard");
     }
   };
 
