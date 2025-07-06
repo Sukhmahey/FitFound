@@ -1,14 +1,23 @@
 import { Grid, Paper } from '@mui/material';
 import { useContext } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { AppInfoContext } from "../contexts/AppInfoContext";
+import { Link } from 'react-router-dom';
 
 const Header = () => {
     const { appGeneralInfo } = useContext(AppInfoContext);
+    const { user } = useAuth();
+
+    const settingsPath = user?.role === 'candidate'
+        ? '/candidate/settings'
+        : user?.role === 'employer'
+            ? '/employer/settings'
+            : '/settings';
 
     return (
         <div>
-            
-            
+
+
 
             <Grid container spacing={2}>
                 <Grid size={10}>
@@ -16,9 +25,9 @@ const Header = () => {
                 </Grid>
                 <Grid size={2}>
                     <div>
-                    <div>Notifications</div>
-                    <a href='/settings'>Settings</a>
-                </div>
+                        <div>Notifications</div>
+                        <Link to={settingsPath}>Settings</Link>
+                    </div>
                 </Grid>
             </Grid>
 
