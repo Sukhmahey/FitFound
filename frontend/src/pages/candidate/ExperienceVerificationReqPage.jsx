@@ -14,6 +14,7 @@ import {
     Alert,
     AlertTitle
 } from '@mui/material';
+import useNotify from '../../utils/notificationService';
 
 export default function ExperienceVerificationReqPage() {
     const [selectedCompany, setSelectedCompany] = useState('');
@@ -24,6 +25,7 @@ export default function ExperienceVerificationReqPage() {
     const [submitStatus, setSubmitStatus] = useState('');
     const [jobRole, setJobRole] = useState('');
     const [employerNames, setEmployerNames] = useState([]);
+    const notify = useNotify();
 
 
     const { user } = useAuth();
@@ -89,16 +91,19 @@ useEffect(() => {
         try {
             const res = await jobVerificationApi.verifyJob(dataBody);
             if (res.status === 200 || res.status === 201) {
-                setSubmitStatus('success');
+                // setSubmitStatus('success');
+                notify.success("Your request has been submitted successfully.");
                 setSelectedCompany('');
                 setStartDate('');
                 setEndDate('');
             } else {
-                setSubmitStatus('error');
+                // setSubmitStatus('error');
+                notify.error("Failed to submit request.");
             }
         } catch (err) {
             console.log("Submission error:", err);
-            setSubmitStatus('error');
+            // setSubmitStatus('error');
+            notify.error("Failed to submit request.");
         }
     };
 
@@ -154,7 +159,7 @@ useEffect(() => {
                 </Box>
             </Container>
             <Box>
-                {submitStatus === 'success' && (
+                {/* {submitStatus === 'success' && (
                     <Box mt={2}>
                         <Alert severity="success">
                             <AlertTitle>Success</AlertTitle>
@@ -170,7 +175,7 @@ useEffect(() => {
                             Something went wrong. Please try again later.
                         </Alert>
                     </Box>
-                )}
+                )} */}
 
             </Box>
         </Container>

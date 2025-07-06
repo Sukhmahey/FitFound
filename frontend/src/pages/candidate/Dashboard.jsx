@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { candidateApi } from '../../services/api';
 import ProfileSummary from './candidateDashboardItems/ProfileSummary';
 import TrendingKeywordsSection from './candidateDashboardItems/TrendingKeywordsSection';
@@ -7,10 +7,13 @@ import InvitationsSection from './candidateDashboardItems/InvitationsSection';
 import { useAuth } from '../../contexts/AuthContext';
 import Allroles from '../../ScoringUtil/skillsFromJob'
 import { Container } from '@mui/material'
+import useNotify from '../../utils/notificationService';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const userId = user?.userId;
+  const profileId = user?.profileId;
+  const notify = useNotify();
 
   const [candidateName, setCandidateName] = useState("Name");
   const [profileScore, setProfileScore] = useState(0);
@@ -19,6 +22,7 @@ export default function Dashboard() {
   const [suggestedSkills, setSuggestedSkills] = useState([]);
   const [alreadySkills, setAlreadySkills] = useState([]);
   const [invitationCount, setInvitationCount] = useState(0);
+  const [workHistory, setWorkHistory] = useState([]);
 
   // console.log(Allroles)
 
@@ -26,12 +30,22 @@ export default function Dashboard() {
     fetchProfileData();
   }, [])
 
+
+
+  const hasFetchedProfile = useRef(false);
+  useEffect(() => {
+    if (workHistory.length > 0) {
+      hasFetchedProfile.current = true;
+    }
+  }, [workHistory]);
+
   const fetchProfileData = async () => {
     try {
       const response = await candidateApi.getProfileByUserId(userId);
       const data = response.data;
       // console.log(data);
       setCandidateName(data.personalInfo.firstName);
+      setWorkHistory(await data.workHistory);
       setProfileScore(data.profileScore);
       if (data.jobPreference?.desiredJobTitle?.length > 0) {
         setDesiredJobRole(data.jobPreference.desiredJobTitle[0]);
@@ -51,6 +65,38 @@ export default function Dashboard() {
       console.error(error);
     }
   }
+  const notifiedHires = useRef(new Set());
+  useEffect(() => {
+    console.log(workHistory);
+    const fetchHiringNotifications = async () => {
+      try {
+        const res = await candidateApi.fetchInteractions(profileId);
+
+        const hired = res.data.filter(i => i.finalStatus === 'hired');
+
+        const workCompanies = workHistory.map(w => w.companyName.toLowerCase());
+
+        const newHires = hired.filter(i => {
+          const companyName = i.employerId?.companyName?.toLowerCase() || '';
+
+          return !workCompanies.includes(companyName) && !notifiedHires.current.has(i._id);
+        });
+
+        newHires.forEach(hire => {
+          notify.success(`🎉 You've been hired at ${hire.employerId?.companyName || "a company"}!`);
+
+          notifiedHires.current.add(hire._id);
+        });
+
+      } catch (err) {
+        console.error("Error fetching hiring notifications", err);
+      }
+    };
+
+    if (hasFetchedProfile.current && workHistory.length >= 0) {
+      fetchHiringNotifications();
+    }
+  }, [workHistory]);
 
   useEffect(() => {
     if (desiredJobRole) {
@@ -83,21 +129,11 @@ export default function Dashboard() {
 
 
 
-  const dummyProfile = {
-    name: candidateName,
-    score: profileScore,
-    interviews: [
-      { jobTitle: 'Frontend Developer', company: 'Shopify', status: 'Scheduled', date: '2025-06-10' },
-      { jobTitle: 'FullStack Developer', company: 'RBC', status: 'Pending', date: 'TBD' },
-    ],
-    suggestions: [
-      'Add React.js to your skills', 'Mention project experience'
-    ]
-  }
+
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }} >     <h1>Dashboard</h1>
-      <h2> Hello 👋, {dummyProfile.name}</h2>
+      <h2> Hello 👋, {candidateName}</h2>
       <ProfileSummary profileScore={profileScore} invitationCount={invitationCount}></ProfileSummary>
       <TrendingKeywordsSection suggestedSkills={suggestedSkills} alreadySkills={alreadySkills}></TrendingKeywordsSection>
       <InvitationsSection setInvitationCount={setInvitationCount}></InvitationsSection>
