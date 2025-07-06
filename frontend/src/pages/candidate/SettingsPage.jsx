@@ -28,6 +28,8 @@ export default function SettingsPage() {
 
     const { user } = useAuth();
     const userId = user?.userId;
+    
+    const [role, setRole] = React.useState(user?.role);
     const [candidateName, setCandidateName] = React.useState('');
     const [candidateEmail, setCandidateEmail] = React.useState('');
     const [open, setOpen] = React.useState(false);
@@ -53,17 +55,17 @@ export default function SettingsPage() {
     useEffect(() => {
 
         setCandidateEmail(user?.email);
-        try {
-            candidateApi.getProfileByUserId(user.userId).then((response) => {
-                setCandidateName(response.data.personalInfo.firstName);
-            })
+        if (role === 'candidate' && userId) {
+    
+    candidateApi.getProfileByUserId(userId).then((response) => {
+      setCandidateName(response.data.personalInfo.firstName);
+    }).catch((error) => {
+      console.error("Error fetching candidate profile:", error);
+    });
+  }
 
-        } catch (error) {
 
-        }
-
-
-    }, [userId])
+    }, [role, userId]);
 
     const resetPassword = () => {
         const user = auth.currentUser;
@@ -156,12 +158,12 @@ export default function SettingsPage() {
                             </Box>
                         </Box>
                     </Box>
-                    <Box>
+        { role=== 'candidate' && <Box>
                         <Typography variant='h6' component={"h6"} className=' border-bottom'>Subscriptions</Typography>
                         <Box>
                             {SubscriptionSelector()}
                         </Box>
-                    </Box>
+                    </Box>}
                     <Box>
                         <Typography variant='h6' component={"h6"} className=' border-bottom'>Notifications</Typography>
                         <Box>
