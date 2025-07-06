@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import {
   signInWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence,
+  signInWithPopup,
 } from "firebase/auth";
 import { auth, provider, signInWithPopup } from "../../services/firebase";
 import { userApi, loginApi, employerApi } from "../../services/api";
@@ -21,17 +21,17 @@ const Login = () => {
   // Navigate base on the role, and if user has employer profile
   const handleNavigate = (role, userId) => {
     if (role === "employer") {
-      employerApi.getEmployerProfile(userId)
-      .then(result => {
-        console.log(result);
-        navigate("/employer/dashboard");
-      })
-      .catch(error => {
-        // employer profile not found
-        navigate("/employer/onboarding"); 
-      })
-    }
-    else {
+      employerApi
+        .getEmployerProfile(userId)
+        .then((result) => {
+          console.log(result);
+          navigate("/employer/dashboard");
+        })
+        .catch((error) => {
+          // employer profile not found
+          navigate("/employer/onboarding");
+        });
+    } else {
       navigate("/candidate/dashboard");
     }
   };
@@ -54,7 +54,6 @@ const Login = () => {
               if (result.data.userId) {
                 login(result.data);
                 localStorage.setItem("userId", result?.data?.userId);
-                console.log("login function", result.data);
                 setResponseMessage("User logged in successful");
                 console.log(responseMessage);
                 console.log("User logged in successful");
@@ -99,7 +98,6 @@ const Login = () => {
               userApi.addUser(newUser).then((resultNewUser) => {
                 login(resultNewUser.data);
                 setResponseMessage("User registered successful");
-                console.log("User registered successful", resultNewUser.data);
                 navigate(
                   resultNewUser.data.role === "candidate"
                     ? "/candidate/dashboard"
@@ -109,7 +107,6 @@ const Login = () => {
             } else {
               login(result.data);
               setResponseMessage("User logged in successful");
-              console.log("User logged in successful", result.data);
               navigate(
                 result.data.role === "candidate"
                   ? "/candidate/dashboard"
@@ -132,13 +129,11 @@ const Login = () => {
 
   const handleOnclickRole = (e) => {
     setRole(e.target.id);
-    console.log(e.target);
   };
 
   return (
     <div className="container bg-light mt-3">
       <div className="row p-3">
-        {/* FitFount texts */}
         <div className="col-md-6 d-flex justify-content-center align-items-center">
           <div className="text-center">
             <h1>FitFound</h1>
@@ -146,7 +141,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Login Form */}
         <div className="col-md-6">
           <div className="text-center">
             <span className="text-muted">Login as</span>
@@ -154,34 +148,26 @@ const Login = () => {
 
           <div className="d-flex gap-3 mt-2 mb-2">
             <button
-              onClick={(e) => handleOnclickRole(e)}
+              onClick={handleOnclickRole}
               type="button"
               id="candidate"
-              className="btn btn-primary w-50"
+              className={`w-50 btn ${
+                role === "candidate" ? "btn-primary" : "btn-outline-primary"
+              }`}
             >
               Candidate
             </button>
             <button
-              onClick={(e) => handleOnclickRole(e)}
+              onClick={handleOnclickRole}
               type="button"
-              className="btn btn-secondary w-50"
               id="employer"
+              className={`w-50 btn ${
+                role === "employer" ? "btn-primary" : "btn-outline-primary"
+              }`}
             >
               Employer
             </button>
           </div>
-
-          {/* <div className="btn-group gap-4 text-center" >
-            <input type="radio" className="btn-check" name="btnradio" id="btnradio1" autocomplete="off" 
-            onChange={(e) => setRole(e.target.value)}
-            value="candidate" /> 
-            <label className="btn btn-outline-primary" for="btnradio1">Candidate</label>
-
-            <input type="radio" className="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
-            onChange={(e) => setRole(e.target.value)}
-            value="employer" />
-            <label className="btn btn-outline-primary" for="btnradio2">Employeer</label>
-          </div> */}
 
           <form onSubmit={handleEmailLogin}>
             <div className="mb-3">
@@ -226,7 +212,6 @@ const Login = () => {
             </div>
           </form>
 
-          {/* -----or------------ */}
           <div className="d-flex align-items-center my-4">
             <hr className="flex-grow-1" />
             <span className="mx-3 text-muted">or</span>
@@ -234,11 +219,11 @@ const Login = () => {
           </div>
 
           <div>
-            {/* <button>Continue with LinkedIn</button> */}
             <button onClick={handleGoogleLogin} className="form-control">
               Continue with Google
             </button>
           </div>
+
           <div className="text-center" onClick={handleSignupClick}>
             <a href="#">Are you new? Create an Account</a>
           </div>
@@ -249,9 +234,3 @@ const Login = () => {
 };
 
 export default Login;
-
-/*
-TODO: 
-1. Redirect to the fill profile page
-
-*/
