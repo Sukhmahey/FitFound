@@ -28,6 +28,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/settings" element={<SettingsPage />} />
         {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
         {/* Candidate Routes */}
         <Route
@@ -66,12 +67,6 @@ function App() {
             path="/candidate/badge-verification"
             element={
               <ExperienceVerificationReqPage></ExperienceVerificationReqPage>
-            }
-          />
-          <Route
-            path="/candidate/setting"
-            element={
-              <SettingsPage></SettingsPage>
             }
           />
         </Route>

@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import { useAuth } from '../../contexts/AuthContext';
-import { candidateApi } from '../../services/api';
+import { candidateApi, employerApi } from '../../services/api';
 import { auth } from '../../services/firebase';
 import { reauthenticateWithCredential, EmailAuthProvider, updatePassword } from 'firebase/auth';
 import SubscriptionSelector from './settingsComponents/SubscriptionSelector';
@@ -31,7 +31,8 @@ export default function SettingsPage() {
     
     const [role, setRole] = React.useState(user?.role);
     const [candidateName, setCandidateName] = React.useState('');
-    const [candidateEmail, setCandidateEmail] = React.useState('');
+    const [employerName, setEmployerName] = React.useState('');
+    const [currentUserEmail, setCurrentUserEmail] = React.useState('');
     const [open, setOpen] = React.useState(false);
     const [oldPassword, setOldPassword] = React.useState('');
     const [newPassword, setNewPassword] = React.useState('');
@@ -52,20 +53,43 @@ export default function SettingsPage() {
     };
 
 
-    useEffect(() => {
+//     useEffect(() => {
 
-        setCandidateEmail(user?.email);
-        if (role === 'candidate' && userId) {
-    
-    candidateApi.getProfileByUserId(userId).then((response) => {
-      setCandidateName(response.data.personalInfo.firstName);
-    }).catch((error) => {
-      console.error("Error fetching candidate profile:", error);
-    });
+       
+//         if (role === 'candidate' && userId) {
+//      setCandidateEmail(user?.email);
+//     candidateApi.getProfileByUserId(userId).then((response) => {
+//       setCandidateName(response.data.personalInfo.firstName);
+//     }).catch((error) => {
+//       console.error("Error fetching candidate profile:", error);
+//     });
+//   }
+
+
+//     }, [userId]);
+useEffect(() => {
+        setRole(user?.role)
+  setCurrentUserEmail(user?.email);
+  if (user?.role === 'candidate' && userId) {
+    console.log('Candidate')
+    candidateApi.getProfileByUserId(userId)
+      .then((response) => {
+        setCandidateName(response.data.personalInfo.firstName);
+      })
+      .catch((error) => {
+        console.error("Error fetching candidate profile:", error);
+      });
   }
-
-
-    }, [role, userId]);
+  else if (user?.role === 'employer') {
+    employerApi.getEmployerProfile(userId)
+    .then((response) =>
+        setEmployerName(response.data.companyName)
+    )
+    .catch((error) =>
+        console.error("Error fetching employer profile:", error)
+    );
+  }
+}, [userId]);
 
     const resetPassword = () => {
         const user = auth.currentUser;
@@ -95,6 +119,7 @@ export default function SettingsPage() {
                             <AccountCircleRoundedIcon sx={{ fontSize: '5rem' }}></AccountCircleRoundedIcon>
                         </CardMedia>
                         <CardContent>
+                            {employerName && <Typography variant='h6'>{employerName}</Typography>}
                             {candidateName && <Typography variant='h6'>{candidateName}</Typography>}
                         </CardContent>
                     </Card>
@@ -103,11 +128,11 @@ export default function SettingsPage() {
                         <Box>
                             <Box>
                                 <Typography component={"p"} sx={{ fontSize: '1rem' }}>Username</Typography>
-                                <TextField size='small' value={candidateEmail || ''}></TextField>
+                                <TextField size='small' value={currentUserEmail || ''}></TextField>
                             </Box>
                             <Box>
                                 <Typography component={"p"} sx={{ fontSize: '1rem' }}>Password</Typography>
-                                <TextField size='small' value={candidateEmail || ''} disabled={"true"} type="password"
+                                <TextField size='small' value={currentUserEmail || ''} disabled={true} type="password"
                                     autoComplete="current-password"></TextField>
                                 <Button onClick={handleClickOpen}>Reset</Button>
                                 <Dialog open={open} onClose={handleClose}>
@@ -158,16 +183,16 @@ export default function SettingsPage() {
                             </Box>
                         </Box>
                     </Box>
-        { role=== 'candidate' && <Box>
+        { role === 'candidate' && (<Box>
                         <Typography variant='h6' component={"h6"} className=' border-bottom'>Subscriptions</Typography>
                         <Box>
-                            {SubscriptionSelector()}
+                            <SubscriptionSelector/>
                         </Box>
-                    </Box>}
+                    </Box>)}
                     <Box>
                         <Typography variant='h6' component={"h6"} className=' border-bottom'>Notifications</Typography>
                         <Box>
-                            {NotificationPermission()}
+                            <NotificationPermission />
                         </Box>
                     </Box>
                     <Box>
