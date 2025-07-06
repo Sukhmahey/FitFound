@@ -11,6 +11,7 @@ import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
 import EducationStep from './onboardingSteps/EducationStep';
 import JobPreferenceStep from './onboardingSteps/JobPreferenceStep';
 import PortfolioStep from './onboardingSteps/PortfolioStep';
+import notify from '../../utils/notificationService';
 
 import {
   Box,
@@ -73,12 +74,8 @@ export default function MyProfile() {
     fetchVerificationData();
   }, [userId]);
 
-  // Debug state changes to verificationCompany
-  useEffect(() => {
-    console.log('Updated verificationCompany:', verificationCompany);
-  }, [verificationCompany]);
+ 
 
-  // Reset submit status on tab change
   useEffect(() => {
     setSubmitStatus('');
 
@@ -100,8 +97,12 @@ export default function MyProfile() {
     try {
       await candidateApi.updateProfile(userId, formData);
       setSubmitStatus('success');
+      notify.success("Profile saved successfully!");
+
     } catch (err) {
       console.error('Failed to update profile:', err);
+      notify.error("Failed to update profile");
+
       setSubmitStatus('error');
     }
   };
@@ -170,7 +171,7 @@ export default function MyProfile() {
         </Button>
       </Box>
 
-      {submitStatus === 'success' && (
+      {/* {submitStatus === 'success' && (
         <Box mt={2}>
           <Alert severity="success">
             <AlertTitle>Success</AlertTitle>
@@ -186,7 +187,7 @@ export default function MyProfile() {
             Something went wrong. Please try again later.
           </Alert>
         </Box>
-      )}
+      )} */}
     </Container>
   );
 }
