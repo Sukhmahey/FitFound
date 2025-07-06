@@ -17,7 +17,7 @@ const Header = () => {
                 <Grid size={2}>
                     <div>
                     <div>Notifications</div>
-                    <div>Settings</div>
+                    <a href='/settings'>Settings</a>
                 </div>
                 </Grid>
             </Grid>
