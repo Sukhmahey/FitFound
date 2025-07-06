@@ -30,6 +30,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/settings" element={<SettingsPage />} />
         {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
+        
         {/* Candidate Routes */}
         <Route
           path="/candidate"
@@ -39,6 +40,8 @@ function App() {
           </ProtectedRoute>
           }
         >
+          <Route path="settings" element={<SettingsPage />} />
+
           <Route
             path="onboarding"
             element={
@@ -79,6 +82,8 @@ function App() {
             </ProtectedRoute>
           }
         >
+          <Route path="settings" element={<SettingsPage />} />
+
           <Route path="onboarding" element={<EmployerOnboarding />} />
           <Route path="profile" element={<EmployerProfile />} />
           <Route path="dashboard" element={<EmployerDashboard />} />
