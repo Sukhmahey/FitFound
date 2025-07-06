@@ -11,7 +11,8 @@ import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
 import EducationStep from './onboardingSteps/EducationStep';
 import JobPreferenceStep from './onboardingSteps/JobPreferenceStep';
 import PortfolioStep from './onboardingSteps/PortfolioStep';
-import notify from '../../utils/notificationService';
+// import notify from '../../utils/notificationService';
+import useNotify from '../../utils/notificationService';
 
 import {
   Box,
@@ -26,6 +27,7 @@ import {
 
 export default function MyProfile() {
   const { user } = useAuth();
+  const notify = useNotify();
   const userId = user?.userId;
   const profileId = user?.profileId;
 
@@ -97,6 +99,7 @@ export default function MyProfile() {
     try {
       await candidateApi.updateProfile(userId, formData);
       setSubmitStatus('success');
+      console.log("Success in update")
       notify.success("Profile saved successfully!");
 
     } catch (err) {
