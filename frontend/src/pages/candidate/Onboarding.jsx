@@ -15,6 +15,7 @@ import InfoConfirmationPage from './onboardingSteps/InfoConfirmationPage';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import Dashboard from './Dashboard';
+import useNotify from '../../utils/notificationService';
 import {
   Box,
   Button,
@@ -29,6 +30,8 @@ export default function CandidateOnboarding() {
   const userId = user?.userId;
   const userEmail = user?.email;
   const navigate = useNavigate();
+  const notify = useNotify();
+
 
   const [stepIndex, setStepIndex] = useState(0);
   const [confirmedData, setConfirmedData] = useState(null);
@@ -120,9 +123,11 @@ export default function CandidateOnboarding() {
         setStepIndex(7);
       } else if (stepIndex === 7) {
         await candidateApi.updateJobPreference(userId, formData.jobPreference);
-        setSnackMsg("Profile saved successfully!");
-        setSnackSeverity("success");
-        setSnackOpen(true);
+        // setSnackMsg("Profile saved successfully!");
+        // setSnackSeverity("success");
+        // setSnackOpen(true);
+        notify.success("Profile saved successfully!");
+
         navigate('/candidate/dashboard');
 
         // setStepIndex(99);
@@ -131,9 +136,11 @@ export default function CandidateOnboarding() {
       }
     } catch (err) {
       console.error("Failed to submit:", err);
-      setSnackMsg("Submission failed.");
-      setSnackSeverity("error");
-      setSnackOpen(true);
+      notify.error("Failed to submit");
+
+      // setSnackMsg("Submission failed.");
+      // setSnackSeverity("error");
+      // setSnackOpen(true);
     }
   };
 

@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../../contexts/AuthContext';
 import { candidateApi } from '../../../services/api';
+import useNotify from '../../../utils/notificationService';
 
 export default function WorkExperienceStep({ data = [], onUpdate, verificationCompany = [] }) {
   // const handleChange = (index, field, value) => {
@@ -22,6 +23,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
   //   onUpdate(updated);
   // };
   const { user } = useAuth();
+  const notify = useNotify();
   const profileId = user?.profileId;
   const [hiredCompany, setHiredCompany] = React.useState([]);
   // const handleChange = (index, field, value) => {
@@ -35,23 +37,23 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
   //   onUpdate(updated);
   // };
 
-const handleChange = (index, field, value) => {
-  const updated = [...data];
+  const handleChange = (index, field, value) => {
+    const updated = [...data];
 
-  // If it's a month input field
-  if (field === 'startDate' || field === 'endDate') {
-    const [year, month] = value.split('-'); // convert YYYY-MM → MM-YYYY
-    value = `${month}-${year}`;
-  }
 
-  updated[index][field] = value;
+    if (field === 'startDate' || field === 'endDate') {
+      const [year, month] = value.split('-');
+      value = `${month}-${year}`;
+    }
 
-  if (field === 'role') {
-    updated[index]['jobTitle'] = value;
-  }
+    updated[index][field] = value;
 
-  onUpdate(updated);
-};
+    if (field === 'role') {
+      updated[index]['jobTitle'] = value;
+    }
+
+    onUpdate(updated);
+  };
 
   const normalizeDate = (dateStr) => {
     if (!dateStr) return '';
@@ -124,37 +126,38 @@ const handleChange = (index, field, value) => {
 
 
 
- useEffect(() => {
-  if (hiredCompany.length === 0) return;
-
-  
-
-  const hiredWorkHistory = hiredCompany.map((item) => ({
-    companyName: item.employerName,
-    jobTitle: item.job?.jobTitle || 'Developer',
-    role: item.job?.jobTitle || 'Developer',
-    startDate: item.date || '2024-01',
-    endDate: item.date || '2024-01',
-    achievements: [],
-    experienceLevel: '',
-    remarkFromEmployer: '',
-    fromHiredCompany: true
-  }));
-
-  const existingCompanies = data.map((d) => d.companyName.toLowerCase());
-  const newEntries = hiredWorkHistory.filter(
-    (h) => !existingCompanies.includes(h.companyName.toLowerCase())
-  );
-
-  if (newEntries.length === 0) return;
-
-  const updatedData = [...data, ...newEntries];
+  useEffect(() => {
+    if (hiredCompany.length === 0) return;
 
 
-  onUpdate(updatedData);
+
+    const hiredWorkHistory = hiredCompany.map((item) => ({
+      companyName: item.employerName,
+      jobTitle: item.job?.jobTitle || 'Developer',
+      role: item.job?.jobTitle || 'Developer',
+      startDate: item.date || '2024-01',
+      endDate: item.date || '2024-01',
+      achievements: [],
+      experienceLevel: '',
+      remarkFromEmployer: '',
+      fromHiredCompany: true
+    }));
+
+    const existingCompanies = data.map((d) => d.companyName.toLowerCase());
+    const newEntries = hiredWorkHistory.filter(
+      (h) => !existingCompanies.includes(h.companyName.toLowerCase())
+    );
+
+    if (newEntries.length === 0) return;
+
+    const updatedData = [...data, ...newEntries];
+    notify.success("You have been hired by a new company!");
+
+    onUpdate(updatedData);
 
 
-}, [hiredCompany]);
+  }, [hiredCompany]);
+
 
 
 
@@ -171,14 +174,14 @@ const handleChange = (index, field, value) => {
   //   return match?.status || null;
   // };
   const getVerificationStatus = (companyName) => {
-  if (!companyName) return null;
-  const match = verificationCompany.find(
-    v =>
-      v.company &&
-      v.company.trim().toLowerCase() === companyName.trim().toLowerCase()
-  );
-  return match?.status || null;
-};
+    if (!companyName) return null;
+    const match = verificationCompany.find(
+      v =>
+        v.company &&
+        v.company.trim().toLowerCase() === companyName.trim().toLowerCase()
+    );
+    return match?.status || null;
+  };
 
 
   return (
@@ -193,29 +196,24 @@ const handleChange = (index, field, value) => {
 
 
           return (
-            // <Box
-            //   key={index}
-            //   sx={{ border: '1px solid #ccc', borderRadius: 2, p: 3 }}
-            //   className="d-flex flex-column gap-3"
-            // >
             <Box
-  key={index}
-  sx={{
-    border: exp.fromHiredCompany ? '2px solid #fbc02d' : '1px solid #ccc',
-    backgroundColor: exp.fromHiredCompany ? '#fffde7' : '#fff',
-    borderRadius: 2,
-    p: 3
-  }}
-  className="d-flex flex-column gap-3"
->
-  {exp.fromHiredCompany && (
-    <Typography
-      variant="body2"
-      sx={{ color: '#f57f17', fontWeight: 'bold', mb: 1 }}
-    >
-      ⓘ This work experience was added based on your recent hiring. Kindly ensure all relevant details are accurate and up to date.
-    </Typography>
-  )}
+              key={index}
+              sx={{
+                border: exp.fromHiredCompany ? '2px solid #fbc02d' : '1px solid #ccc',
+                backgroundColor: exp.fromHiredCompany ? '#fffde7' : '#fff',
+                borderRadius: 2,
+                p: 3
+              }}
+              className="d-flex flex-column gap-3"
+            >
+              {exp.fromHiredCompany && (
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#f57f17', fontWeight: 'bold', mb: 1 }}
+                >
+                  ⓘ This work experience was added based on your recent hiring. Kindly ensure all relevant details are accurate and up to date.
+                </Typography>
+              )}
               <TextField
                 label="Company Name"
                 variant="outlined"

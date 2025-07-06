@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { candidateApi } from '../../../services/api';
 import InvitationSectionDialogbox from './InvitationSectionDialogbox';
@@ -11,8 +11,10 @@ import {
   List,
   ListItem,
 } from '@mui/material';
+import useNotify from '../../../utils/notificationService';
 
 export default function InvitationsSection({ setInvitationCount }) {
+  const notify = useNotify();
   const [invitations, setInvitations] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState(null);
@@ -45,6 +47,47 @@ export default function InvitationsSection({ setInvitationCount }) {
     };
     if (profileId) fetchInvitations();
   }, [profileId]);
+
+//   useEffect(() => {
+//   if (invitations.length !== 0) {
+//     const seen = new Set();
+    
+//     const uniqueInvitations = invitations.filter((inv) => {
+//       if (seen.has(inv.invitationId)) return false;
+//       seen.add(inv.invitationId);
+//       return true;
+//     });
+
+//     uniqueInvitations.forEach((inv) => {
+//       console.log(`🔔 New unique invitation from ${inv.employerName}`);
+//       notify.info(`🔔 New invitation from ${inv.employerName}`)
+      
+//     });
+
+    
+//   }
+// }, [invitations]);
+const alreadyNotified = useRef(new Set());
+
+useEffect(() => {
+  if (invitations.length !== 0) {
+    const seen = new Set();
+    const newUniques = invitations.filter((inv) => {
+      if (seen.has(inv.invitationId)) return false;
+      seen.add(inv.invitationId);
+      return true;
+    });
+
+    newUniques.forEach((inv) => {
+      if (!alreadyNotified.current.has(inv.invitationId)) {
+        console.log(`🔔 New unique invitation from ${inv.employerName}`);
+        notify.info(`🔔 New invitation from ${inv.employerName}`)
+        alreadyNotified.current.add(inv.invitationId); 
+      }
+    });
+  }
+}, [invitations]);
+
 
   return (
     <Box mt={4}>
