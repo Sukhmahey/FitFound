@@ -1,10 +1,16 @@
 import { toast } from 'react-toastify';
+import { useNotification } from '../contexts/NotificationContext';
+const useNotify = () => {
+  const { isMuted } = useNotification();
 
-const notify = {
-  success: (msg) => toast.success(msg),
-  error: (msg) => toast.error(msg),
-  info: (msg) => toast.info(msg),
-  warning: (msg) => toast.warning(msg),
+  const notify = {
+    success: (msg, options = {}) => !isMuted && toast.success(msg, options),
+    error: (msg, options = {}) => !isMuted && toast.error(msg, options),
+    info: (msg, options = {}) => !isMuted && toast.info(msg, options),
+    warning: (msg, options = {}) => !isMuted && toast.warning(msg, options),
+  };
+
+  return notify;
 };
 
-export default notify;
+export default useNotify;
