@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { candidateApi, employerApi } from '../../services/api';
 import { auth } from '../../services/firebase';
 import { reauthenticateWithCredential, EmailAuthProvider, updatePassword } from 'firebase/auth';
@@ -28,7 +29,9 @@ export default function SettingsPage() {
 
     const { user } = useAuth();
     const userId = user?.userId;
-    
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
     const [role, setRole] = React.useState(user?.role);
     const [candidateName, setCandidateName] = React.useState('');
     const [employerName, setEmployerName] = React.useState('');
@@ -53,43 +56,43 @@ export default function SettingsPage() {
     };
 
 
-//     useEffect(() => {
-
-       
-//         if (role === 'candidate' && userId) {
-//      setCandidateEmail(user?.email);
-//     candidateApi.getProfileByUserId(userId).then((response) => {
-//       setCandidateName(response.data.personalInfo.firstName);
-//     }).catch((error) => {
-//       console.error("Error fetching candidate profile:", error);
-//     });
-//   }
+    //     useEffect(() => {
 
 
-//     }, [userId]);
-useEffect(() => {
+    //         if (role === 'candidate' && userId) {
+    //      setCandidateEmail(user?.email);
+    //     candidateApi.getProfileByUserId(userId).then((response) => {
+    //       setCandidateName(response.data.personalInfo.firstName);
+    //     }).catch((error) => {
+    //       console.error("Error fetching candidate profile:", error);
+    //     });
+    //   }
+
+
+    //     }, [userId]);
+    useEffect(() => {
         setRole(user?.role)
-  setCurrentUserEmail(user?.email);
-  if (user?.role === 'candidate' && userId) {
-    console.log('Candidate')
-    candidateApi.getProfileByUserId(userId)
-      .then((response) => {
-        setCandidateName(response.data.personalInfo.firstName);
-      })
-      .catch((error) => {
-        console.error("Error fetching candidate profile:", error);
-      });
-  }
-  else if (user?.role === 'employer') {
-    employerApi.getEmployerProfile(userId)
-    .then((response) =>
-        setEmployerName(response.data.companyName)
-    )
-    .catch((error) =>
-        console.error("Error fetching employer profile:", error)
-    );
-  }
-}, [userId]);
+        setCurrentUserEmail(user?.email);
+        if (user?.role === 'candidate' && userId) {
+            console.log('Candidate')
+            candidateApi.getProfileByUserId(userId)
+                .then((response) => {
+                    setCandidateName(response.data.personalInfo.firstName);
+                })
+                .catch((error) => {
+                    console.error("Error fetching candidate profile:", error);
+                });
+        }
+        else if (user?.role === 'employer') {
+            employerApi.getEmployerProfile(userId)
+                .then((response) =>
+                    setEmployerName(response.data.companyName)
+                )
+                .catch((error) =>
+                    console.error("Error fetching employer profile:", error)
+                );
+        }
+    }, [userId]);
 
     const resetPassword = () => {
         const user = auth.currentUser;
@@ -108,6 +111,12 @@ useEffect(() => {
             });
 
     }
+
+    const handleLogout = () =>{
+        logout();
+        navigate("/login");
+    }
+
 
     return (
         <Container>
@@ -183,10 +192,10 @@ useEffect(() => {
                             </Box>
                         </Box>
                     </Box>
-        { role === 'candidate' && (<Box>
+                    {role === 'candidate' && (<Box>
                         <Typography variant='h6' component={"h6"} className=' border-bottom'>Subscriptions</Typography>
                         <Box>
-                            <SubscriptionSelector/>
+                            <SubscriptionSelector />
                         </Box>
                     </Box>)}
                     <Box>
@@ -197,16 +206,17 @@ useEffect(() => {
                     </Box>
                     <Box>
                         <Typography variant='h6' component={"h6"} className=' border-bottom'>Help</Typography>
-                        <Card sx={{ maxWidth: 345, display: 'flex', mb: 5 , mt : 5, justifyContent: 'center', alignItems: 'center' , borderRadius: 5}}>
-                        <CardContent sx={{display : 'flex', flexDirection: "column", justifyContent: 'center', alignItems: 'center', gap : 2}}>
-                            <Typography variant='h6' sx={{ fontStyle:"bold", fontWeight:"800"}}>Get the help you need</Typography>
-                            <Typography variant='p'>Reach got and get the help you need</Typography>
-                            <Button variant='outlined'>Contact Us</Button>
-                        </CardContent>
-                    </Card>
+                        <Card sx={{ maxWidth: 345, display: 'flex', mb: 5, mt: 5, justifyContent: 'center', alignItems: 'center', borderRadius: 5 }}>
+                            <CardContent sx={{ display: 'flex', flexDirection: "column", justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+                                <Typography variant='h6' sx={{ fontStyle: "bold", fontWeight: "800" }}>Get the help you need</Typography>
+                                <Typography variant='p'>Reach got and get the help you need</Typography>
+                                <Button variant='outlined'>Contact Us</Button>
+                            </CardContent>
+                        </Card>
                     </Box>
                 </Box>)
             }
+            <Button variant='standard' sx={{backgroundColor: "red", color:"white"}} onClick={handleLogout}>Logout</Button>
         </Container>
     )
 }
