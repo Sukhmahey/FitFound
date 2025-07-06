@@ -8,8 +8,15 @@ import { useNotification } from '../../../contexts/NotificationContext';
 export default function NotificationPermission() {
   const { isMuted, toggleMute } = useNotification(); 
 
-  const soundOnIcon = encodeURIComponent(`...`);
-  const silentIcon = encodeURIComponent(`...`);
+  const silentIcon = encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+  <path d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-2.8-1.6-5.2-4-6.3V4a2 2 0 0 0-4 0v.7c-2.4 1.1-4 3.5-4 6.3v5l-2 2v1h16v-1l-2-2z"/>
+</svg>
+`);
+
+  const soundOnIcon = encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
+  <path d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2zm6.29-5.88L18 15v-5c0-3.07-1.63-5.64-4.5-6.32V3a1.5 1.5 0 0 0-3 0v.68c-.46.1-.9.24-1.31.42l10.1 10.1zM4.27 3L3 4.27l4.39 4.39C7.14 9.57 7 10.27 7 11v5l-2 2v1h12.73l1 1L20 19.73 4.27 3z"/>
+</svg>
+`);
 
   const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     width: 62,
