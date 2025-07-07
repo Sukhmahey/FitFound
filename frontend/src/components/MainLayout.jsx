@@ -12,35 +12,31 @@ const MainLayout = () => {
 
   return (
     <AppInfoContext.Provider value={{ appGeneralInfo, setAppGeneralInfo }}>
-      <Box
-        sx={{
-          display: "flex",
-          minHeight: "100vh",
-          overflow: "hidden",
-        }}
-      >
-        {/* Fixed Sidebar (non-scrollable) */}
+      <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        {/* Fixed Sidebar */}
         <Box
           sx={{
             width: { xs: "100%", md: "250px" },
             flexShrink: 0,
             bgcolor: "#062F54",
             minHeight: "100vh",
-            position: "sticky",
+            position: "fixed",
             top: 0,
+            left: 0,
+            overflow: "auto",
           }}
         >
           <Sidebar />
         </Box>
 
-        {/* Scrollable Main Area */}
+        {/* Main Area */}
         <Box
           sx={{
-            flexGrow: 1,
+            marginLeft: { xs: 0, md: "250px" },
             display: "flex",
             flexDirection: "column",
-            maxHeight: "100vh",
-            overflow: "hidden",
+            width: "100%",
+            height: "100vh",
           }}
         >
           {/* Sticky Header */}
@@ -48,14 +44,22 @@ const MainLayout = () => {
             <Header />
           </Box>
 
-          {/* Scrollable Content */}
-          <Box sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
-            <Outlet />
-          </Box>
+          {/* Scrollable Content + Footer */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Box sx={{ flexGrow: 1, p: 2 }}>
+              <Outlet />
+            </Box>
 
-          {/* Footer */}
-          <Box sx={{ borderTop: "1px solid #eee" }}>
-            <Footer />
+            <Box sx={{ borderTop: "1px solid #eee" }}>
+              <Footer />
+            </Box>
           </Box>
         </Box>
       </Box>
