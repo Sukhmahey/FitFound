@@ -60,7 +60,7 @@ exports.getCandidateById = async (req, res) => {
   const { candidateId } = req.params;
   console.log(candidateId);
   try {
-    const candidate = await Candidate.findOne({ _id: candidateId }).lean();
+    const candidate = await Candidate.findById(candidateId);
 
     if (!candidate) {
       return res.status(404).json({ message: "Candidate profile not found" });

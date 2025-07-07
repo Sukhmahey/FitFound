@@ -5,7 +5,7 @@ const candidateController = require("../controllers/CandidateController");
 // General Profile Endpoints
 router.post("/", candidateController.createCandidateProfile);
 router.get("/user/:userId", candidateController.getCandidateByUserId);
-router.get("/:candidateId", candidateController.getCandidateById);
+router.get("/candidate/:candidateId", candidateController.getCandidateById);
 router.get("/", candidateController.getAllCandidateProfiles);
 router.patch("/:userId", candidateController.updateCandidateProfile);
 router.delete("/:userId", candidateController.deleteCandidateProfile);
