@@ -1,47 +1,46 @@
 import { useEffect, useState } from "react";
 import { employerApi, candidateApi } from "../../../services/api";
 
-const RecentSearch = () => {
+const RecentSearch = ( props ) => {
     const [job, setJob] = useState({});
     const [candidates, setCandidates] = useState([]);
     
     const candidateslist = [];
 
     useEffect(() => {
-        
-        employerApi.getLastJobSearch("6868603e0d6db40517c6f95b")
-        .then( result => {
-            const candidateIds = result.data.topMatchedCandidates;
-            setJob(result.data);
-            
-            return Promise.all( candidateIds.map( id => (
+        console.log(props.userProfile._id);
+        if (props.userProfile._id) {
+            employerApi.getLastJobSearch(props.userProfile._id) // employerId for testing: "6868603e0d6db40517c6f95b"
+            .then( result => {
+                const candidateIds = result.data.topMatchedCandidates;
+                setJob(result.data);
+
+                return Promise.all( candidateIds.map( id => (
                 candidateApi.getProfileById(id)
                 .then(result => {
-                    console.log(result.data);
+                    // console.log(result.data);
                     return result.data;
-                })
-            )));
+                    })
+                )));
 
-        })
-        .then ( result => {
+            })
+            .then ( result => {
             setCandidates(result);
-            console.log(result);
-        })
-        .catch( error => {
-            console.log(error);
-        });
+            // console.log(result);
+            })
+            .catch( error => {
+            // console.log(error);
+            });
+        }
+        
+        
 
-        candidates.forEach(element => {
-            console.log(element);
-        });
-
-    }, []);
+    }, [props.userProfile]);
 
 
     return (
         <div>
             <h4>Recent Search {job.jobTitle}</h4>
-                {console.log(candidates.data)}
             <div>
                 {candidates.length > 0 && candidates.map(candidate => (
                     <div className="card" key={candidate._id}>
