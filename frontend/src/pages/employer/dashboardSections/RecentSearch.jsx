@@ -1,4 +1,18 @@
+import { useEffect } from "react";
+import { employerApi } from "../../../services/api";
+
 const RecentSearch = () => {
+
+    useEffect(() => {
+        employerApi.getLastJobSearch("6868603e0d6db40517c6f95b")
+        .then( result => {
+            console.log(result);
+        })
+        .catch( error => {
+            console.log(error);
+        });
+    }, []);
+
     return (
         <div>
             <h3>Top Candidates</h3>

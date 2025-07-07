@@ -73,6 +73,7 @@ export const employerApi = {
     api.get(
       `/candidates?title=${data.title}&jobType=${data.jobType}&location=${data.location}&salaryFrom=${data.salaryFrom}&salaryTo=${data.salaryTo}&jobDescriptionKeywords=${data.jobDescription}&workStatus=${data.workStatus}&skills=${data.skills}`
     ),
+  getLastJobSearch: (jobId) => api.get(`/jobs/${jobId}`),
 
   sendConnectionRequest: (data) => api.post(`/interactions`, data),
   fetchCurrentEmployees: (employerId) =>
