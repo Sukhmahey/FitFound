@@ -14,29 +14,33 @@ const MainLayout = () => {
     <AppInfoContext.Provider value={{ appGeneralInfo, setAppGeneralInfo }}>
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "250px 1fr" },
+          display: "flex",
           minHeight: "100vh",
+          overflow: "hidden",
         }}
       >
-        {/* Sidebar */}
+        {/* Fixed Sidebar (non-scrollable) */}
         <Box
           sx={{
-            gridColumn: { xs: "1", md: "1" },
-            gridRow: "1 / span 3",
+            width: { xs: "100%", md: "250px" },
+            flexShrink: 0,
             bgcolor: "#062F54",
+            minHeight: "100vh",
+            position: "sticky",
+            top: 0,
           }}
         >
           <Sidebar />
         </Box>
 
-        {/* Main Content Area (Header + Outlet + Footer) */}
+        {/* Scrollable Main Area */}
         <Box
           sx={{
-            gridColumn: { xs: "1", md: "2" },
+            flexGrow: 1,
             display: "flex",
             flexDirection: "column",
-            minHeight: "100vh",
+            maxHeight: "100vh",
+            overflow: "hidden",
           }}
         >
           {/* Sticky Header */}
@@ -50,7 +54,9 @@ const MainLayout = () => {
           </Box>
 
           {/* Footer */}
-          <Footer />
+          <Box sx={{ borderTop: "1px solid #eee" }}>
+            <Footer />
+          </Box>
         </Box>
       </Box>
     </AppInfoContext.Provider>
