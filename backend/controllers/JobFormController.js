@@ -126,6 +126,21 @@ exports.getJobById = async (req, res) => {
   }
 };
 
+exports.getLastJobByEmployerId= async (req, res) => {
+  const { employerId } = req.params;
+  try {
+    const job = await Job.findOne({ employerId: employerId }).sort({ createdAt: -1 });
+
+    if (!job) {
+      return res.status(404).json({ message: "No Job found" });
+    }
+
+    res.status(200).json(job);
+  } catch (error) {
+    handleError(res, error, "Failed to fetch job posting", 500);
+  }
+};
+
 exports.updateJobById = async (req, res) => {
   const { jobId } = req.params;
   const updates = req.body;
