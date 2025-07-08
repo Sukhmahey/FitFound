@@ -48,6 +48,7 @@ export const candidateApi = {
     api.patch(`/interactions/${interactionId}/final-status`, {
       status: "rejected",
     }),
+  getProfileById: (candidateId) => api.get(`/candidates/candidate/${candidateId}`)
 };
 
 export const jobVerificationApi = {
@@ -73,6 +74,7 @@ export const employerApi = {
     api.get(
       `/candidates?title=${data.title}&jobType=${data.jobType}&location=${data.location}&salaryFrom=${data.salaryFrom}&salaryTo=${data.salaryTo}&jobDescriptionKeywords=${data.jobDescription}&workStatus=${data.workStatus}&skills=${data.skills}`
     ),
+  getLastJobSearch: (jobId) => api.get(`/jobs/lastJob/${jobId}`),
 
   sendConnectionRequest: (data) => api.post(`/interactions`, data),
   fetchCurrentEmployees: (employerId) =>
@@ -90,6 +92,7 @@ export const employerApi = {
       status: "hired",
     }),
   saveTopCandidates: (jobId, data) => api.patch(`/jobs/${jobId}`, data),
+  getLastJob: (employerId) => api.get(`/jobs/${employerId}`)
 };
 
 export { api };
