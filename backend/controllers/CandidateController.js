@@ -58,7 +58,6 @@ exports.createCandidateProfile = async (req, res) => {
 
 exports.getCandidateById = async (req, res) => {
   const { candidateId } = req.params;
-  console.log(candidateId);
   try {
     const candidate = await Candidate.findById(candidateId);
 

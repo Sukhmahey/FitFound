@@ -220,6 +220,47 @@ const RecentSearch = ( props ) => {
           </Box>
         ))}
       </Stack>
+
+      {/* <Dialog
+        open={openModal}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Candidate Basic Info
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedCandidate && (
+            <Box>
+              <Typography variant="body2" gutterBottom>
+                <strong>First Name:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).firstName || "N/A"}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Last Name:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).lastName || "N/A"}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Email:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).email || "N/A"}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Status:</strong>{" "}
+                {getPersonalInfo(selectedCandidate).currentStatus || "N/A"}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog> */}
+
     </Box>
     );
 
