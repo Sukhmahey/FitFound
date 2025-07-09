@@ -31,6 +31,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/notifications-list" element={<NotificationList></NotificationList>}></Route>
+        <Route path="/candidate/onboarding" element={<CandidateOnboarding />} />
         {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
         
         {/* Candidate Routes */}
@@ -44,12 +45,12 @@ function App() {
         >
           <Route path="settings" element={<SettingsPage />} />
 
-          <Route
+          {/* <Route
             path="onboarding"
             element={
               <CandidateOnboarding />
             }
-          />
+          /> */}
           <Route
             path="dashboard"
             element={

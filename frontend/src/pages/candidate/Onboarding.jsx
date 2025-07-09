@@ -79,11 +79,21 @@ export default function CandidateOnboarding() {
   const handleManual = () => setStepIndex(1);
   const handleUpload = () => setStepIndex(14);
 
+  // const convertMonthFormat = (value) => {
+  //   if (!value || !value.includes("-")) return value;
+  //   const [year, month] = value.split("-");
+  //   return `${month}-${year}`;
+  // };
   const convertMonthFormat = (value) => {
-    if (!value || !value.includes("-")) return value;
-    const [year, month] = value.split("-");
+  if (!value || typeof value !== 'string') return '';
+  const parts = value.split('-');
+  if (parts.length === 2 && parts[0].length === 4 && parts[1].length === 2) {
+    const [year, month] = parts;
     return `${month}-${year}`;
-  };
+  }
+  return value;
+};
+
 
   const handleNextBtn = async () => {
     try {
