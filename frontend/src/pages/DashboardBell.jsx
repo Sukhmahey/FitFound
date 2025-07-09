@@ -29,9 +29,9 @@ export default function DashboardBell() {
 
   return (
     <>
-      <IconButton onClick={handleOpen} color="#062F54">
+      <IconButton onClick={handleOpen}>
         <Badge badgeContent={unreadCount} color="error">
-          <NotificationsIcon />
+          <NotificationsIcon sx={{color:"#062F54"}}/>
         </Badge>
       </IconButton>
 
