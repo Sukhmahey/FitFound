@@ -3,8 +3,7 @@ import { AppInfoContext } from "../contexts/AppInfoContext";
 import { Link } from 'react-router-dom';
 import DashboardBell from '../pages/DashboardBell';
 import { useAuth } from "../contexts/AuthContext";
-import { Link } from "react-router-dom";
-import { Box, Typography, IconButton, Avatar, Badge } from "@mui/material";
+import { Box, Typography, IconButton, Avatar, Badge, Grid } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SettingsIcon from "@mui/icons-material/AccountCircle"; // Profile icon as per your request
 
@@ -51,26 +50,14 @@ const Header = () => {
 
       {/* Icons Section */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <IconButton>
-          <Badge badgeContent={3} color="error">
-            <NotificationsIcon sx={{ color: primaryColor }} />
-          </Badge>
-        </IconButton>
-
-            <Grid container spacing={2}>
-                <Grid size={10}>
-                    <div>{appGeneralInfo.pageTitle}</div>
-                </Grid>
-                <Grid size={2}>
-                    <div>
-                        <DashboardBell></DashboardBell>
-                        <Link to={settingsPath}>Settings</Link>
-                    </div>
-                </Grid>
-            </Grid>
-
+        
+        <div>
+            <DashboardBell></DashboardBell>
+                    
         </div>
-    );
+
+        
+    
         <Link to={settingsPath} style={{ textDecoration: "none" }}>
           <IconButton>
             <Avatar sx={{ bgcolor: primaryColor, width: 32, height: 32 }}>
