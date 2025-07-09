@@ -12,20 +12,24 @@ const EmployerDashboard = () => {
   const navigate = useNavigate();
   const { setAppGeneralInfo } = useContext(AppInfoContext);
   const { user } = useAuth();
-  const userId = user?.userId;
-  const [userProfile, setUserProfile] = useState({});
+  // const userId = user?.userId;
+  // const [userProfile, setUserProfile] = useState({});
+
+  
     
   useEffect(() => {
       setAppGeneralInfo({ pageTitle: "Dashboard"});
 
-      // Getting the user profile by ID
-      employerApi.getEmployerProfile(userId)
-      .then( result => {
-        setUserProfile(result.data);;
-      })
-      .catch( error => {
-        navigate('/login');
-      });
+      console.log(user);
+
+      // // Getting the user profile by ID
+      // employerApi.getEmployerProfile(userId)
+      // .then( result => {
+      //   setUserProfile(result.data);;
+      // })
+      // .catch( error => {
+      //   navigate('/login');
+      // });
 
   }, []);
   
@@ -34,7 +38,7 @@ const EmployerDashboard = () => {
     <div>
       <div>
         <PopularTech></PopularTech>
-        <RecentSearch userProfile = { userProfile }></RecentSearch>
+        <RecentSearch></RecentSearch>
       </div>
     </div>
   );
