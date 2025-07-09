@@ -29,7 +29,7 @@ export default function DashboardBell() {
 
   return (
     <>
-      <IconButton onClick={handleOpen} color="inherit">
+      <IconButton onClick={handleOpen} color="#062F54">
         <Badge badgeContent={unreadCount} color="error">
           <NotificationsIcon />
         </Badge>
