@@ -11,26 +11,9 @@ import RecentSearch from "./dashboardSections/RecentSearch";
 const EmployerDashboard = () => {
   const navigate = useNavigate();
   const { setAppGeneralInfo } = useContext(AppInfoContext);
-  const { user } = useAuth();
-  // const userId = user?.userId;
-  // const [userProfile, setUserProfile] = useState({});
-
   
-    
   useEffect(() => {
       setAppGeneralInfo({ pageTitle: "Dashboard"});
-
-      console.log(user);
-
-      // // Getting the user profile by ID
-      // employerApi.getEmployerProfile(userId)
-      // .then( result => {
-      //   setUserProfile(result.data);;
-      // })
-      // .catch( error => {
-      //   navigate('/login');
-      // });
-
   }, []);
   
 
