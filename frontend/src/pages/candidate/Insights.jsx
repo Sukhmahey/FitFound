@@ -7,7 +7,6 @@ import AppearanceIn from "./insightsSections/AppearanceIn";
 const Insights = () => {
     return (
         <div>
-            <h1>Hi!</h1>
             {
             <AppearanceIn></AppearanceIn>
             /* <ProfileVisibility></ProfileVisibility>

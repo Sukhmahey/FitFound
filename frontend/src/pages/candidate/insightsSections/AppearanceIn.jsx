@@ -1,51 +1,70 @@
 // MultiCharts.js
-import React from 'react';
-import { PieChart, Pie, ResponsiveContainer } from 'recharts';
+import React, { useEffect, useState } from 'react';
+import { PieChart, Pie, ResponsiveContainer, Cell } from 'recharts';
+
+import { candidateApi } from '../../../services/api';
 
 const data1 = [
   { name: 'Group A', value: 400 },
   { name: 'Group B', value: 300 },
 ];
 
-const data2 = [
-  { name: 'Group C', value: 200 },
-  { name: 'Group D', value: 100 },
-];
-
-const data3 = [
-  { name: 'Group E', value: 600 },
-  { name: 'Group F', value: 150 },
-];
-
 const AppearanceIn = () => {
-  return (
-    <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-      {/* Cada gráfico debe tener un contenedor con altura definida */}
-      <div style={{ width: 200, height: 200 }}>
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie data={data1} dataKey="value" outerRadius={60} fill="#8884d8" />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+    const [skillsData, setSkillsData] = useState([]);
 
-      <div style={{ width: 200, height: 200 }}>
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie data={data2} dataKey="value" outerRadius={60} fill="#82ca9d" />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+    useEffect(() => {
+        candidateApi.getAppearanceInSkills("6867037fab263ff7903b8f21")
+        .then(result => { 
+            console.log(result.data); 
+            setSkillsData([...result.data]);
+        })
+        .catch();
+    }, []);
 
-      <div style={{ width: 200, height: 200 }}>
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie data={data3} dataKey="value" outerRadius={60} fill="#ffc658" />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+    function capitalizeWords(text) {
+        return text
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    const COLORS = ['#81C784', '#E57373'];
+
+
+    return (
+        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexDirection:'column' }}>
+            <p>Appearance In</p>
+            {skillsData.length > 0 && skillsData.map((skill, index) => {
+                const appearances = Math.trunc(((skill.candidateAppearances / skill.totalPlatformSearches) * 100) * 100) / 100;
+                const chartData = [
+                    { name: "hits", value:  appearances},
+                    { name: 'no hits', value: Math.trunc((100 - appearances) * 100) / 100 }
+                ];
+
+            return (
+                <div key={index} style={{ width: 250, height: 200 }}>
+                    <p>{capitalizeWords(skill.skill)}</p>
+                    <ResponsiveContainer key={skill.skill}>
+                        <PieChart>
+                        <Pie
+                            data={chartData}
+                            dataKey="value"
+                            outerRadius={60}
+                            fill="#8884d8"
+                            // label={({ name, value }) => `${name}: ${value}%`}
+                            >
+                            {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <p>{`${skill.candidateAppearances}/${skill.totalPlatformSearches} Searches`}</p>
+                </div>
+            );
+            })}
+        </div>
+    );
 };
 
 export default AppearanceIn;
