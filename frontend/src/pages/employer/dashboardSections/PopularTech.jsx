@@ -40,6 +40,13 @@ const PopularTech = () => {
     return <CodeIcon fontSize="medium" />;
   };
 
+  function capitalizeWords(text) {
+    return text
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography
@@ -98,7 +105,7 @@ const PopularTech = () => {
                 textAlign: "center",
               }}
             >
-              “{role.role}”
+              “{capitalizeWords(role.role)}”
             </Typography>
 
             <Typography
