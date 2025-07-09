@@ -1,6 +1,6 @@
 // MultiCharts.js
 import React, { useEffect, useState } from 'react';
-import { PieChart, Pie, ResponsiveContainer, Cell } from 'recharts';
+import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 
 import { candidateApi } from '../../../services/api';
 
@@ -37,28 +37,30 @@ const AppearanceIn = () => {
             {skillsData.length > 0 && skillsData.map((skill, index) => {
                 const appearances = Math.trunc(((skill.candidateAppearances / skill.totalPlatformSearches) * 100) * 100) / 100;
                 const chartData = [
-                    { name: "hits", value:  appearances},
-                    { name: 'no hits', value: Math.trunc((100 - appearances) * 100) / 100 }
+                    { name: "Appearances", value:  appearances},
+                    { name: 'No Appearances', value: Math.trunc((100 - appearances) * 100) / 100 }
                 ];
-
+                
             return (
-                <div key={index} style={{ width: 250, height: 200 }}>
+                <div>
                     <p>{capitalizeWords(skill.skill)}</p>
-                    <ResponsiveContainer key={skill.skill}>
-                        <PieChart>
-                        <Pie
-                            data={chartData}
-                            dataKey="value"
-                            outerRadius={60}
-                            fill="#8884d8"
-                            // label={({ name, value }) => `${name}: ${value}%`}
-                            >
-                            {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
+                    <div key={index} style={{ width: 250, height: 250 }}>
+                        <ResponsiveContainer key={skill.skill}>
+                            <PieChart>
+                            <Pie
+                                data={chartData}
+                                dataKey="value"
+                                outerRadius={60}
+                                fill="#8884d8"
+                                >
+                                {chartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
                     <p>{`${skill.candidateAppearances}/${skill.totalPlatformSearches} Searches`}</p>
                 </div>
             );
