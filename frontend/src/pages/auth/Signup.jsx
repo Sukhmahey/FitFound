@@ -4,6 +4,14 @@ import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
 import { auth } from "../../services/firebase";
 import { userApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import {
+  Button,
+  TextField,
+  Typography,
+  Box,
+  Paper,
+  useMediaQuery,
+} from "@mui/material";
 
 const Signup = () => {
   const [role, setRole] = useState("candidate");
@@ -15,6 +23,8 @@ const Signup = () => {
   const [responseMessage, setResponseMessage] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   const handleSignUpClick = (e) => {
     e.preventDefault();
@@ -67,130 +77,231 @@ const Signup = () => {
     setRole(selectedRole);
   };
 
+  const handleLoginRedirect = () => {
+    navigate("/login");
+  };
+
   return (
-    <div className="container bg-light mt-3">
-      <div className="row p-3">
-        <div className="col-md-6 d-flex justify-content-center align-items-center">
-          <div className="text-center">
-            <h1>FitFound</h1>
-            <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
-          </div>
-        </div>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        flexDirection: isMobile ? "column" : "row",
+        fontFamily: "Figtree, sans-serif",
+      }}
+    >
+      {/* Logo for Desktop */}
+      <Box
+        sx={{
+          position: isMobile ? "static" : "absolute",
+          top: 20,
+          left: 20,
+          display: isMobile ? "none" : "block",
+          zIndex: 10,
+        }}
+      >
+        <Box
+          sx={{
+            width: 120,
+            height: 40,
+            bgcolor: "#ccc",
+            borderRadius: "8px",
+            textAlign: "center",
+            lineHeight: "40px",
+            fontWeight: 600,
+          }}
+        >
+          LOGO
+        </Box>
+      </Box>
 
-        <div className="col-md-6">
-          <div className="text-center">
-            <span className="text-muted">Sign up as</span>
-          </div>
+      {/* Form Panel */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#fff",
+          py: isMobile ? 4 : 8,
+          px: isMobile ? 2 : 4,
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{ width: "100%", maxWidth: 400, p: isMobile ? 2 : 4 }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              fontFamily: "Montserrat, sans-serif",
+              fontWeight: 600,
+              mb: 2,
+              textAlign: isMobile ? "center" : "left",
+            }}
+          >
+            Create your account
+          </Typography>
 
-          <div className="d-flex gap-3 mt-2 mb-2">
-            <button
+          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            <Button
               onClick={() => handleRoleClick("candidate")}
-              type="button"
-              className={`btn w-50 ${
-                role === "candidate" ? "btn-primary" : "btn-secondary"
-              }`}
+              fullWidth
+              variant={role === "candidate" ? "contained" : "outlined"}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                bgcolor: role === "candidate" ? "#0E3A62" : "white",
+                color: role === "candidate" ? "white" : "#0E3A62",
+              }}
             >
               Candidate
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleRoleClick("employer")}
-              type="button"
-              className={`btn w-50 ${
-                role === "employer" ? "btn-primary" : "btn-secondary"
-              }`}
+              fullWidth
+              variant={role === "employer" ? "contained" : "outlined"}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                bgcolor: role === "employer" ? "#0E3A62" : "white",
+                color: role === "employer" ? "white" : "#0E3A62",
+              }}
             >
               Employer
-            </button>
-          </div>
+            </Button>
+          </Box>
 
           <form onSubmit={handleSignUpClick}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                className="form-control"
-                name="email"
-                placeholder="Email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+            <TextField
+              label="Email"
+              type="email"
+              variant="outlined"
+              fullWidth
+              margin="dense"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <TextField
+              label="Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              margin="dense"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <TextField
+              label="Confirm Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              margin="dense"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
 
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                className="form-control"
-                name="password"
-                placeholder="Password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="confirm-password" className="form-label">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                className="form-control"
-                name="confirm-password"
-                placeholder="Confirm password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* {role === "employer" && (
+            {role === "employer" && (
               <>
-                <div className="mb-3">
-                  <label className="form-label">Company Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Company Name"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Company Description</label>
-                  <textarea
-                    className="form-control"
-                    placeholder="Company Description"
-                    value={companyDescription}
-                    onChange={(e) => setCompanyDescription(e.target.value)}
-                    required
-                  />
-                </div>
+                <TextField
+                  label="Company Name"
+                  variant="outlined"
+                  fullWidth
+                  margin="dense"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  required
+                />
+                <TextField
+                  label="Company Description"
+                  variant="outlined"
+                  fullWidth
+                  margin="dense"
+                  multiline
+                  rows={3}
+                  value={companyDescription}
+                  onChange={(e) => setCompanyDescription(e.target.value)}
+                  required
+                />
               </>
-            )} */}
+            )}
 
-            <div>
-              <input
-                type="submit"
-                className="form-control btn btn-success"
-                value="Sign up"
-              />
-            </div>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 2,
+                bgcolor: "#0E3A62",
+                borderRadius: "12px",
+                textTransform: "none",
+                py: 1.2,
+              }}
+            >
+              Sign up
+            </Button>
           </form>
 
-          <div className="mt-2 text-danger">{responseMessage}</div>
-        </div>
-      </div>
-    </div>
+          {responseMessage && (
+            <Typography
+              variant="body2"
+              sx={{ mt: 2, color: "red", textAlign: "center" }}
+            >
+              {responseMessage}
+            </Typography>
+          )}
+
+          <Typography
+            variant="body2"
+            sx={{ mt: 3, textAlign: "center", cursor: "pointer" }}
+            onClick={handleLoginRedirect}
+          >
+            Already have an account?{" "}
+            <span style={{ color: "#0E3A62", fontWeight: 600 }}>Log in</span>
+          </Typography>
+        </Paper>
+      </Box>
+
+      {/* Right Panel */}
+      <Box
+        sx={{
+          flex: 1,
+          bgcolor: "#0E3A62",
+          color: "white",
+          display: isMobile ? "none" : "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 4,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 500,
+            textAlign: "center",
+          }}
+        >
+          Join the smarter way to get hired
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            maxWidth: 400,
+            textAlign: "center",
+            fontFamily: "Figtree, sans-serif",
+          }}
+        >
+          FitFound helps you connect with employers or find the right candidates
+          efficiently.
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 

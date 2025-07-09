@@ -1,235 +1,258 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import {
   signInWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
-import { auth, provider, signInWithPopup } from "../../services/firebase";
-import { userApi, loginApi } from "../../services/api";
+import { auth } from "../../services/firebase";
+import { userApi, loginApi, employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import {
+  Button,
+  TextField,
+  Typography,
+  Box,
+  Paper,
+  useMediaQuery,
+} from "@mui/material";
 
 const Login = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState("candidate");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [responseMessage, setResponseMessage] = useState("");
   const { login } = useAuth();
+
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const isTablet = useMediaQuery("(min-width:601px) and (max-width:1024px)");
+
+  const handleNavigate = (role, userId) => {
+    if (role === "employer") {
+      employerApi
+        .getEmployerProfile(userId)
+        .then(() => navigate("/employer/dashboard"))
+        .catch(() => navigate("/employer/onboarding"));
+    } else {
+      navigate("/candidate/dashboard");
+    }
+  };
 
   const handleEmailLogin = (e) => {
     e.preventDefault();
-
     setPersistence(auth, browserLocalPersistence).then(() => {
       signInWithEmailAndPassword(auth, email, password)
         .then((result) => result.user.getIdToken())
-        .then((idToken) => {
-          loginApi
-            .loginUser({ idToken })
-            .then((res) => {
-              return userApi.getUserByEmail({
-                email: res.data.decodedidToken.email,
-              });
-            })
-            .then((result) => {
-              if (result.data.userId) {
-                login(result.data);
-                localStorage.setItem("userId", result?.data?.userId);
-                console.log("login function", result.data);
-                setResponseMessage("User logged in successful");
-                console.log(responseMessage);
-                console.log("User logged in successful");
-                navigate(
-                  result.data.role === "candidate"
-                    ? "/candidate/dashboard"
-                    : "/employer/dashboard"
-                );
-              } else {
-                setResponseMessage("User login failed");
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        })
-        .catch((error) => {
-          console.error("Error in login", error.message);
-        });
+        .then((idToken) =>
+          loginApi.loginUser({ idToken }).then((res) =>
+            userApi
+              .getUserByEmail({ email: res.data.decodedidToken.email })
+              .then((result) => {
+                if (result.data.userId) {
+                  login(result.data);
+                  localStorage.setItem("userId", result.data.userId);
+                  handleNavigate(result.data.role, result.data.userId);
+                }
+              })
+          )
+        )
+        .catch((error) => console.error("Login Error:", error));
     });
   };
 
-  const handleGoogleLogin = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => result.user.getIdToken())
-      .then((idToken) => loginApi.loginUser({ idToken }))
-      .then((res) => {
-        userApi
-          .getUserByEmail({ email: res.data.decodedidToken.email })
-          .then((result) => {
-            if (!result.data.userId) {
-              const newUser = {
-                role: role,
-                email: res.data.decodedidToken.email,
-                idFirebaseUser: res.data.decodedidToken.uid,
-              };
-
-              userApi.addUser(newUser).then((resultNewUser) => {
-                login(resultNewUser.data);
-                setResponseMessage("User registered successful");
-                console.log("User registered successful", resultNewUser.data);
-                navigate(
-                  resultNewUser.data.role === "candidate"
-                    ? "/candidate/dashboard"
-                    : "/employer/dashboard"
-                );
-              });
-            } else {
-              login(result.data);
-              setResponseMessage("User logged in successful");
-              console.log("User logged in successful", result.data);
-              navigate(
-                result.data.role === "candidate"
-                  ? "/candidate/dashboard"
-                  : "/employer/dashboard"
-              );
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
-  const handleSignupClick = () => {
-    navigate("/signup");
-  };
-
-  const handleOnclickRole = (e) => {
-    setRole(e.target.id);
-    console.log(e.target);
-  };
+  const handleForgotPassword = () => navigate("/forgot-password");
+  const handleSignupClick = () => navigate("/signup");
 
   return (
-    <div className="container bg-light mt-3">
-      <div className="row p-3">
-        {/* FitFount texts */}
-        <div className="col-md-6 d-flex justify-content-center align-items-center">
-          <div className="text-center">
-            <h1>FitFound</h1>
-            <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
-          </div>
-        </div>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        flexDirection: isMobile ? "column" : "row",
+        fontFamily: "Figtree, sans-serif",
+      }}
+    >
+      {/* Left Panel (Logo for desktop) */}
+      <Box
+        sx={{
+          position: isMobile ? "static" : "absolute",
+          top: 20,
+          left: 20,
+          zIndex: 10,
+          display: isMobile ? "none" : "block",
+        }}
+      >
+        <Box
+          sx={{
+            width: 120,
+            height: 40,
+            bgcolor: "#ccc",
+            borderRadius: "8px",
+            textAlign: "center",
+            lineHeight: "40px",
+            fontWeight: 600,
+          }}
+        >
+          LOGO
+        </Box>
+      </Box>
 
-        {/* Login Form */}
-        <div className="col-md-6">
-          <div className="text-center">
-            <span className="text-muted">Login as</span>
-          </div>
+      {/* Form Panel */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#fff",
+          py: isMobile ? 4 : 8,
+          px: isMobile ? 2 : 4,
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{ width: "100%", maxWidth: 400, p: isMobile ? 2 : 4 }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              fontFamily: "Montserrat, sans-serif",
+              fontWeight: 600,
+              mb: 2,
+              textAlign: isMobile ? "center" : "left",
+            }}
+          >
+            Log in to your account
+          </Typography>
 
-          <div className="d-flex gap-3 mt-2 mb-2">
-            <button
-              onClick={(e) => handleOnclickRole(e)}
-              type="button"
-              id="candidate"
-              className="btn btn-primary w-50"
+          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            <Button
+              onClick={() => setRole("candidate")}
+              fullWidth
+              variant={role === "candidate" ? "contained" : "outlined"}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                bgcolor: role === "candidate" ? "#0E3A62" : "white",
+                color: role === "candidate" ? "white" : "#0E3A62",
+              }}
             >
               Candidate
-            </button>
-            <button
-              onClick={(e) => handleOnclickRole(e)}
-              type="button"
-              className="btn btn-secondary w-50"
-              id="employer"
+            </Button>
+            <Button
+              onClick={() => setRole("employer")}
+              fullWidth
+              variant={role === "employer" ? "contained" : "outlined"}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                bgcolor: role === "employer" ? "#0E3A62" : "white",
+                color: role === "employer" ? "white" : "#0E3A62",
+              }}
             >
               Employer
-            </button>
-          </div>
-
-          {/* <div className="btn-group gap-4 text-center" >
-            <input type="radio" className="btn-check" name="btnradio" id="btnradio1" autocomplete="off" 
-            onChange={(e) => setRole(e.target.value)}
-            value="candidate" /> 
-            <label className="btn btn-outline-primary" for="btnradio1">Candidate</label>
-
-            <input type="radio" className="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
-            onChange={(e) => setRole(e.target.value)}
-            value="employer" />
-            <label className="btn btn-outline-primary" for="btnradio2">Employeer</label>
-          </div> */}
+            </Button>
+          </Box>
 
           <form onSubmit={handleEmailLogin}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                className="form-control"
-                name="email"
-                id="email"
-                placeholder="Email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            <TextField
+              label="Email"
+              variant="outlined"
+              fullWidth
+              margin="dense"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              margin="dense"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+              <Button
+                onClick={handleForgotPassword}
+                sx={{
+                  textTransform: "none",
+                  fontSize: "13px",
+                  color: "#0E3A62",
+                }}
+              >
+                Forgot password?
+              </Button>
+            </Box>
 
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                className="form-control"
-                id="password"
-                placeholder="Password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <div className="text-end">
-                <span>I forgot my password</span>
-              </div>
-            </div>
-
-            <div>
-              <input type="submit" className="form-control" value="Login" />
-            </div>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 2,
+                bgcolor: "#0E3A62",
+                borderRadius: "12px",
+                textTransform: "none",
+                py: 1.2,
+              }}
+            >
+              Log in
+            </Button>
           </form>
 
-          {/* -----or------------ */}
-          <div className="d-flex align-items-center my-4">
-            <hr className="flex-grow-1" />
-            <span className="mx-3 text-muted">or</span>
-            <hr className="flex-grow-1" />
-          </div>
+          <Typography
+            variant="body2"
+            sx={{ mt: 3, textAlign: "center", cursor: "pointer" }}
+            onClick={handleSignupClick}
+          >
+            New here?{" "}
+            <span style={{ color: "#0E3A62", fontWeight: 600 }}>
+              Create an Account
+            </span>
+          </Typography>
+        </Paper>
+      </Box>
 
-          <div>
-            {/* <button>Continue with LinkedIn</button> */}
-            <button onClick={handleGoogleLogin} className="form-control">
-              Continue with Google
-            </button>
-          </div>
-          <div className="text-center" onClick={handleSignupClick}>
-            <a href="#">Are you new? Create an Account</a>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* Right Panel */}
+      <Box
+        sx={{
+          flex: 1,
+          bgcolor: "#0E3A62",
+          color: "white",
+          display: isMobile ? "none" : "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 4,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 500,
+            textAlign: "center",
+          }}
+        >
+          Very simple way you can engage
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            maxWidth: 400,
+            textAlign: "center",
+            fontFamily: "Figtree, sans-serif",
+          }}
+        >
+          Welcome to DAILY Inventory Management System! Efficiently track and
+          manage your inventory with ease.
+        </Typography>
+        {/* Optionally add graphs or images */}
+      </Box>
+    </Box>
   );
 };
 
 export default Login;
-
-/*
-TODO: 
-1. Redirect to the fill profile page
-
-*/

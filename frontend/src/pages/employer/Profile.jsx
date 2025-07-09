@@ -1,206 +1,162 @@
-import { useEffect, useState } from "react";
-import { useContext } from 'react';
+import { useEffect, useState, useContext } from "react";
+import { Box, Typography, Tabs, Tab, Button, Paper } from "@mui/material";
 import { useForm, FormProvider } from "react-hook-form";
-
+import { useNavigate } from "react-router-dom";
 import { employerApi } from "../../services/api";
-import { useAuth } from '../../contexts/AuthContext';
-import { updateFileByUrl } from "../../utils/supabaseStorage";
+import { useAuth } from "../../contexts/AuthContext";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
-
-import CompanyInfo from './onboardingSteps/CompanyInfo';
-import UserContactInfo from './onboardingSteps/UserContactInfo';
+import CompanyInfo from "./onboardingSteps/CompanyInfo";
+import UserContactInfo from "./onboardingSteps/UserContactInfo";
 
 const EmployerProfile = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
-  const [formSection, setFormSection] = useState("details"); // the other is contact
+  const [formSection, setFormSection] = useState(0);
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
-  const [userProfile, setUserProfile] = useState({});
-  const [logoUrl, setLogoUrl] = useState("");
-  let profilePictureUrl;
-  const [detailsIsActive, setDetailsIsActive] = useState(true);
-  const [contactIsActive, setContactIsActive] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
+  const [messageClass, setMessageClass] = useState("");
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
-  
-    useEffect(() => {
-        setAppGeneralInfo({ pageTitle: "My Profile"});
-    }, []);
-
-  const handleFormSectionClick = (e) => {
-    setFormSection(e.target.id);
-    
-    console.log(e.target.id);
-
-    // when the user changes the form section
-    if (e.target.id == "details") {
-      methods.reset(companyInfo);
-
-      setDetailsIsActive(true);
-      setContactIsActive(false);
-    }
-    else {
-      methods.reset(contactInfo);
-
-      setDetailsIsActive(false);
-      setContactIsActive(true);
-    }
-  };
 
   useEffect(() => {
-    // Getting the user profile by ID
-    employerApi.getEmployerProfile(userId)
-    .then( result => {
-      setUserProfile(result.data);
-      // setting the data for every form section
-      const { contactInfo, ...companyInfo } = result.data; 
-      setCompanyInfo( companyInfo );
-      methods.reset( companyInfo );
-      setContactInfo(result.data.contactInfo);
+    setAppGeneralInfo({ pageTitle: "My Profile" });
+  }, [setAppGeneralInfo]);
 
-    })
-    .catch( error => {
-      console.log(error);
-    });
-  }, []);
+  useEffect(() => {
+    employerApi
+      .getEmployerProfile(userId)
+      .then((result) => {
+        const { contactInfo, ...company } = result.data;
+        setCompanyInfo(company);
+        setContactInfo(contactInfo);
+        methods.reset(company);
+      })
+      .catch(() => navigate("/employer/onboarding"));
+  }, [userId, navigate, methods]);
+
+  const handleTabChange = (event, newValue) => {
+    setFormSection(newValue);
+    methods.reset(newValue === 0 ? companyInfo : contactInfo);
+  };
 
   const onSubmit = (data) => {
+    const employerProfile =
+      formSection === 0
+        ? { ...data, contactInfo }
+        : { ...companyInfo, contactInfo: { ...data } };
 
-    let employerProfile;
-    
-    if (formSection == "details") {
-      
-      // updating the logo url
-      if (data.companyLogo) {
-        updateFileByUrl(companyInfo.companyLogo, data.companyLogo);
-        console.log(data.companyLogo);
-        return;
-        // const logoFile = data.companyLogo["0"];
-        // const logoFileName = setFileName(data.companyName + "-logo");
-        // const logoFilePath = `logo/${Date.now()}-${logoFileName}`;
-
-        // addFile(logoFilePath, logoFile);
-        // setLogoUrl(getUlrFile(logoFilePath));
-
-        // console.log(logoUrl);
-      }
-      else {
-        return;
-      }
-
-      employerProfile = {
-        userId: userId,
-        companyLogo: data.companyLogo,
-        companyName: data.companyName,
-        establishedYear: data.establishedYear,
-        businessRegisteredNumber: data.businessRegisteredNumber,
-        industrySector: data.industrySector,
-        companySize: data.companySize,
-        workLocation: data.workLocation,
-        companyWebsite: data.companyWebsite,
-        companyDescription: data.companyDescription,
-        contactInfo: contactInfo
-      };
-      setCompanyInfo(data);
-    }
-    else {
-
-      let newContactInfo = {
-        profilePicture: data.profilePicture,
-        firstName: data.firstName,
-        middleName: data.middleName,
-        lastName: data.lastName,
-        designation: data.designation,
-        phone: data.phone,
-        email: data.email,
-        linkedInProfile: data.linkedInProfile,
-        additionalDetails: data.additionalDetails
-      };
-      employerProfile = {...companyInfo , contactInfo: newContactInfo };
-      setContactInfo(data);
-    }
-
-      
-
-      console.log(employerProfile);
-      
-      // save data
-      employerApi.updateEmployerProfile(userId, employerProfile)
-      .then( result => {
-        console.log(result);
-        setMessage(`Success: Info saved.`);
-        // Hide the message after 3 seconds
-        setTimeout(() => {
-          setMessage('');
-        }, 5000);
-
+    employerApi
+      .updateEmployerProfile(userId, employerProfile)
+      .then(() => {
+        setMessage("Your profile has been saved successfully.");
+        setMessageClass("alert alert-success");
+        setTimeout(() => setMessage(""), 5000);
       })
-      .catch( error => {
-        console.log(error);
-        setMessage(`Error: Info not saved.`);
-        // Hide the message after 3 seconds
-        setTimeout(() => {
-          setMessage('');
-        }, 5000);
+      .catch((err) => {
+        setMessage(err.response?.data?.details || "An error occurred.");
+        setMessageClass("alert alert-danger");
+        setTimeout(() => setMessage(""), 5000);
       });
-      
-    
   };
 
   return (
-    <div>
-      <div>
-        <ul className="nav nav-underline">
-          <li className="nav-item">
-            <a className={`nav-link ${detailsIsActive ? 'active' : ''}`} aria-current="page" 
-            id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</a>
-          </li>
-          <li className="nav-item">
-            <a className={`nav-link ${contactIsActive ? 'active' : ''}`} aria-disabled="true"
-            id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</a>
-          </li>
-        </ul>
-      </div>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Typography
+        variant="h5"
+        sx={{ fontFamily: "Montserrat", fontWeight: 700, mb: 3 }}
+      >
+        My Profile
+      </Typography>
 
-      <div id="message">{ message }</div>
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        <Button
+          variant={formSection === 0 ? "contained" : "outlined"}
+          onClick={() => handleTabChange(null, 0)}
+          sx={{
+            borderRadius: "999px",
+            fontFamily: "Poppins, sans-serif",
+            textTransform: "none",
+            fontWeight: 600,
+            backgroundColor: formSection === 0 ? "#062F54" : "#fff",
+            color: formSection === 0 ? "#fff" : "#062F54",
+            borderColor: "#062F54",
+            px: 3,
+            "&:hover": {
+              backgroundColor: formSection === 0 ? "#041f39" : "#f5f5f5",
+              borderColor: "#062F54",
+            },
+          }}
+        >
+          🏢 Organization Details
+        </Button>
 
-      {/* <div>
-        <div id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</div>
-        <div id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</div>
-      </div> */}
+        <Button
+          variant={formSection === 1 ? "contained" : "outlined"}
+          onClick={() => handleTabChange(null, 1)}
+          sx={{
+            borderRadius: "999px",
+            fontFamily: "Poppins, sans-serif",
+            textTransform: "none",
+            fontWeight: 600,
+            backgroundColor: formSection === 1 ? "#062F54" : "#fff",
+            color: formSection === 1 ? "#fff" : "#062F54",
+            borderColor: "#062F54",
+            px: 3,
+            "&:hover": {
+              backgroundColor: formSection === 1 ? "#041f39" : "#f5f5f5",
+              borderColor: "#062F54",
+            },
+          }}
+        >
+          👤 Primary Contact
+        </Button>
+      </Box>
+
+      {message && (
+        <Box className={messageClass} sx={{ mb: 2 }}>
+          {message}
+        </Box>
+      )}
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
-          { formSection === "details" && (<>
-            <div className="container">
-              <div className="row">
-                <CompanyInfo />
-                <div className="d-flex justify-content-end gap-4">
-                  <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" />
-                </div>
-              </div>
-            </div>
-          </>) }
+          <Paper
+            elevation={3}
+            sx={{
+              p: { xs: 2, md: 4 },
+              borderRadius: 4,
+              mb: 3,
+              backgroundColor: "#fff",
+            }}
+          >
+            {formSection === 0 ? <CompanyInfo /> : <UserContactInfo />}
+          </Paper>
 
-          { formSection === "contact" && (
-            <>
-            <div className="container">
-              <div className="row">
-                <UserContactInfo />
-                <div className="d-flex justify-content-end gap-4">
-                  <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" />
-                </div>
-              </div>
-            </div>
-          </>) }
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                backgroundColor: "#062F54",
+                fontFamily: "Poppins, sans-serif",
+                textTransform: "none",
+                borderRadius: 3,
+                px: 3,
+                py: 1.5,
+                "&:hover": {
+                  backgroundColor: "#041f39",
+                },
+              }}
+            >
+              Save Changes
+            </Button>
+          </Box>
         </form>
       </FormProvider>
-      
-      
-    </div>
+    </Box>
   );
 };
 

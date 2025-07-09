@@ -15,7 +15,8 @@ router.get("/", jobController.getAllJobs);
 // GET /api/jobs/:jobId
 router.get("/:jobId", jobController.getJobById);
 
-
+// GET lastJob
+router.get("/lastJob/:employerId", jobController.getLastJobByEmployerId);
 
 
 router.patch("/:jobId", jobController.updateJobById);

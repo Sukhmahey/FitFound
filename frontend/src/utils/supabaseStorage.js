@@ -30,20 +30,17 @@ export const getUlrFile = (filePath) => {
 // updating the file
 export const updateFileByUrl = (fileUrl, newFile) => {
     
-    if ( typeof newFile != "string") {
-        console.log("Es un archivo nuevo");
+    // updating the file
+    const filePath = fileUrl.split('/object/public/')[1];
+    const fileElements = filePath.split('/');
 
-        // updating the file
-        const filePath = fileUrl.split('/object/public/')[1];
-        const fileElements = filePath.split('/');
-        console.log(fileElements);
+    console.log(fileElements[0]);
+    console.log(fileElements[1]);
+    console.log(fileElements[2]);
 
-        return supabase.storage
-        .from(fileElements[0]) // bucket
-        .upload( `${fileElements[1]}/${fileElements[2]}`, newFile, { upsert: true })
-        .then( result => console.log(result))
-        .catch( error => console.log(error));
-    }
+    return supabase.storage
+    .from(fileElements[0]) // bucket
+    .upload( `${fileElements[1]}/${fileElements[2]}`, newFile, { upsert: true });
     
 };
 

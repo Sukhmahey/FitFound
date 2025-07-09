@@ -56,6 +56,21 @@ exports.createCandidateProfile = async (req, res) => {
   }
 };
 
+exports.getCandidateById = async (req, res) => {
+  const { candidateId } = req.params;
+  try {
+    const candidate = await Candidate.findById(candidateId);
+
+    if (!candidate) {
+      return res.status(404).json({ message: "Candidate profile not found" });
+    }
+
+    res.status(200).json(candidate);
+  } catch (error) {
+    handleError(res, error, "Failed to fetch candidate profile", 500);
+  }
+};
+
 exports.getCandidateByUserId = async (req, res) => {
   const { userId } = req.params;
   try {
