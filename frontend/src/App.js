@@ -20,6 +20,7 @@ import MainLayout from "./components/MainLayout";
 import SettingsPage from "./pages/candidate/SettingsPage";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import NotificationList from "./pages/NotificationList";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/notifications-list" element={<NotificationList></NotificationList>}></Route>
         {/* <Route path="/unauthorized" element={<Unauthorized />} /> */}
         
         {/* Candidate Routes */}

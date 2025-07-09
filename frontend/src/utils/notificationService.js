@@ -1,13 +1,43 @@
 import { toast } from 'react-toastify';
 import { useNotification } from '../contexts/NotificationContext';
+import { useAuth } from '../contexts/AuthContext';
+import { notificationApi } from '../services/notificationApi';
+
 const useNotify = () => {
   const { isMuted } = useNotification();
+  const { user } = useAuth();
+
+  const sendToDB = async (type, msg) => {
+    if (!user?.userId) return;
+    try {
+       await notificationApi.create({
+        userId: user.userId,
+        message: msg,
+        type,
+      });
+      
+    } catch (err) {
+      console.error("Failed to store notification:", err.message);
+    }
+  };
 
   const notify = {
-    success: (msg, options = {}) => !isMuted && toast.success(msg, options),
-    error: (msg, options = {}) => !isMuted && toast.error(msg, options),
-    info: (msg, options = {}) => !isMuted && toast.info(msg, options),
-    warning: (msg, options = {}) => !isMuted && toast.warning(msg, options),
+    success: async (msg, options = {}) => {
+      if (!isMuted) toast.success(msg, options);
+      await sendToDB("success", msg);
+    },
+    error: async (msg, options = {}) => {
+      if (!isMuted) toast.error(msg, options);
+      await sendToDB("error", msg);
+    },
+    info: async (msg, options = {}) => {
+      if (!isMuted) toast.info(msg, options);
+      await sendToDB("info", msg);
+    },
+    warning: async (msg, options = {}) => {
+      if (!isMuted) toast.warning(msg, options);
+      await sendToDB("warning", msg);
+    },
   };
 
   return notify;

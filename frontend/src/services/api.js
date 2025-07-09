@@ -56,6 +56,13 @@ export const jobVerificationApi = {
  api.get(`/verification-requests/candidate/${candidateId}`),
 };
 
+export const notificationApi = {
+  create: (data) => api.post('/notifications', data),
+  getByUser: (userId) => api.get(`/notifications/${userId}`),
+  getUnreadByUser: (userId) => api.get(`/notifications/${userId}/unread`),
+  markAsRead: (id) => api.patch(`/notifications/${id}/read`),
+};
+
 // employer endpoints
 export const employerApi = {
   getAllEmployers: () => api.get("/employers"),

@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AppInfoContext } from "../contexts/AppInfoContext";
 import { Link } from 'react-router-dom';
+import DashboardBell from '../pages/DashboardBell';
 
 const Header = () => {
     const { appGeneralInfo } = useContext(AppInfoContext);
@@ -25,7 +26,7 @@ const Header = () => {
                 </Grid>
                 <Grid size={2}>
                     <div>
-                        <div>Notifications</div>
+                        <DashboardBell></DashboardBell>
                         <Link to={settingsPath}>Settings</Link>
                     </div>
                 </Grid>

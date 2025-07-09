@@ -11,7 +11,6 @@ import WorkExperienceStep from './onboardingSteps/WorkExperienceStep';
 import EducationStep from './onboardingSteps/EducationStep';
 import JobPreferenceStep from './onboardingSteps/JobPreferenceStep';
 import PortfolioStep from './onboardingSteps/PortfolioStep';
-// import notify from '../../utils/notificationService';
 import useNotify from '../../utils/notificationService';
 
 import {
@@ -100,11 +99,11 @@ export default function MyProfile() {
       await candidateApi.updateProfile(userId, formData);
       setSubmitStatus('success');
       console.log("Success in update")
-      notify.success("Profile saved successfully!");
+      await notify.success("Profile saved successfully!");
 
     } catch (err) {
       console.error('Failed to update profile:', err);
-      notify.error("Failed to update profile");
+      await notify.error("Failed to update profile");
 
       setSubmitStatus('error');
     }
