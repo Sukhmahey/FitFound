@@ -48,7 +48,8 @@ export const candidateApi = {
     api.patch(`/interactions/${interactionId}/final-status`, {
       status: "rejected",
     }),
-  getProfileById: (candidateId) => api.get(`/candidates/candidate/${candidateId}`)
+  getProfileById: (candidateId) => api.get(`/candidates/candidate/${candidateId}`),
+  getAppearanceCount : (candidateId) => api.get(`/insights/visibility-timeline/${candidateId}`)
 };
 
 export const jobVerificationApi = {

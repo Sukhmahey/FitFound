@@ -17,7 +17,7 @@ export default function Dashboard() {
 
   const [candidateName, setCandidateName] = useState("Name");
   const [profileScore, setProfileScore] = useState(0);
-  const [profileView, setProfileView] = useState(40);
+  const [profileView, setProfileView] = useState(0);
   const [desiredJobRole, setDesiredJobRole] = useState("");
   const [suggestedSkills, setSuggestedSkills] = useState([]);
   const [alreadySkills, setAlreadySkills] = useState([]);
@@ -28,6 +28,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchProfileData();
+    fetchAppearance()
   }, [])
 
 
@@ -38,6 +39,23 @@ export default function Dashboard() {
       hasFetchedProfile.current = true;
     }
   }, [workHistory]);
+
+  const fetchAppearance = async () => {
+  try {
+    const response = await candidateApi.getAppearanceCount(profileId);
+
+    const totalAppearances = response.data.reduce(
+      (sum, item) => sum + item.appearances,
+      0
+    );
+    setProfileView(totalAppearances);
+    
+  } catch (error) {
+    console.error("Error fetching appearances:", error);
+    
+  }
+};
+
 
   const fetchProfileData = async () => {
     try {
@@ -134,7 +152,7 @@ export default function Dashboard() {
   return (
     <Container maxWidth="md" sx={{ mt: 4 }} >     <h1>Dashboard</h1>
       <h2> Hello 👋, {candidateName}</h2>
-      <ProfileSummary profileScore={profileScore} invitationCount={invitationCount}></ProfileSummary>
+      <ProfileSummary profileScore={profileScore} invitationCount={invitationCount} profileView={profileView}></ProfileSummary>
       <TrendingKeywordsSection suggestedSkills={suggestedSkills} alreadySkills={alreadySkills}></TrendingKeywordsSection>
       <InvitationsSection setInvitationCount={setInvitationCount}></InvitationsSection>
 
