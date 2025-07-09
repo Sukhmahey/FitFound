@@ -9,6 +9,7 @@ const jobRouter = require("./jobFormRouters");
 const employerProfileRouter = require("./employerProfileRouters"); 
 const interactionRoutes = require("./interactionRouters");
 const verificationRequestRouter = require("./verificationRequestRouters"); 
+const insightsRouter = require("./insights");
 
 router.use("/user", userRouter);
 router.use("/login", loginRouter);
@@ -18,5 +19,6 @@ router.use("/employers", employerProfileRouter);
 
 router.use("/interactions", interactionRoutes);
 router.use("/verification-requests", verificationRequestRouter);
+router.use("/insights", insightsRouter);
 
 module.exports = router;
