@@ -50,6 +50,7 @@ export const candidateApi = {
     }),
   getProfileById: (candidateId) => api.get(`/candidates/candidate/${candidateId}`),
   getAppearanceInSkills: (candidateId) => api.get(`/insights/skill-breakdown/${candidateId}`),
+  getVisibilityTimeline: (candidateId) => api.get(`/insights/visibility-timeline/${candidateId}`),
 };
 
 export const jobVerificationApi = {

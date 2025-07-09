@@ -1,13 +1,8 @@
-// MultiCharts.js
 import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 
 import { candidateApi } from '../../../services/api';
 
-const data1 = [
-  { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
-];
 
 const AppearanceIn = () => {
     const [skillsData, setSkillsData] = useState([]);
@@ -15,7 +10,6 @@ const AppearanceIn = () => {
     useEffect(() => {
         candidateApi.getAppearanceInSkills("6867037fab263ff7903b8f21")
         .then(result => { 
-            console.log(result.data); 
             setSkillsData([...result.data]);
         })
         .catch();
