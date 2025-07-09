@@ -21,6 +21,7 @@ import SettingsPage from "./pages/candidate/SettingsPage";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NotificationList from "./pages/NotificationList";
+import Insights from "./pages/candidate/Insights";
 
 function App() {
   return (
@@ -56,12 +57,21 @@ function App() {
               <CandidateDashboard />
             }
           />
+
           <Route
             path="/candidate/profile"
             element={
               <MyProfile></MyProfile>
             }
           />
+
+          <Route
+            path="/candidate/insights"
+            element={
+              <Insights></Insights>
+            }
+          />
+
           <Route
             path="/candidate/connections"
             element={
