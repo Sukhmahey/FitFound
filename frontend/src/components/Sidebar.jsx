@@ -143,7 +143,7 @@ const Sidebar = () => {
         {user?.role === "candidate" && (
           <>
             <ListItemButton
-              onClick={() => goTo("ingsights")}
+              onClick={() => goTo("insights")}
               sx={menuItemStyle("ingsights")}
             >
               <ListItemIcon>

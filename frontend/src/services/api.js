@@ -49,7 +49,12 @@ export const candidateApi = {
       status: "rejected",
     }),
   getProfileById: (candidateId) => api.get(`/candidates/candidate/${candidateId}`),
+<<<<<<< HEAD
   getAppearanceCount : (candidateId) => api.get(`/insights/visibility-timeline/${candidateId}`)
+=======
+  getAppearanceInSkills: (candidateId) => api.get(`/insights/skill-breakdown/${candidateId}`),
+  getVisibilityTimeline: (candidateId) => api.get(`/insights/visibility-timeline/${candidateId}`),
+>>>>>>> candidate-insights-SM
 };
 
 export const jobVerificationApi = {
