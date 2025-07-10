@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
 import { useAuth } from "../../contexts/AuthContext";
-
+import { CircularProgress, Backdrop } from "@mui/material";
 import { scoreCandidates } from "./GenerateCandidateScore";
 
 import {
@@ -42,6 +42,7 @@ const dummyobj1 = {
 };
 
 const Search = () => {
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState({
     title: "",
     location: "",
@@ -88,6 +89,7 @@ const Search = () => {
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     const paramObj = {
       employerId: userId,
       jobTitle: searchQuery.title,
@@ -155,154 +157,159 @@ const Search = () => {
 
       if (candidateList) {
       }
+      setLoading(false);
     } catch (c) {
       console.log("here");
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
-      <div className="row">
-        {/* LEFT COLUMN */}
-        <div className="col-md-6">
-          <div className="mb-3">
-            <TextField
-              className="w-100"
-              id="outlined-basic"
-              label="Title"
-              variant="outlined"
-              value={searchQuery?.title}
-              onChange={(e) => {
-                onChangeInputFiels(e.target.value, "title");
-              }}
-            />
-          </div>
+    <>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, flexDirection: 'column' }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+        <div style={{ marginTop: '1rem', fontSize: '1.2rem' }}>Loading candidates...</div>
+      </Backdrop>
 
-          <div className="mb-3">
-            <TextField
-              className="w-100"
-              id="outlined-multiline-flexible"
-              value={searchQuery?.location}
-              onChange={(e) => {
-                onChangeInputFiels(e.target.value, "location");
-              }}
-              label="Location"
-              multiline
-              maxRows={2}
-            />
-          </div>
-
-          <div className="mb-3">
-            <TextField
-              className="w-100"
-              id="outlined-multiline-flexible"
-              value={searchQuery?.jobDescription}
-              onChange={(e) => {
-                onChangeInputFiels(e.target.value, "jobDescription");
-              }}
-              label="Job Description"
-              multiline
-              maxRows={20}
-            />
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN */}
-        <div className="col-md-6">
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Job Type</InputLabel>
-            <Select
-              labelId="jobType"
-              id="jobType"
-              value={searchQuery?.jobType}
-              label="jobType"
-              onChange={(e) => {
-                onChangeInputFiels(e.target.value, "jobType");
-              }}
-            >
-              <MenuItem value={"full-time"}>Full-time</MenuItem>
-              <MenuItem value={"part-time"}>Part-time</MenuItem>
-              <MenuItem value={"contract"}>Contract</MenuItem>
-              <MenuItem value={"internship"}>Internship</MenuItem>
-            </Select>
-          </FormControl>
-
-          <div className="mb-3">
-            <label htmlFor="jobType" className="form-label">
-              Salary Range
-            </label>
-            <div>
-              <input
-                type="number"
-                className="form-control form-control-sm"
-                name="startRange"
-                id="startRange"
-                placeholder="From"
-                value={searchQuery?.salaryFrom}
+      <div className="container">
+        <div className="row">
+          {/* LEFT COLUMN */}
+          <div className="col-md-6">
+            <div className="mb-3">
+              <TextField
+                className="w-100"
+                id="outlined-basic"
+                label="Title"
+                variant="outlined"
+                value={searchQuery?.title}
                 onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "salaryFrom");
-                }}
-              />
-              <input
-                type="number"
-                className="form-control form-control-sm"
-                placeholder="To"
-                name="endRange"
-                id="endRange"
-                value={searchQuery?.salaryTo}
-                onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "salaryTo");
+                  onChangeInputFiels(e.target.value, "title");
                 }}
               />
             </div>
-          </div>
-
-          <div className="mb-3">
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Work Status</InputLabel>
-              <Select
-                labelId="workStatus"
-                id="workStatus"
-                value={searchQuery?.workStatus}
-                label="workStatus"
+            <div className="mb-3">
+              <TextField
+                className="w-100"
+                id="outlined-multiline-flexible"
+                value={searchQuery?.location}
                 onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "workStatus");
+                  onChangeInputFiels(e.target.value, "location");
+                }}
+                label="Location"
+                multiline
+                maxRows={2}
+              />
+            </div>
+            <div className="mb-3">
+              <TextField
+                className="w-100"
+                id="outlined-multiline-flexible"
+                value={searchQuery?.jobDescription}
+                onChange={(e) => {
+                  onChangeInputFiels(e.target.value, "jobDescription");
+                }}
+                label="Job Description"
+                multiline
+                maxRows={20}
+              />
+            </div>
+          </div>
+          {/* RIGHT COLUMN */}
+          <div className="col-md-6">
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Job Type</InputLabel>
+              <Select
+                labelId="jobType"
+                id="jobType"
+                value={searchQuery?.jobType}
+                label="jobType"
+                onChange={(e) => {
+                  onChangeInputFiels(e.target.value, "jobType");
                 }}
               >
-                <MenuItem value={"studyPermit"}>Study Permit</MenuItem>
-                <MenuItem value={"workPermit"}>Work Permit</MenuItem>
-                <MenuItem value={"permanentResident"}>
-                  Permanent Resident
-                </MenuItem>
-                <MenuItem value={"citizen"}>Citizen</MenuItem>
+                <MenuItem value={"full-time"}>Full-time</MenuItem>
+                <MenuItem value={"part-time"}>Part-time</MenuItem>
+                <MenuItem value={"contract"}>Contract</MenuItem>
+                <MenuItem value={"internship"}>Internship</MenuItem>
               </Select>
             </FormControl>
-          </div>
-
-          <div className="mb-3">
-            <TextField
-              className="w-100"
-              value={searchQuery?.skills}
-              onChange={(e) => {
-                onChangeInputFiels(e.target.value, "skills");
-              }}
-              label="Skills"
-              multiline
-              maxRows={5}
-            />
+            <div className="mb-3">
+              <label htmlFor="jobType" className="form-label">
+                Salary Range
+              </label>
+              <div>
+                <input
+                  type="number"
+                  className="form-control form-control-sm"
+                  name="startRange"
+                  id="startRange"
+                  placeholder="From"
+                  value={searchQuery?.salaryFrom}
+                  onChange={(e) => {
+                    onChangeInputFiels(e.target.value, "salaryFrom");
+                  }}
+                />
+                <input
+                  type="number"
+                  className="form-control form-control-sm"
+                  placeholder="To"
+                  name="endRange"
+                  id="endRange"
+                  value={searchQuery?.salaryTo}
+                  onChange={(e) => {
+                    onChangeInputFiels(e.target.value, "salaryTo");
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mb-3">
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Work Status</InputLabel>
+                <Select
+                  labelId="workStatus"
+                  id="workStatus"
+                  value={searchQuery?.workStatus}
+                  label="workStatus"
+                  onChange={(e) => {
+                    onChangeInputFiels(e.target.value, "workStatus");
+                  }}
+                >
+                  <MenuItem value={"studyPermit"}>Study Permit</MenuItem>
+                  <MenuItem value={"workPermit"}>Work Permit</MenuItem>
+                  <MenuItem value={"permanentResident"}>
+                    Permanent Resident
+                  </MenuItem>
+                  <MenuItem value={"citizen"}>Citizen</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+            <div className="mb-3">
+              <TextField
+                className="w-100"
+                value={searchQuery?.skills}
+                onChange={(e) => {
+                  onChangeInputFiels(e.target.value, "skills");
+                }}
+                label="Skills"
+                multiline
+                maxRows={5}
+              />
+            </div>
           </div>
         </div>
+        <div className="d-flex justify-content-end gap-4">
+          <button onClick={clearForm} className="btn btn-primary btn-sm mb-3">
+            Reset
+          </button>
+          <button onClick={handleSubmit} className="btn btn-primary btn-sm mb-3">
+            Search
+          </button>
+        </div>
       </div>
-
-      <div className="d-flex justify-content-end gap-4">
-        <button onClick={clearForm} className="btn btn-primary btn-sm mb-3">
-          Reset
-        </button>
-        <button onClick={handleSubmit} className="btn btn-primary btn-sm mb-3">
-          Search
-        </button>
-      </div>
-    </div>
+    </>
   );
 };
 
