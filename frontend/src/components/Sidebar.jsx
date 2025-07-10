@@ -71,7 +71,7 @@ const Sidebar = () => {
   const displayName =
     user?.role === "candidate"
       ? userProfile?.personalInfo?.firstName || "Candidate"
-      : "Anna Paul";
+      : userProfile?.contactInfo?.firstName + " " + userProfile?.contactInfo?.lastName || "";
 
   const menuItemStyle = (tab) => ({
     borderRadius: "8px",
