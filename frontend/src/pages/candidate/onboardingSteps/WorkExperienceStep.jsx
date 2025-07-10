@@ -151,7 +151,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
     if (newEntries.length === 0) return;
 
     const updatedData = [...data, ...newEntries];
-    notify.success("You have been hired by a new company!");
+    notify.success("You have been hired by a new company! kindly update it in profile");
 
     onUpdate(updatedData);
 

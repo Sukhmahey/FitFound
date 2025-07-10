@@ -4,17 +4,19 @@ import { candidateApi } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Container, MenuItem, Select, InputLabel, FormControl, FormControlLabel, Checkbox, Stack, Divider, Chip, RadioGroup, Radio } from '@mui/material';
+import useNotify from '../../../utils/notificationService';
 
 
 export default function InfoConfirmationPage({ data }) {
   const { user } = useAuth();
   const userId = user?.userId;
   const navigate = useNavigate();
+  const notify = useNotify();
 
   const convertToHtmlMonth = (date) => {
     if (!date || !/^\d{2}-\d{4}$/.test(date)) return '';
     const [month, year] = date.split('-');
-    return `${year}-${month.padStart(2, '0')}`; // YYYY-MM
+    return `${year}-${month.padStart(2, '0')}`;
   };
 
 
@@ -35,7 +37,6 @@ export default function InfoConfirmationPage({ data }) {
       additionalInfo: data.basicInfo?.additionalInfo || ''
     },
     skills: data.skills || [''],
-    // workExperience: data.workExperience || [],
     workExperience: (data.workExperience || []).map(exp => ({
       ...exp,
       startDate: convertToHtmlMonth(exp.startDate),
@@ -53,7 +54,7 @@ export default function InfoConfirmationPage({ data }) {
       const toHtmlMonth = (dateStr) => {
         if (!dateStr) return '';
         const [mm, yyyy] = dateStr.split('-');
-        return `${yyyy}-${mm.padStart(2, '0')}`;  // returns YYYY-MM
+        return `${yyyy}-${mm.padStart(2, '0')}`;  
       };
 
       return {
@@ -159,9 +160,6 @@ export default function InfoConfirmationPage({ data }) {
     try {
       await candidateApi.updatePersonalInfo(userId, form.personalInfo);
       await candidateApi.updateBasicInfo(userId, form.basicInfo);
-      // await candidateApi.updateSkills(userId, {
-      //   skills: form.skills.map(skill => ({ skill }))
-      // });
       await candidateApi.updateSkills(userId, {
         skills: form.skills.map(skill => ({ skill }))
       });
@@ -194,11 +192,12 @@ export default function InfoConfirmationPage({ data }) {
       await candidateApi.updatePortfolio(userId, form.portfolio);
       await candidateApi.updateJobPreference(userId, form.jobPreference);
 
-      alert("Confirmation data saved successfully!");
+      notify.success("Confirmation data saved successfully!");
+
       navigate('/candidate/dashboard');
     } catch (err) {
+      notify.error("Submission failed!");
       console.error("Failed to submit confirmation data:", err);
-      alert("Submission failed.");
     }
   };
 
