@@ -80,7 +80,14 @@ const RecommendedActions = () => {
         <div>
             <p>Recommended Actions</p>
             <>{ recommendations.length > 0 && recommendations.map((recommendation) => (
-                <div key={recommendation}>
+                <div 
+                style={{
+                border: '1px solid #ccc',
+                padding: '16px',
+                margin: '16px',
+                borderRadius: '8px'
+                }}
+                key={recommendation}>
                     <p>Add "{recommendation}" to your profile to appear in more searches as “role here”.</p>
                     <button>Add</button>
                 </div>
