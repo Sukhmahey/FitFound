@@ -64,12 +64,12 @@ const EmployerProfile = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
-      <Typography
+      {/* <Typography
         variant="h5"
         sx={{ fontFamily: "Montserrat", fontWeight: 700, mb: 3 }}
       >
         My Profile
-      </Typography>
+      </Typography> */}
 
       <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
         <Button
