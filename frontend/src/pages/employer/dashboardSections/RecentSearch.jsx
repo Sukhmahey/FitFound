@@ -84,7 +84,7 @@ const RecentSearch = () => {
                 color: primaryColor,
                 }}
             >
-                {`Recent Search “${job.jobTitle}"`}
+                {`Recent Search "${job?.jobTitle || 'No searches'}"`}
             </Typography>
 
             <Typography
