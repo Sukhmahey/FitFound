@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
+import { useAuth } from '../../../contexts/AuthContext';
 
 import { candidateApi } from '../../../services/api';
 
 
 const AppearanceIn = () => {
+    const { user } = useAuth();
     const [skillsData, setSkillsData] = useState([]);
 
     useEffect(() => {
-        candidateApi.getAppearanceInSkills("6867037fab263ff7903b8f21")
+        // console.log(user.profileId);
+        candidateApi.getAppearanceInSkills(user.profileId)//("6867037fab263ff7903b8f21")
         .then(result => { 
             setSkillsData([...result.data]);
         })

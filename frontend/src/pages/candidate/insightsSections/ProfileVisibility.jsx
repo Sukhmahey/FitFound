@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import { candidateApi } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 // const data = [
   
@@ -49,11 +50,11 @@ import { candidateApi } from '../../../services/api';
 
 
 const ProfileVisibility = () => {
-
+    const { user } = useAuth();
     const [visibilityData, setVisibilityData] = useState([]);
 
     useEffect(() => {
-        candidateApi.getVisibilityTimeline("6867037fab263ff7903b8f21")
+        candidateApi.getVisibilityTimeline(user.profileId)//("6867037fab263ff7903b8f21")
         .then(result => {
             setVisibilityData([...result.data]);
         })
