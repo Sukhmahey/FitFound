@@ -6,7 +6,8 @@ import {
     Typography,
     Stack,
     IconButton,
-    Divider
+    Divider,
+    Button
 } from "@mui/material";
 import {
     InfoOutlined,
@@ -60,11 +61,20 @@ export default function NotificationList({ onUpdateUnreadCount }) {
         }
     };
 
+    const handleMarkAsReadAll = ()=>{
+        
+        notifications.map((n)=>{
+            handleMarkAsRead(n?._id)
+        })
+
+    }
+
     return (
         <Box sx={{ width: 1, px: 1 , backgroundColor: "#f1f9fc"}}>
             <Typography variant="h6" fontWeight={600} mb={2}>
                 Notifications
             </Typography>
+            <Button onClick={handleMarkAsReadAll}>Read All</Button>
 
             <Stack spacing={1} sx={{p:1}}>
                 {notifications.length === 0 ? (

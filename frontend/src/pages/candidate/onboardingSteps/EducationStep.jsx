@@ -2,19 +2,31 @@ import React from 'react';
 import { Box, TextField, Button } from '@mui/material';
 
 
-export default function EducationStep({ data = [], onUpdate }) {
+export default function EducationStep({ data = [], onUpdate,errors = {}}) {
+
+  
 
   const handleChange = (index, field, value) => {
-    const updated = [...data];
+  const updated = [...data];
+
+  if (field === 'startDate' || field === 'endDate') {
+    const [year, month] = value.split('-');
+    updated[index][field] = `${month}-${year}`;
+  } else {
     updated[index][field] = value;
-    onUpdate(updated);
-  };
+  }
+
+  onUpdate(updated);
+};
+
+ 
   const normalizeDate = (dateStr) => {
-    if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts[0].length === 4) return dateStr;
-    return `${parts[1]}-${parts[0]}`;
-  };
+  if (!dateStr) return '';
+  const [month, year] = dateStr.split('-');
+  return `${year}-${month}`;  
+};
+
+  
 
   const addEducation = () => {
     onUpdate([

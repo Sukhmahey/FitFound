@@ -31,6 +31,8 @@ export default function CandidateOnboarding() {
   const userEmail = user?.email;
   const navigate = useNavigate();
   const notify = useNotify();
+  const [formErrors, setFormErrors] = useState({});
+
 
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -74,16 +76,54 @@ export default function CandidateOnboarding() {
       }
     }
   });
+ 
 
+const validateStep = () => {
+  let errors = {};
+  if (stepIndex === 1) {
+    const { firstName, lastName } = formData.personalInfo;
+    if (!firstName.trim()) errors.firstName = "First name is required";
+    if (!lastName.trim()) errors.lastName = "Last name is required";
+  }
+
+  if (stepIndex === 2) {
+    const { phoneNumber } = formData.basicInfo;
+    if (!phoneNumber.trim()) errors.phoneNumber = "Phone number is required";
+  }
+
+  if (stepIndex === 3) {
+    if (formData.skills.length === 0) errors.skills = "Add at least one skill";
+  }
+
+  if (stepIndex === 4) {
+    formData.workExperience.forEach((exp, i) => {
+      if (!exp.companyName) errors[`companyName_${i}`] = "Company name is required";
+      if (!exp.jobTitle) errors[`jobTitle_${i}`] = "Job title is required";
+      if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
+      if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
+
+      if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
+    });
+  }
+
+  if (stepIndex === 7) {
+  const desired = formData.jobPreference.desiredJobTitle;
+  const jobType = formData.jobPreference.jobType;
+  if (!desired || desired.length === 0 || !desired[0]?.trim()) {
+    errors.selectedRole = "Desired Role is required";
+  }
+  if (!jobType.trim()) errors.jobType = "Job type is required";
+
+}
+
+
+  return errors;
+};
 
   const handleManual = () => setStepIndex(1);
   const handleUpload = () => setStepIndex(14);
 
-  // const convertMonthFormat = (value) => {
-  //   if (!value || !value.includes("-")) return value;
-  //   const [year, month] = value.split("-");
-  //   return `${month}-${year}`;
-  // };
+ 
   const convertMonthFormat = (value) => {
   if (!value || typeof value !== 'string') return '';
   const parts = value.split('-');
@@ -95,64 +135,79 @@ export default function CandidateOnboarding() {
 };
 
 
-  const handleNextBtn = async () => {
-    try {
-      if (stepIndex === 1) {
-        await candidateApi.updatePersonalInfo(userId, formData.personalInfo);
-        setStepIndex(2);
-      } else if (stepIndex === 2) {
-        await candidateApi.updateBasicInfo(userId, formData.basicInfo);
-        setStepIndex(3);
-      } else if (stepIndex === 3) {
-        const cleanedSkills = formData.skills.map(skill => ({ skill: skill.skill?.trim?.() || '' }));
-        await candidateApi.updateSkills(userId, { skills: cleanedSkills });
-        setStepIndex(4);
-      } else if (stepIndex === 14) {
-        // setStepIndex(99); 
-      } else if (stepIndex === 4) {
-        const cleanedExperience = formData.workExperience.map(item => ({
-          ...item,
-          startDate: convertMonthFormat(item.startDate),
-          endDate: convertMonthFormat(item.endDate),
-          achievements: item.achievements?.filter(a => a.trim()) || []
-        }));
-        await candidateApi.updateWorkHistory(userId, { workHistory: cleanedExperience });
-        setStepIndex(5);
-      } else if (stepIndex === 5) {
-        await candidateApi.updatePortfolio(userId, {
-          socialLinks: formData.portfolio.socialLinks
-        });
-        setStepIndex(6);
-      } else if (stepIndex === 6) {
-        const cleanedEducation = formData.education.map(item => ({
-          ...item,
-          startDate: convertMonthFormat(item.startDate),
-          endDate: convertMonthFormat(item.endDate)
-        }));
-        await candidateApi.updateEducation(userId, { education: cleanedEducation });
-        setStepIndex(7);
-      } else if (stepIndex === 7) {
-        await candidateApi.updateJobPreference(userId, formData.jobPreference);
-        // setSnackMsg("Profile saved successfully!");
-        // setSnackSeverity("success");
-        // setSnackOpen(true);
-        notify.success("Profile saved successfully!");
+const handleNextBtn = async () => {
+  const errors = validateStep();
 
-        navigate('/candidate/dashboard');
+  if (Object.keys(errors).length > 0) {
+  setFormErrors(errors);
 
-        // setStepIndex(99);
-      } else {
-        setStepIndex(stepIndex + 1);
-      }
-    } catch (err) {
-      console.error("Failed to submit:", err);
-      notify.error("Failed to submit");
+  const messages = Object.values(errors); 
+  const messageText = messages.join(', ');
 
-      // setSnackMsg("Submission failed.");
-      // setSnackSeverity("error");
-      // setSnackOpen(true);
+  setSnackMsg(`Please fix: ${messageText}`);
+  setSnackSeverity('error');
+  setSnackOpen(true);
+  return;
+}
+
+ 
+
+  setFormErrors({});
+
+  try {
+    if (stepIndex === 1) {
+      await candidateApi.updatePersonalInfo(userId, formData.personalInfo);
+      setStepIndex(2);
+
+    } else if (stepIndex === 2) {
+      await candidateApi.updateBasicInfo(userId, formData.basicInfo);
+      setStepIndex(3);
+
+    } else if (stepIndex === 3) {
+      const cleanedSkills = formData.skills.map(skill => ({ skill: skill.skill?.trim?.() || '' }));
+      await candidateApi.updateSkills(userId, { skills: cleanedSkills });
+      setStepIndex(4);
+
+    } else if (stepIndex === 4) {
+      const cleanedExperience = formData.workExperience.map(item => ({
+        ...item,
+        startDate: convertMonthFormat(item.startDate),
+        endDate: convertMonthFormat(item.endDate),
+        achievements: item.achievements?.filter(a => a.trim()) || []
+      }));
+      await candidateApi.updateWorkHistory(userId, { workHistory: cleanedExperience });
+      setStepIndex(5);
+
+    } else if (stepIndex === 5) {
+      await candidateApi.updatePortfolio(userId, {
+        socialLinks: formData.portfolio.socialLinks
+      });
+      setStepIndex(6);
+
+    } else if (stepIndex === 6) {
+      const cleanedEducation = formData.education.map(item => ({
+        ...item,
+        startDate: convertMonthFormat(item.startDate),
+        endDate: convertMonthFormat(item.endDate)
+      }));
+      await candidateApi.updateEducation(userId, { education: cleanedEducation });
+      setStepIndex(7);
+
+    } else if (stepIndex === 7) {
+      await candidateApi.updateJobPreference(userId, formData.jobPreference);
+      setSnackMsg("Profile saved successfully!");
+      setSnackSeverity('success');
+      setSnackOpen(true);
+      navigate('/candidate/dashboard');
     }
-  };
+
+  } catch (err) {
+    console.error("Failed to submit:", err);
+    setSnackMsg("Failed to submit");
+    setSnackSeverity('error');
+    setSnackOpen(true);
+  }
+};
 
 
 
@@ -186,23 +241,23 @@ const handleSnackClose = (event, reason) => {
   const renderStep = () => {
     switch (stepIndex) {
       case 0:
-        return <ProfileSetupOption onManualClick={handleManual} onUploadClick={handleUpload} />;
+        return <ProfileSetupOption onManualClick={handleManual} onUploadClick={handleUpload} errors={formErrors}/>;
       case 1:
-        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} userEmail={userEmail} />;
+        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} userEmail={userEmail} errors={formErrors}/>;
       case 2:
-        return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} />;
+        return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} errors={formErrors}/>;
       case 3:
-        return <SkillsStep data={formData.skills} onUpdate={(data) => updateFormData('skills', data)} />;
+        return <SkillsStep data={formData.skills} onUpdate={(data) => updateFormData('skills', data)} errors={formErrors}/>;
       case 14:
         return <ResumeParsing setStep={setStepIndex} setConfirmedData={setConfirmedData} />;
       case 4:
-        return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} />;
+        return <WorkExperienceStep data={formData.workExperience} onUpdate={(data) => updateFormData('workExperience', data)} errors={formErrors}/>;
       case 5:
-        return <PortfolioStep data={formData.portfolio} onUpdate={(data) => updateFormData('portfolio', data)} />;
+        return <PortfolioStep data={formData.portfolio} onUpdate={(data) => updateFormData('portfolio', data)} errors={formErrors}/>;
       case 6:
-        return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} />;
+        return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} errors={formErrors}/>;
       case 7:
-        return <JobPreferenceStep data={formData.jobPreference} onUpdate={(data) => updateFormData('jobPreference', data)} />;
+        return <JobPreferenceStep data={formData.jobPreference} onUpdate={(data) => updateFormData('jobPreference', data)} errors={formErrors}/>;
 
       case 99:
         return <InfoConfirmationPage data={confirmedData} />;
