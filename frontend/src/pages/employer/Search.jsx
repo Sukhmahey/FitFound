@@ -17,6 +17,7 @@ import {
 
 import { employerApi } from "../../services/api";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
+import { Javascript } from "@mui/icons-material";
 
 const dummyobj1 = {
   employerId: "68659ec4901fec3956f9280f",
@@ -52,6 +53,7 @@ const Search = () => {
     salaryTo: "",
     workStatus: "",
     skills: "",
+    locationType: "",
   });
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
@@ -120,7 +122,7 @@ const Search = () => {
         .getAllCandidates()
         .then(async (data) => {
           const scoredC = await scoreCandidates(
-            data.data,
+            data.data.slice(0, 2),
             paramObj.jobDescription
           );
 
@@ -132,11 +134,23 @@ const Search = () => {
             })
           );
 
-          await employerApi.saveTopCandidates(employerDD?.data._id, {
-            topMatchedCandidates: (scoredC || []).map((element) => {
-              return element._id;
-            }),
-          });
+          const arrayOfCandidateIds = [];
+
+          await employerApi
+            .saveTopCandidates(employerDD?.data._id, {
+              topMatchedCandidates: (scoredC || []).map((element) => {
+                arrayOfCandidateIds.push(element._id);
+                return element._id;
+              }),
+            })
+            .then(async () => {
+              await employerApi.saveCandidateAppearance({
+                employerId: userId,
+                skills: ["Html", "CSS", "Javascript"],
+                candidateIds: arrayOfCandidateIds,
+              });
+            });
+
           console.log("scoredC", scoredC);
           dispatch(setSearchForm(paramObj));
           dispatch(setCandidates(scoredC));
@@ -167,11 +181,17 @@ const Search = () => {
   return (
     <>
       <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, flexDirection: 'column' }}
+        sx={{
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          flexDirection: "column",
+        }}
         open={loading}
       >
         <CircularProgress color="inherit" />
-        <div style={{ marginTop: '1rem', fontSize: '1.2rem' }}>Loading candidates...</div>
+        <div style={{ marginTop: "1rem", fontSize: "1.2rem" }}>
+          Loading candidates...
+        </div>
       </Backdrop>
 
       <div className="container">
@@ -219,7 +239,7 @@ const Search = () => {
           </div>
           {/* RIGHT COLUMN */}
           <div className="col-md-6">
-            <FormControl fullWidth>
+            <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel id="demo-simple-select-label">Job Type</InputLabel>
               <Select
                 labelId="jobType"
@@ -234,6 +254,24 @@ const Search = () => {
                 <MenuItem value={"part-time"}>Part-time</MenuItem>
                 <MenuItem value={"contract"}>Contract</MenuItem>
                 <MenuItem value={"internship"}>Internship</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">
+                Location Type
+              </InputLabel>
+              <Select
+                labelId="jobType"
+                id="jobType"
+                value={searchQuery?.locationType}
+                label="jobType"
+                onChange={(e) => {
+                  onChangeInputFiels(e.target.value, "locationType");
+                }}
+              >
+                <MenuItem value={"onsite"}>On Site</MenuItem>
+                <MenuItem value={"remotee"}>Remote</MenuItem>
+                <MenuItem value={"hybrid"}>Hybrid</MenuItem>
               </Select>
             </FormControl>
             <div className="mb-3">
@@ -267,7 +305,9 @@ const Search = () => {
             </div>
             <div className="mb-3">
               <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Work Status</InputLabel>
+                <InputLabel id="demo-simple-select-label">
+                  Work Status
+                </InputLabel>
                 <Select
                   labelId="workStatus"
                   id="workStatus"
@@ -304,7 +344,10 @@ const Search = () => {
           <button onClick={clearForm} className="btn btn-primary btn-sm mb-3">
             Reset
           </button>
-          <button onClick={handleSubmit} className="btn btn-primary btn-sm mb-3">
+          <button
+            onClick={handleSubmit}
+            className="btn btn-primary btn-sm mb-3"
+          >
             Search
           </button>
         </div>

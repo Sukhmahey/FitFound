@@ -48,20 +48,24 @@ export const candidateApi = {
     api.patch(`/interactions/${interactionId}/final-status`, {
       status: "rejected",
     }),
-  getProfileById: (candidateId) => api.get(`/candidates/candidate/${candidateId}`),
-  getAppearanceCount : (candidateId) => api.get(`/insights/visibility-timeline/${candidateId}`),
-  getAppearanceInSkills: (candidateId) => api.get(`/insights/skill-breakdown/${candidateId}`),
-  getVisibilityTimeline: (candidateId) => api.get(`/insights/visibility-timeline/${candidateId}`),
+  getProfileById: (candidateId) =>
+    api.get(`/candidates/candidate/${candidateId}`),
+  getAppearanceCount: (candidateId) =>
+    api.get(`/insights/visibility-timeline/${candidateId}`),
+  getAppearanceInSkills: (candidateId) =>
+    api.get(`/insights/skill-breakdown/${candidateId}`),
+  getVisibilityTimeline: (candidateId) =>
+    api.get(`/insights/visibility-timeline/${candidateId}`),
 };
 
 export const jobVerificationApi = {
   verifyJob: (data) => api.post("/verification-requests", data),
   getVerificationStatus: (candidateId) =>
- api.get(`/verification-requests/candidate/${candidateId}`),
+    api.get(`/verification-requests/candidate/${candidateId}`),
 };
 
 export const notificationApi = {
-  create: (data) => api.post('/notifications', data),
+  create: (data) => api.post("/notifications", data),
   getByUser: (userId) => api.get(`/notifications/${userId}`),
   getUnreadByUser: (userId) => api.get(`/notifications/${userId}/unread`),
   markAsRead: (id) => api.patch(`/notifications/${id}/read`),
@@ -102,7 +106,9 @@ export const employerApi = {
       status: "hired",
     }),
   saveTopCandidates: (jobId, data) => api.patch(`/jobs/${jobId}`, data),
-  getLastJob: (employerId) => api.get(`/jobs/${employerId}`)
+  getLastJob: (employerId) => api.get(`/jobs/${employerId}`),
+  saveCandidateAppearance: (data) =>
+    api.post(`/insights/log-bulk-appearance`, data),
 };
 
 export { api };
