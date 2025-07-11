@@ -1,10 +1,19 @@
+import { useEffect, useContext } from "react";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 import AppearanceIn from "./insightsSections/AppearanceIn";
 import ProfileVisibility from "./insightsSections/ProfileVisibility";
 import RecommendedActions from "./insightsSections/RecommendedActions";
 import SuggestionBoard from "./insightsSections/SuggestionBoard";
 
 
+
 const Insights = () => {
+    const { setAppGeneralInfo } = useContext(AppInfoContext);
+
+    useEffect(() => {
+        setAppGeneralInfo({ pageTitle: "Insigths" });
+    }, [setAppGeneralInfo]);
+
     return (
         <div>
             <ProfileVisibility></ProfileVisibility>
