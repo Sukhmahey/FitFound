@@ -236,19 +236,9 @@ const Login = () => {
             textAlign: "center",
           }}
         >
-          Very simple way you can engage
+          FITFOUND
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            maxWidth: 400,
-            textAlign: "center",
-            fontFamily: "Figtree, sans-serif",
-          }}
-        >
-          Welcome to DAILY Inventory Management System! Efficiently track and
-          manage your inventory with ease.
-        </Typography>
+
         {/* Optionally add graphs or images */}
       </Box>
     </Box>

@@ -149,7 +149,7 @@ const Connections = () => {
         </Tabs>
       </AppBar>
 
-      <Box my={2}>
+      {/* <Box my={2}>
         <TextField
           variant="outlined"
           placeholder="Search..."
@@ -159,11 +159,11 @@ const Connections = () => {
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{ startAdornment: <InputAdornment position="start" /> }}
         />
-      </Box>
+      </Box> */}
 
       <TabPanel value={tabIndex} index={0}>
         <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
-          {currentEmployee.map((emp, index) => (
+          {/* {currentEmployee.map((emp, index) => (
             <Card
               key={index}
               sx={{
@@ -193,7 +193,7 @@ const Connections = () => {
                 </Button>
               </Box>
             </Card>
-          ))}
+          ))} */}
         </Box>
       </TabPanel>
 
@@ -244,9 +244,6 @@ const Connections = () => {
 
       <TabPanel value={tabIndex} index={2}>
         <Box sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
-          <Typography variant="h5" gutterBottom>
-            Current Employees
-          </Typography>
           <Stack spacing={3}>
             {pendingTasks.map((emp, index) => (
               <TaskCard
