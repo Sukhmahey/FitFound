@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
 import { useAuth } from '../../../contexts/AuthContext';
 import { candidateApi } from "../../../services/api";
-
 
 const RecommendedActions = () => {
     const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_SINDY_API;
@@ -12,9 +12,13 @@ const RecommendedActions = () => {
     const [userSkills, setUserSkills] = useState(""); 
     const [prompt, setPrompt] = useState("");
     const [recommendations, setRecommendatios] = useState([]);
+    const [message, setMessage] = useState("");
+    const [messageClass, setMessageClass] = useState("");
 
    
     useEffect(() => {
+
+        console.log(user);
 
         candidateApi.getProfileById(user.profileId)
         .then( result => {
@@ -42,7 +46,7 @@ const RecommendedActions = () => {
     }, [userSkills, userRole]);
 
     useEffect( () => {
-        console.log(prompt);
+        // console.log(prompt);
         if (prompt.length > 10) {
             axios.post(
                 `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
@@ -66,9 +70,33 @@ const RecommendedActions = () => {
         }
     }, [prompt]);
 
+    const handlerAddClick = (skill) => {
+        console.log(skill);
+        candidateApi.updateSkills(user.userId,  { skills: [{ skill: skill.trim() }]} )
+        .then( result => { 
+            console.log(result.data);
+            setMessage( `The skill ${skill} has been added to your profile successfully.`);
+            setMessageClass("alert alert-success"); 
+            setTimeout(() => {
+                setMessage("");
+                setRecommendatios(recommendations.filter(item => item !== skill))
+            }, 5000);
+        })
+        .catch( (err) => {
+            setMessage(err.response?.data?.details || "An error occurred.");
+            setMessageClass("alert alert-danger");
+            setTimeout(() => setMessage(""), 5000);
+        });
+    };
+
     return(
         <div>
             <p>Recommended Actions</p>
+            {message && (
+                <Box className={messageClass} sx={{ mb: 2 }}>
+                {message}
+                </Box>
+            )}
             <div>
                 <>{ recommendations.length > 0 && recommendations.map((recommendation) => (
                     <div 
@@ -80,7 +108,7 @@ const RecommendedActions = () => {
                     }}
                     key={recommendation}>
                         <p>Add "{recommendation}" to your profile to appear in more searches as “role here”.</p>
-                        <button>Add</button>
+                        <button onClick={() => handlerAddClick(recommendation)}>Add</button>
                     </div>
                 ))}
                 </>

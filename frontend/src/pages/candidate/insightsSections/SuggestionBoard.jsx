@@ -20,7 +20,7 @@ const SuggestionBoard = () => {
             setUserProfile(result.data);
         })
         .catch( error => {
-            console.log(error); 
+            // console.log(error); 
         });
     }, []);
 
@@ -29,7 +29,7 @@ const SuggestionBoard = () => {
         if (userProfile && userRole.length > 0) {
             const { personalInfo, basicInfo, portfolio, _id, userId, ...cleanProfile } = userProfile;
 
-            console.log(cleanProfile);
+            // console.log(cleanProfile);
 
             setPrompt(`I am a/an ${userRole}. Based on the current job market requirements, give me exactly two suggestions that I can do to improve my profile. This is my profile ${cleanProfile}. Please give me the recommendations in terms of eductation, level, salary, job references, work achievements, and others. Please, don't give me suggestions about technologies or sikills I could add. Only return a simple list of short suggestions (no more than 15 words), with a short explanation of how to do it (in the same suggestions, before the semicolon), with simple words, in a single line, splitted by semmicolon (;). Don't add anything else at the beginning or ending neither a dot (.), please, thanks.
             Please use this example format: Quantify achievements using numbers: Use metrics to showcase the impact you made in past roles; Target a slightly higher salary range: Research salaries for your experience and location to negotiate better`);
@@ -38,7 +38,7 @@ const SuggestionBoard = () => {
     }, [userProfile, userRole]);
 
     useEffect( () => {
-        console.log(prompt);
+        // console.log(prompt);
         if (prompt.length > 10) {
             axios.post(
                 `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
@@ -52,7 +52,7 @@ const SuggestionBoard = () => {
                 }
             )
             .then( result => {
-                console.log(result.data.candidates[0].content.parts[0].text);
+                // console.log(result.data.candidates[0].content.parts[0].text);
                 let response = result.data.candidates[0].content.parts[0].text.replace(/\./g, "");
                 setSuggestions(response.split(';').map(skill => skill.trim()));
             })
