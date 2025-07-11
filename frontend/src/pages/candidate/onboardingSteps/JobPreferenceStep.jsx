@@ -24,7 +24,7 @@ const predefinedJobTitles = [
   "ui designer"
 ];
 
-export default function JobPreferenceStep({ data, onUpdate }) {
+export default function JobPreferenceStep({ data, onUpdate,errors = {} }) {
   const [selectedRole, setSelectedRole] = useState(data.desiredJobTitle?.[0] || '');
 
   const handleChange = (event, newRole) => {
@@ -73,6 +73,8 @@ export default function JobPreferenceStep({ data, onUpdate }) {
           onChange={handleChange}
           fullWidth
           color="primary"
+          error={!!errors.selectedRole}
+          helperText={errors.selectedRole}
         >
           {predefinedJobTitles.map((role) => (
             <ToggleButton key={role} value={role} sx={{ textTransform: 'capitalize' }}>

@@ -16,7 +16,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { candidateApi } from '../../../services/api';
 import useNotify from '../../../utils/notificationService';
 
-export default function WorkExperienceStep({ data = [], onUpdate, verificationCompany = [] }) {
+export default function WorkExperienceStep({ data = [], onUpdate, verificationCompany = [] ,errors = {}}) {
   // const handleChange = (index, field, value) => {
   //   const updated = [...data];
   //   updated[index][field] = value;
@@ -169,10 +169,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
   };
 
 
-  // const getVerificationStatus = (companyName) => {
-  //   const match = verificationCompany.find(v => v.company.toLowerCase() === companyName.toLowerCase());
-  //   return match?.status || null;
-  // };
+ 
   const getVerificationStatus = (companyName) => {
     if (!companyName) return null;
     const match = verificationCompany.find(
@@ -220,6 +217,8 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 value={exp.companyName}
                 onChange={(e) => handleChange(index, 'companyName', e.target.value)}
                 disabled={isVerified}
+                error={!!errors.companyName}
+                helperText={errors.companyName}
               />
 
               {status && (
@@ -234,6 +233,8 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 value={exp.role}
                 onChange={(e) => handleChange(index, 'role', e.target.value)}
                 disabled={isVerified}
+                error={!!errors.jobTitle}
+                helperText={errors.jobTitle}
               />
               {/* <TextField
                 label="Job Title"
@@ -250,6 +251,8 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 value={normalizeDate(exp.startDate) || ''}
                 onChange={(e) => handleChange(index, 'startDate', e.target.value)}
                 disabled={isVerified}
+                error={!!errors.startDate}
+                helperText={errors.startDate}
               />
 
               <TextField
@@ -259,6 +262,8 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 value={normalizeDate(exp.endDate) || ''}
                 onChange={(e) => handleChange(index, 'endDate', e.target.value)}
                 disabled={isVerified}
+                error={!!errors.endDate}
+                helperText={errors.endDate}
               />
 
 
@@ -270,6 +275,8 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                   label="Experience Level"
                   disabled={isVerified}
                   onChange={(e) => handleChange(index, 'experienceLevel', e.target.value)}
+                  error={!!errors.experienceLevel}
+                helperText={errors.experienceLevel}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="junior">Junior</MenuItem>

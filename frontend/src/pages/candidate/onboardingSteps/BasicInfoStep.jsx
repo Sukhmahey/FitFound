@@ -2,7 +2,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
-export default function BasicInfoStep({ data, onUpdate }) {
+export default function BasicInfoStep({ data, onUpdate ,errors = {}}) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     onUpdate({ [name]: value });
@@ -25,6 +25,8 @@ export default function BasicInfoStep({ data, onUpdate }) {
           id="outlined-basic" label="Phone Number" variant="outlined"
           value={data.phoneNumber}
           onChange={handleChange}
+          error={!!errors.phoneNumber}
+          helperText={errors.phoneNumber}
         />
         <TextField
           type="text"

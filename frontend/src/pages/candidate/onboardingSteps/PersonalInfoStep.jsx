@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
 
-export default function PersonalInfoStep({ data, onUpdate , userEmail}) {
+export default function PersonalInfoStep({ data, onUpdate , userEmail,errors = {} }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     onUpdate({ [name]: value });
@@ -29,6 +29,8 @@ export default function PersonalInfoStep({ data, onUpdate , userEmail}) {
             id="outlined-basic" label="First Name" variant="outlined"
             value={data.firstName}
             onChange={handleChange}
+            error={!!errors.firstName}
+  helperText={errors.firstName}
           />
           <TextField
             type="text"
@@ -36,6 +38,7 @@ export default function PersonalInfoStep({ data, onUpdate , userEmail}) {
             id="outlined-basic" label="Middle Name" variant="outlined"
             value={data.middleName}
             onChange={handleChange}
+            
           />
           <TextField
             type="text"
@@ -43,6 +46,8 @@ export default function PersonalInfoStep({ data, onUpdate , userEmail}) {
             id="outlined-basic" label="Last Name" variant="outlined"
             value={data.lastName}
             onChange={handleChange}
+            error={!!errors.lastName}
+  helperText={errors.lastName}
           />
           <TextField
             type="email"

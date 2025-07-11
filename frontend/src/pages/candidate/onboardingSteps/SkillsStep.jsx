@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Chip, Stack } from '@mui/material';
 
-export default function SkillsStep({ data = [], onUpdate }) {
+export default function SkillsStep({ data = [], onUpdate,errors = {} }) {
   const [skill, setSkill] = useState('');
 
   const addSkill = () => {
@@ -27,6 +27,8 @@ export default function SkillsStep({ data = [], onUpdate }) {
             variant="outlined"
             fullWidth
             value={skill}
+            error={!!errors.skills}
+            helperText={errors.skills}
             onChange={(e) => setSkill(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {

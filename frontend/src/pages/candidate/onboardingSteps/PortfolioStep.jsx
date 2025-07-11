@@ -6,7 +6,7 @@ import {
   Stack
 } from '@mui/material';
 
-export default function PortfolioStep({ data = { socialLinks: {} }, onUpdate }) {
+export default function PortfolioStep({ data = { socialLinks: {} }, onUpdate ,errors = {}}) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     onUpdate({
