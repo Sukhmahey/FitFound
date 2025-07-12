@@ -17,9 +17,6 @@ const RecommendedActions = () => {
 
    
     useEffect(() => {
-
-        console.log(user);
-
         candidateApi.getProfileById(user.profileId)
         .then( result => {
             let skillsString = "";
