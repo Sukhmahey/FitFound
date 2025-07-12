@@ -31,8 +31,16 @@ const SuggestionBoard = () => {
 
             // console.log(cleanProfile);
 
-            setPrompt(`I am a/an ${userRole}. Based on the current job market requirements, give me exactly two suggestions that I can do to improve my profile. This is my profile ${cleanProfile}. Please give me the recommendations in terms of eductation, level, salary, job references, work achievements, and others. Please, don't give me suggestions about technologies or sikills I could add. Only return a simple list of short suggestions (no more than 15 words), with a short explanation of how to do it (in the same suggestions, before the semicolon), with simple words, in a single line, splitted by semmicolon (;). Don't add anything else at the beginning or ending neither a dot (.), please, thanks.
-            Please use this example format: Quantify achievements using numbers: Use metrics to showcase the impact you made in past roles; Target a slightly higher salary range: Research salaries for your experience and location to negotiate better`);
+            setPrompt(`I am a/an ${userRole}. Based on the current job market requirements, give me exactly two suggestions to improve my profile. This is my profile: ${cleanProfile}. Focus only on recommendations related to education, level, salary, job references, work achievements, or other professional growth aspects — excluding technologies or skills I could add.
+            Return a simple list of two suggestions in a single line, following these exact rules:
+            Each suggestion must have a clear title (maximum 8 words).
+            Use a colon (:) to separate the title from its explanation.
+            Use a semicolon (;) to separate the two suggestions, but do not place a semicolon after the second suggestion.
+            Do not use the colon (:) or semicolon (;) for anything else except separating titles form descriptions (:), and suggestions (;)
+            Do not use any other special characters (* - "" # $)
+            Do not add any introduction, closing sentence, or period (.) at the end
+            Example format:
+            Quantify achievements using numbers: Use metrics to showcase the impact you made in past roles; Target a slightly higher salary range: Research salaries for your experience and location to negotiate better`);
         }
 
     }, [userProfile, userRole]);
@@ -75,32 +83,13 @@ const SuggestionBoard = () => {
                 borderRadius: '8px'
                 }}
                 key={index}>
-                    <div><p>"Profile Improvements"</p></div>
-                    <div><p>{suggestion}.</p></div>
+                    <div><p>{`"${suggestion.split(':')[0]}"`}</p></div>
+                    <div><p>{suggestion.split(':')[1]}.</p></div>
                 </div>
             ))
 
             }
             </>
-                {/* <div style={{
-                    border: '1px solid #ccc',
-                    padding: '16px',
-                    margin: '16px',
-                    borderRadius: '8px'
-                    }}>
-                    <div><p>"Profile Updates"</p></div>
-                    <div><p>Your profile hasn’t been updated in 3 weeks. Refresh your current role to stay on top of search results.</p></div>
-                </div>
-
-                <div style={{
-                border: '1px solid #ccc',
-                padding: '16px',
-                margin: '16px',
-                borderRadius: '8px'
-                }}>
-                    <div><p>"Profile Updates"</p></div>
-                    <div><p>Your profile hasn’t been updated in 3 weeks. Refresh your current role to stay on top of search results.</p></div>
-                </div> */}
             </div>
         </div>
     );
