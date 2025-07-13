@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const UserContactInfo = () => {
+const UserContactInfo = ({ errors }) => {
     const { register, watch, setValue } = useFormContext();
     const [imageSrc, setImageSrc] = useState( null );
     const profilePicture = watch('profilePicture');

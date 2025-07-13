@@ -7,23 +7,64 @@ import { useAuth } from "../../contexts/AuthContext";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
 import CompanyInfo from "./onboardingSteps/CompanyInfo";
 import UserContactInfo from "./onboardingSteps/UserContactInfo";
+import useNotify from "../../utils/notificationService";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 const EmployerProfile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
+  const notify = useNotify();
   const [formSection, setFormSection] = useState(0);
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
   const [message, setMessage] = useState("");
   const [messageClass, setMessageClass] = useState("");
+  const [snackOpen, setSnackOpen] = useState(false);
+const [snackMessage, setSnackMessage] = useState("");
+const [snackSeverity, setSnackSeverity] = useState("error");
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
 
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "My Profile" });
   }, [setAppGeneralInfo]);
+
+  const validateForm = (data) => {
+  const errors = [];
+
+  if (formSection === 0) {
+    if (!data.companyName?.trim()) errors.push("Company name is required");
+    if (!data.establishedYear || data.establishedYear < 1900 || data.establishedYear > new Date().getFullYear()) {
+      errors.push("Established year must be between 1900 and the current year");
+    }
+    if (!data.businessRegisteredNumber?.trim()) errors.push("Business Reg. Number is required");
+    if (!data.industrySector?.trim()) errors.push("Industry sector is required");
+    if (!data.companySize?.trim()) errors.push("Company size is required");
+    if (!data.workLocation?.trim()) errors.push("Work location is required");
+    if (!data.companyWebsite?.trim()) errors.push("Company website is required");
+    if (!data.companyDescription?.trim() || data.companyDescription.length < 10) {
+      errors.push("Description must be at least 10 characters");
+    }
+  }
+
+  if (formSection === 1) {
+    if (!data.firstName?.trim()) errors.push("First name is required");
+    if (!data.lastName?.trim()) errors.push("Last name is required");
+    if (!data.phone?.trim()) errors.push("Phone number is required");
+    if (!data.email?.trim()) errors.push("Email is required");
+    if (!data.designation?.trim()) errors.push("Designation is required");
+
+    if (data.linkedInProfile?.trim() &&
+        !/^https?:\/\/(www\.)?linkedin\.com\/.*$/.test(data.linkedInProfile)) {
+      errors.push("Invalid LinkedIn URL");
+    }
+  }
+
+  return errors;
+};
 
   useEffect(() => {
     employerApi
@@ -43,6 +84,13 @@ const EmployerProfile = () => {
   };
 
   const onSubmit = (data) => {
+    const errors = validateForm(data);
+  if (errors.length > 0) {
+    setSnackMessage(errors.join(" | "));
+    setSnackSeverity("error");
+    setSnackOpen(true);
+    return;
+  }
     const employerProfile =
       formSection === 0
         ? { ...data, contactInfo }
@@ -51,8 +99,9 @@ const EmployerProfile = () => {
     employerApi
       .updateEmployerProfile(userId, employerProfile)
       .then(() => {
-        setMessage("Your profile has been saved successfully.");
-        setMessageClass("alert alert-success");
+        notify.success("Your profile has been saved successfully.")
+        // setMessage("Your profile has been saved successfully.");
+        // setMessageClass("alert alert-success");
         setTimeout(() => setMessage(""), 5000);
       })
       .catch((err) => {
@@ -156,6 +205,11 @@ const EmployerProfile = () => {
           </Box>
         </form>
       </FormProvider>
+      <Snackbar open={snackOpen} autoHideDuration={5000} onClose={() => setSnackOpen(false)}>
+  <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} sx={{ width: '100%' }} elevation={6} variant="filled">
+    {snackMessage}
+  </MuiAlert>
+</Snackbar>
     </Box>
   );
 };

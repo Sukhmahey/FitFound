@@ -5,6 +5,8 @@ import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
 import { useAuth } from "../../contexts/AuthContext";
 import { CircularProgress, Backdrop } from "@mui/material";
 import { scoreCandidates } from "./GenerateCandidateScore";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 import {
   FormControl,
@@ -44,6 +46,9 @@ const dummyobj1 = {
 
 const Search = () => {
   const [loading, setLoading] = useState(false);
+  const [snackOpen, setSnackOpen] = useState(false);
+const [snackMessage, setSnackMessage] = useState("");
+const [snackSeverity, setSnackSeverity] = useState("error");
   const [searchQuery, setSearchQuery] = useState({
     title: "",
     location: "",
@@ -61,6 +66,22 @@ const Search = () => {
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "Candidate Search" });
   }, []);
+
+  const validateSearchForm = () => {
+  const errors = [];
+
+  if (!searchQuery.title?.trim()) errors.push("Job title is required");
+  if (!searchQuery.location?.trim()) errors.push("Location is required");
+  if (!searchQuery.jobDescription?.trim()) errors.push("Job description is required");
+  if (!searchQuery.jobType?.trim()) errors.push("Job type is required");
+  if (!searchQuery.locationType?.trim()) errors.push("Location type is required");
+  if (!searchQuery.salaryFrom || !searchQuery.salaryTo) {
+    errors.push("Salary range (From and To) is required");
+  }
+  if (!searchQuery.skills?.trim()) errors.push("At least one skill is required");
+
+  return errors;
+};
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -91,6 +112,14 @@ const Search = () => {
   };
 
   const handleSubmit = async () => {
+    const errors = validateSearchForm();
+if (errors.length > 0) {
+  setSnackMessage(errors.join(" , "));
+  setSnackSeverity("error");
+  setSnackOpen(true);
+  setLoading(false);
+  return;
+}
     setLoading(true);
     const paramObj = {
       employerId: userId,
@@ -180,6 +209,11 @@ const Search = () => {
 
   return (
     <>
+    <Snackbar open={snackOpen} autoHideDuration={5000} onClose={() => setSnackOpen(false)}>
+  <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} elevation={6} variant="filled">
+    {snackMessage}
+  </MuiAlert>
+</Snackbar>
       <Backdrop
         sx={{
           color: "#fff",

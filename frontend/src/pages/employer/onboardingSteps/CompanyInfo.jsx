@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const CompanyInfo = () => {
+const CompanyInfo = ({errors}) => {
   const { register, watch, setValue } = useFormContext();
   const [imageSrc, setImageSrc] = useState();
   const companyLogo = watch("companyLogo");
