@@ -21,8 +21,10 @@ import {
   CircularProgress,
   Container,
   Alert,
-  AlertTitle
+  AlertTitle,
+  Snackbar
 } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 
 export default function MyProfile() {
   const { user } = useAuth();
@@ -34,6 +36,11 @@ export default function MyProfile() {
   const [formData, setFormData] = useState(null);
   const [submitStatus, setSubmitStatus] = useState('');
   const [verificationCompany, setVerificationCompany] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
+    const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
+  
+
+      const handleSnackClose = () => setSnack({ ...snack, open: false });
 
   // Fetch candidate profile
   useEffect(() => {
@@ -94,20 +101,67 @@ export default function MyProfile() {
     }));
   };
 
-  const handleUpdate = async () => {
-    try {
-      await candidateApi.updateProfile(userId, formData);
-      setSubmitStatus('success');
-      console.log("Success in update")
-      await notify.success("Profile saved successfully!");
+  const validateForm = () => {
+  let errors = {};
+  if (activeTab === 'Personal') {
+    const { firstName, lastName } = formData.personalInfo || {};
+    if (!firstName?.trim()) errors.firstName = "First name is required";
+    if (!lastName?.trim()) errors.lastName = "Last name is required";
+  }
 
-    } catch (err) {
-      console.error('Failed to update profile:', err);
-      await notify.error("Failed to update profile");
+  if (activeTab === 'Basic') {
+    const { phoneNumber } = formData.basicInfo || {};
+    if (!phoneNumber?.trim()) errors.phoneNumber = "Phone number is required";
+  }
 
-      setSubmitStatus('error');
+  if (activeTab === 'Skills') {
+    if ((formData.skills || []).length === 0) errors.skills = "Add at least one skill";
+  }
+
+  if (activeTab === 'Work') {
+    (formData.workHistory || []).forEach((exp, i) => {
+      if (!exp.companyName) errors[`companyName_${i}`] = "Company name is required";
+      if (!exp.jobTitle) errors[`jobTitle_${i}`] = "Job title is required";
+      if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
+      if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
+      if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
+    });
+  }
+
+  if (activeTab === 'Job') {
+    const desired = formData.jobPreference?.desiredJobTitle;
+    const jobType = formData.jobPreference?.jobType;
+    if (!desired || desired.length === 0 || !desired[0]?.trim()) {
+      errors.selectedRole = "Desired Role is required";
     }
-  };
+    if (!jobType?.trim()) errors.jobType = "Job type is required";
+  }
+
+  return errors;
+};
+
+  const handleUpdate = async () => {
+  const errors = validateForm();
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    const messages = Object.values(errors); 
+ 
+    const messageText = messages.join(', ');
+    setSnack({ open: true, message: `Please fix: ${messageText}`, severity: 'error' });
+    return;
+  }
+
+  setFormErrors({});
+  try {
+    await candidateApi.updateProfile(userId, formData);
+    setSubmitStatus('success');
+    await notify.success("Profile saved successfully!");
+  } catch (err) {
+    console.error('Failed to update profile:', err);
+    await notify.error("Failed to update profile");
+    setSubmitStatus('error');
+  }
+};
 
   if (!formData) {
     return (
@@ -130,19 +184,19 @@ export default function MyProfile() {
   const renderTab = () => {
     switch (activeTab) {
       case 'Personal':
-        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} />;
+        return <PersonalInfoStep data={formData.personalInfo} onUpdate={(data) => updateFormData('personalInfo', data)} errors={formErrors}/>;
       case 'Basic':
-        return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} />;
+        return <BasicInfoStep data={formData.basicInfo} onUpdate={(data) => updateFormData('basicInfo', data)} errors={formErrors}/>;
       case 'Skills':
-        return <SkillsStep data={formData.skills} onUpdate={(data) => updateFormData('skills', data)} />;
+        return <SkillsStep data={formData.skills} onUpdate={(data) => updateFormData('skills', data)} errors={formErrors}/>;
       case 'Work':
-        return <WorkExperienceStep data={formData.workHistory} onUpdate={(data) => updateFormData('workHistory', data)} verificationCompany={verificationCompany} />;
+        return <WorkExperienceStep data={formData.workHistory} onUpdate={(data) => updateFormData('workHistory', data)} verificationCompany={verificationCompany} errors={formErrors}/>;
       case 'Education':
-        return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} />;
+        return <EducationStep data={formData.education} onUpdate={(data) => updateFormData('education', data)} errors={formErrors}/>;
       case 'Job':
-        return <JobPreferenceStep data={formData.jobPreference} onUpdate={(data) => updateFormData('jobPreference', data)} />;
+        return <JobPreferenceStep data={formData.jobPreference} onUpdate={(data) => updateFormData('jobPreference', data)} errors={formErrors}/>;
       case 'Portfolio':
-        return <PortfolioStep data={formData.portfolio} onUpdate={(data) => updateFormData('portfolio', data)} />;
+        return <PortfolioStep data={formData.portfolio} onUpdate={(data) => updateFormData('portfolio', data)} errors={formErrors}/>;
       default:
         return null;
     }
@@ -173,23 +227,13 @@ export default function MyProfile() {
         </Button>
       </Box>
 
-      {/* {submitStatus === 'success' && (
-        <Box mt={2}>
-          <Alert severity="success">
-            <AlertTitle>Success</AlertTitle>
-            Your request has been submitted successfully.
-          </Alert>
-        </Box>
-      )}
-
-      {submitStatus === 'error' && (
-        <Box mt={2}>
-          <Alert severity="error">
-            <AlertTitle>Error</AlertTitle>
-            Something went wrong. Please try again later.
-          </Alert>
-        </Box>
-      )} */}
+      <Box>
+        <Snackbar open={snack.open} autoHideDuration={4000} onClose={handleSnackClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+          <MuiAlert severity={snack.severity} onClose={handleSnackClose}>
+            {snack.message}
+          </MuiAlert>
+        </Snackbar>
+      </Box>
     </Container>
   );
 }
