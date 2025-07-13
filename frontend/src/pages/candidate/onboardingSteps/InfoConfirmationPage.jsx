@@ -24,6 +24,7 @@ export default function InfoConfirmationPage({ data }) {
   const notify = useNotify();
 
   const [stepIndex, setStepIndex] = useState(0);
+  const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState(data);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
 
@@ -47,7 +48,56 @@ export default function InfoConfirmationPage({ data }) {
   };
   console.log(formData);
 
+
+  const validateStep = () => {
+  let errors = {};
+  if (stepIndex === 0) {
+    const { firstName, lastName } = formData.personalInfo;
+    if (!firstName.trim()) errors.firstName = "First name is required";
+    if (!lastName.trim()) errors.lastName = "Last name is required";
+  }
+
+  if (stepIndex === 1) {
+    const { phoneNumber } = formData.basicInfo;
+    if (!phoneNumber.trim()) errors.phoneNumber = "Phone number is required";
+  }
+
+  if (stepIndex === 2) {
+    if (formData.skills.length === 0) errors.skills = "Add at least one skill";
+  }
+
+  if (stepIndex === 3) {
+    formData.workExperience.forEach((exp, i) => {
+      if (!exp.companyName) errors[`companyName_${i}`] = "Company name is required";
+      if (!exp.jobTitle) errors[`jobTitle_${i}`] = "Job title is required";
+      if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
+      if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
+      if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
+    });
+  }
+
+  if (stepIndex === 6) {
+    const desired = formData.jobPreference.desiredJobTitle;
+    const jobType = formData.jobPreference.jobType;
+    if (!desired || desired.length === 0 || !desired[0]?.trim()) {
+      errors.selectedRole = "Desired Role is required";
+    }
+    if (!jobType.trim()) errors.jobType = "Job type is required";
+  }
+
+  return errors;
+};
+
   const handleNext = async () => {
+    const errors = validateStep();
+if (Object.keys(errors).length > 0) {
+  setFormErrors(errors);
+  const messages = Object.values(errors); 
+  const messageText = messages.join(', ');
+  setSnack({ open: true, message: `Please fix: ${messageText}`, severity: 'error' });
+  return;
+}
+setFormErrors({});
     try {
    const formatDate = (date) => {
     if (!date) return '';
@@ -97,20 +147,20 @@ export default function InfoConfirmationPage({ data }) {
 
   const renderStep = () => {
     switch (stepIndex) {
-      case 0: return <PersonalInfoStep data={formData.personalInfo} onUpdate={d => updateFormData('personalInfo', d)} userEmail={userEmail} />;
-      case 1: return <BasicInfoStep data={formData.basicInfo} onUpdate={d => updateFormData('basicInfo', d)} />;
-      case 2: return <SkillsStep data={formData.skills} onUpdate={d => updateFormData('skills', d)} />;
-      case 3: return <WorkExperienceStep data={formData.workExperience} onUpdate={d => updateFormData('workExperience', d)} />;
-      case 4: return <PortfolioStep data={formData.portfolio} onUpdate={d => updateFormData('portfolio', d)} />;
-      case 5: return <EducationStep data={formData.education} onUpdate={d => updateFormData('education', d)} />;
-      case 6: return <JobPreferenceStep data={formData.jobPreference} onUpdate={d => updateFormData('jobPreference', d)} />;
+      case 0: return <PersonalInfoStep data={formData.personalInfo} onUpdate={d => updateFormData('personalInfo', d)} userEmail={userEmail} errors={formErrors}/>;
+      case 1: return <BasicInfoStep data={formData.basicInfo} onUpdate={d => updateFormData('basicInfo', d)} errors={formErrors}/>;
+      case 2: return <SkillsStep data={formData.skills} onUpdate={d => updateFormData('skills', d)} errors={formErrors}/>;
+      case 3: return <WorkExperienceStep data={formData.workExperience} onUpdate={d => updateFormData('workExperience', d)} errors={formErrors}/>;
+      case 4: return <PortfolioStep data={formData.portfolio} onUpdate={d => updateFormData('portfolio', d)} errors={formErrors} />;
+      case 5: return <EducationStep data={formData.education} onUpdate={d => updateFormData('education', d)} errors={formErrors} />;
+      case 6: return <JobPreferenceStep data={formData.jobPreference} onUpdate={d => updateFormData('jobPreference', d)} errors={formErrors} />;
       default: return null;
     }
   };
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Snackbar open={snack.open} autoHideDuration={4000} onClose={handleSnackClose}>
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={handleSnackClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <MuiAlert severity={snack.severity} onClose={handleSnackClose}>
           {snack.message}
         </MuiAlert>
