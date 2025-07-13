@@ -196,6 +196,7 @@ const handleNextBtn = async () => {
     } else if (stepIndex === 7) {
       await candidateApi.updateJobPreference(userId, formData.jobPreference);
       setSnackMsg("Profile saved successfully!");
+      notify.success("Profile saved successfully!")
       setSnackSeverity('success');
       setSnackOpen(true);
       navigate('/candidate/dashboard');
