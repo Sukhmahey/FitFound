@@ -3,6 +3,7 @@ import { Box, TextField, Button, Chip, Stack } from '@mui/material';
 
 export default function SkillsStep({ data = [], onUpdate,errors = {} }) {
   const [skill, setSkill] = useState('');
+  console.log(data[1])
 
   const addSkill = () => {
     if (skill.trim()) {
@@ -46,7 +47,7 @@ export default function SkillsStep({ data = [], onUpdate,errors = {} }) {
           {data.map((item, index) => (
             <Chip
               key={index}
-              label={item.skill}
+              label={item.skill || item}
               onDelete={() => removeSkill(index)}
               color="primary"
               sx={{ marginBottom: 1 }}
