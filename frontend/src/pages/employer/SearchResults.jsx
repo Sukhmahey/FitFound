@@ -11,138 +11,245 @@ import {
   Paper,
   Stack,
   Dialog,
-  DialogTitle,
   DialogContent,
+  DialogTitle,
   DialogActions,
+  Divider,
+  Avatar,
+  Chip,
+  IconButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
+import WorkIcon from "@mui/icons-material/Work";
+import SchoolIcon from "@mui/icons-material/School";
+import CloseIcon from "@mui/icons-material/Close";
+import LinkIcon from "@mui/icons-material/Link";
+
 import { employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
-
 import { AppInfoContext } from "../../contexts/AppInfoContext";
 
-// Utility to censor names (e.g., Vipul → V***l)
+const PRIMARY_COLOR = "#062F54";
+const ACCENT_COLOR = "#F9A825";
+
 const censorName = (name) => {
-  if (!name || name.length < 2) return name ?? "-";
+  if (!name || name.length < 2) return "-";
   return name[0] + "*".repeat(name.length - 2) + name[name.length - 1];
 };
 
-const CandidateCard = ({ data, onViewDetails, sendVerificationRequest }) => {
+const CandidateCard = ({
+  data,
+  onViewDetails,
+  onInviteClick,
+  isInvited = false,
+}) => {
   const firstName = censorName(data?.personalInfo?.firstName ?? "");
   const lastName = censorName(data?.personalInfo?.lastName ?? "");
   const fullName = `${firstName} ${lastName}`;
 
   return (
     <Paper
-      elevation={3}
+      elevation={0}
       sx={{
-        p: 2,
-        mb: 2,
-        display: "flex",
-        alignItems: "center",
-        borderRadius: 3,
+        p: 3,
+        mb: 3,
+        borderRadius: 4,
+        backgroundColor: "#FAFAFA",
+        border: `1px solid #E0E0E0`,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+        transition: "0.3s",
+        "&:hover": {
+          boxShadow: "0px 10px 20px rgba(0,0,0,0.06)",
+        },
       }}
     >
-      <Box
-        sx={{
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          backgroundColor: "#FADADD",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 24,
-          fontWeight: "bold",
-          mr: 3,
-        }}
-      >
-        {data?.matchingScore ?? "-"}%
-      </Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Avatar
+            sx={{
+              width: 60,
+              height: 60,
+              bgcolor: PRIMARY_COLOR,
+              fontWeight: 600,
+              fontSize: 16,
+            }}
+          >
+            {data?.matchingScore ?? "-"}%
+          </Avatar>
 
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="subtitle1">{fullName}</Typography>
-        <Typography variant="body2">
-          Specialization:{" "}
-          <strong>{data?.personalInfo?.specialization ?? "-"}</strong>
-        </Typography>
-        <Typography variant="body2">
-          Role: <strong>{data?.workHistory?.[0]?.role ?? "-"}</strong> •{" "}
-          {data?.basicInfo?.workStatus ?? "-"}
-        </Typography>
-      </Box>
+          <Box>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 600, color: PRIMARY_COLOR }}
+            >
+              {fullName}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "#666", fontSize: 13, mb: 0.5 }}
+            >
+              {data?.personalInfo?.specialization ?? "-"}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#999", fontSize: 12 }}>
+              {data?.workHistory?.[0]?.role ?? "-"} •{" "}
+              {data?.basicInfo?.workStatus ?? "-"}
+            </Typography>
+          </Box>
+        </Stack>
 
-      <Stack spacing={1} alignItems="flex-end">
-        <Typography variant="subtitle1" fontWeight="bold">
-          ${data?.jobPreference?.salaryExpectation?.min ?? "-"} /hr
-        </Typography>
-        <Button
-          variant="contained"
-          size="small"
-          sx={{ bgcolor: "#fdd" }}
-          onClick={() => onViewDetails(data)}
-        >
-          View Details
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => sendVerificationRequest(data?._id)}
-        >
-          Send Invitation
-        </Button>
-      </Stack>
+        <Stack spacing={1} alignItems="flex-end">
+          <Typography
+            variant="h6"
+            sx={{
+              color: ACCENT_COLOR,
+              fontWeight: 700,
+              fontSize: 16,
+            }}
+          >
+            ${data?.jobPreference?.salaryExpectation?.min ?? "-"} /hr
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={isInvited}
+              sx={{
+                color: isInvited ? "#ccc" : PRIMARY_COLOR,
+                borderColor: isInvited ? "#ccc" : PRIMARY_COLOR,
+                textTransform: "none",
+                fontWeight: 500,
+                borderRadius: "20px",
+                px: 2,
+              }}
+              onClick={() => onInviteClick(data)}
+            >
+              {isInvited ? "Invited" : "Invite"}
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{
+                backgroundColor: PRIMARY_COLOR,
+                color: "#fff",
+                textTransform: "none",
+                fontWeight: 500,
+                borderRadius: "20px",
+                px: 2,
+                "&:hover": {
+                  backgroundColor: "#041f39",
+                },
+              }}
+              onClick={() => onViewDetails(data)}
+            >
+              View Details
+            </Button>
+          </Stack>
+        </Stack>
+      </Box>
     </Paper>
   );
 };
 
+const InviteConfirmModal = ({ open, onClose, onConfirm }) => (
+  <Dialog open={open} onClose={onClose}>
+    <DialogTitle sx={{ bgcolor: PRIMARY_COLOR, color: "#fff" }}>
+      Confirm Invitation
+    </DialogTitle>
+    <DialogContent>
+      <Typography>
+        Are you sure you want to send an invitation to this candidate?
+      </Typography>
+    </DialogContent>
+    <DialogActions sx={{ p: 2 }}>
+      <Button
+        onClick={onClose}
+        sx={{ color: PRIMARY_COLOR, textTransform: "none" }}
+      >
+        Cancel
+      </Button>
+      <Button
+        variant="contained"
+        sx={{ backgroundColor: ACCENT_COLOR, textTransform: "none" }}
+        onClick={onConfirm}
+      >
+        Confirm
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
 const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
   if (!candidate) return null;
 
+  const firstName = censorName(candidate?.personalInfo?.firstName);
+  const lastName = censorName(candidate?.personalInfo?.lastName);
+  const fullName = `${firstName} ${lastName}`;
+
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Candidate Details</DialogTitle>
-      <DialogContent dividers>
-        <Typography variant="body1">
-          <strong>Name:</strong> {candidate.username}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Specialization:</strong> {candidate.specialization}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Role:</strong> {candidate.role}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Type:</strong> {candidate.type}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Experience Level:</strong> {candidate.experience}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Salary Expectation:</strong> {candidate.salary}
-        </Typography>
+      <DialogContent sx={{ p: 3, position: "relative" }}>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: PRIMARY_COLOR,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
 
-        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+        <Stack alignItems="center" spacing={1} mb={2}>
+          <Avatar sx={{ width: 80, height: 80, bgcolor: PRIMARY_COLOR }}>
+            {candidate?.personalInfo?.firstName?.charAt(0)}
+          </Avatar>
+          <Typography variant="h6">{fullName}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            Profile Score: {candidate.profileScore}% • Matching Score:{" "}
+            {candidate.matchingScore}%
+          </Typography>
+        </Stack>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Skills
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, my: 1 }}>
+          {candidate.skills?.length > 0 ? (
+            candidate.skills.map((s) => (
+              <Chip
+                key={s._id}
+                label={s.skill}
+                sx={{ color: PRIMARY_COLOR, borderColor: PRIMARY_COLOR }}
+                variant="outlined"
+              />
+            ))
+          ) : (
+            <Typography variant="body2">No skills listed.</Typography>
+          )}
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
           Work History
         </Typography>
-        {candidate.workHistory.length > 0 ? (
+        {candidate.workHistory?.length > 0 ? (
           candidate.workHistory.map((job, index) => (
-            <Box
-              key={index}
-              sx={{ mb: 1, pl: 1, borderLeft: "2px solid #ccc" }}
-            >
+            <Box key={index} sx={{ my: 1 }}>
               <Typography variant="body2">
                 <strong>Company:</strong> {job.companyName}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Job Title:</strong> {job.jobTitle}
               </Typography>
               <Typography variant="body2">
                 <strong>Role:</strong> {job.role}
               </Typography>
               <Typography variant="body2">
-                <strong>Duration:</strong> {job.startDate} to {job.endDate}
+                <strong>Duration:</strong> {job.startDate} - {job.endDate}
               </Typography>
               <Typography variant="body2">
                 <strong>Experience Level:</strong> {job.experienceLevel}
@@ -152,10 +259,70 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
         ) : (
           <Typography variant="body2">No work history available.</Typography>
         )}
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Education
+        </Typography>
+        {candidate.education?.length > 0 ? (
+          candidate.education.map((edu, index) => (
+            <Box key={index} sx={{ my: 1 }}>
+              <Typography variant="body2">
+                <strong>Institute:</strong> {edu.instituteName}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Credential:</strong> {edu.credentials}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Duration:</strong> {edu.startDate} - {edu.endDate}
+              </Typography>
+            </Box>
+          ))
+        ) : (
+          <Typography variant="body2">
+            No education history available.
+          </Typography>
+        )}
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Job Preferences
+        </Typography>
+        <Typography variant="body2">
+          <strong>Desired Title:</strong>{" "}
+          {candidate?.jobPreference?.desiredJobTitle?.join(", ") || "-"}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Job Type:</strong> {candidate?.jobPreference?.jobType || "-"}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Expected Salary:</strong> $
+          {candidate?.jobPreference?.salaryExpectation?.min || "-"} / hr
+        </Typography>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Portfolio Links
+        </Typography>
+        {candidate?.portfolio?.socialLinks?.linkedin && (
+          <Box sx={{ display: "flex", alignItems: "center", my: 1 }}>
+            <LinkIcon sx={{ fontSize: 18, mr: 1, color: PRIMARY_COLOR }} />
+            <Typography variant="body2">
+              <a
+                href={candidate.portfolio.socialLinks.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: "none", color: PRIMARY_COLOR }}
+              >
+                LinkedIn Profile
+              </a>
+            </Typography>
+          </Box>
+        )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-      </DialogActions>
     </Dialog>
   );
 };
@@ -164,6 +331,10 @@ const SearchResults = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchField, setSearchField] = useState("");
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteCandidate, setInviteCandidate] = useState(null);
+  const [invitedIds, setInvitedIds] = useState([]);
+  const [snackbar, setSnackbar] = useState(false);
 
   const candidates = useSelector((state) => state.search.candidates);
   const { user } = useAuth();
@@ -177,32 +348,30 @@ const SearchResults = () => {
     setAppGeneralInfo({ pageTitle: "Candidate Search" });
   }, []);
 
-  const sendVerificationRequest = async (id) => {
-    await employerApi.sendConnectionRequest({
-      candidateId: id,
-      employerId: userId,
-      jobId: jobId,
-      outreachMessage:
-        "Your profile matches our opening. Would you be interested in learning more?",
-    });
+  const handleInvite = (candidate) => {
+    setInviteCandidate(candidate);
+    setInviteDialogOpen(true);
+  };
+
+  const confirmInvite = async () => {
+    try {
+      await employerApi.sendConnectionRequest({
+        candidateId: inviteCandidate._id,
+        employerId: userId,
+        jobId: jobId,
+        outreachMessage:
+          "Your profile matches our opening. Would you be interested in learning more?",
+      });
+      setInvitedIds((prev) => [...prev, inviteCandidate._id]);
+      setSnackbar(true);
+      setInviteDialogOpen(false);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleViewDetails = (candidate) => {
-    const firstName = candidate?.personalInfo?.firstName ?? "";
-    const lastName = candidate?.personalInfo?.lastName ?? "";
-    const fullName = `${censorName(firstName)} ${censorName(lastName)}`;
-
-    const normalizedCandidate = {
-      username: fullName,
-      specialization: candidate?.personalInfo?.specialization ?? "-",
-      role: candidate?.workHistory?.[0]?.role ?? "-",
-      experience: candidate?.workHistory?.[0]?.experienceLevel ?? "-",
-      type: candidate?.basicInfo?.workStatus ?? "-",
-      salary: `$${candidate?.jobPreference?.salaryExpectation?.min ?? "-"}/hr`,
-      workHistory: candidate?.workHistory ?? [],
-    };
-
-    setSelectedCandidate(normalizedCandidate);
+    setSelectedCandidate(candidate);
     setModalOpen(true);
   };
 
@@ -229,7 +398,7 @@ const SearchResults = () => {
         }}
       />
 
-      <Box sx={{ maxHeight: "80vh", overflowY: "auto", pr: 1 }}>
+      <Box sx={{ maxHeight: "80vh", overflowY: "auto", pr: 1, mt: 2 }}>
         {candidates?.length > 0 ? (
           candidates
             .filter((c) =>
@@ -244,7 +413,8 @@ const SearchResults = () => {
                 key={index}
                 data={c}
                 onViewDetails={handleViewDetails}
-                sendVerificationRequest={() => sendVerificationRequest(c?._id)}
+                onInviteClick={handleInvite}
+                isInvited={invitedIds.includes(c._id)}
               />
             ))
         ) : (
@@ -257,6 +427,27 @@ const SearchResults = () => {
         handleClose={handleClose}
         candidate={selectedCandidate}
       />
+
+      <InviteConfirmModal
+        open={inviteDialogOpen}
+        onClose={() => setInviteDialogOpen(false)}
+        onConfirm={confirmInvite}
+      />
+
+      <Snackbar
+        open={snackbar}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Invitation sent successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

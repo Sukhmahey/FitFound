@@ -1,12 +1,18 @@
 import { useContext } from "react";
 import { AppInfoContext } from "../contexts/AppInfoContext";
-import { Link } from 'react-router-dom';
-import DashboardBell from '../pages/DashboardBell';
+import { Link } from "react-router-dom";
+import DashboardBell from "../pages/DashboardBell";
 import { useAuth } from "../contexts/AuthContext";
-import { Box, Typography, IconButton, Avatar, Badge, Grid } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Avatar,
+  Badge,
+  Grid,
+} from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SettingsIcon from "@mui/icons-material/AccountCircle"; // Profile icon as per your request
-
 
 const Header = () => {
   const { appGeneralInfo } = useContext(AppInfoContext);
@@ -26,7 +32,7 @@ const Header = () => {
       sx={{
         position: "sticky",
         top: 0,
-        zIndex: 1000,
+        // zIndex: 1000,
         bgcolor: "#fff",
         borderBottom: "1px solid #ddd",
         height: 64,
@@ -50,14 +56,10 @@ const Header = () => {
 
       {/* Icons Section */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        
         <div>
-            <DashboardBell></DashboardBell>
-                    
+          <DashboardBell></DashboardBell>
         </div>
 
-        
-    
         <Link to={settingsPath} style={{ textDecoration: "none" }}>
           <IconButton>
             <Avatar sx={{ bgcolor: primaryColor, width: 32, height: 32 }}>
@@ -68,7 +70,6 @@ const Header = () => {
       </Box>
     </Box>
   );
-
 };
 
 export default Header;

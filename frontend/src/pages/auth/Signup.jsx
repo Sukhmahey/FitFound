@@ -13,6 +13,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
+import logo from "../../assets/logo-blue.svg";
+
 const Signup = () => {
   const [role, setRole] = useState("candidate");
   const [email, setEmail] = useState("");
@@ -104,14 +106,17 @@ const Signup = () => {
           sx={{
             width: 120,
             height: 40,
-            bgcolor: "#ccc",
             borderRadius: "8px",
             textAlign: "center",
             lineHeight: "40px",
             fontWeight: 600,
           }}
         >
-          LOGO
+          <img
+            src={logo}
+            alt="FitFound Logo"
+            style={{ height: "40px", color: "blue" }}
+          />
         </Box>
       </Box>
 
@@ -204,7 +209,7 @@ const Signup = () => {
               required
             />
 
-            {role === "employer" && (
+            {/* {role === "employer" && (
               <>
                 <TextField
                   label="Company Name"
@@ -227,7 +232,7 @@ const Signup = () => {
                   required
                 />
               </>
-            )}
+            )} */}
 
             <Button
               type="submit"

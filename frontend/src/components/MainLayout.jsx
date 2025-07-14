@@ -16,7 +16,7 @@ const MainLayout = () => {
         {/* Fixed Sidebar */}
         <Box
           sx={{
-            width: { xs: "100%", md: "250px" },
+            width: { md: "250px" },
             flexShrink: 0,
             bgcolor: "#062F54",
             minHeight: "100vh",
@@ -32,7 +32,7 @@ const MainLayout = () => {
         {/* Main Area */}
         <Box
           sx={{
-            marginLeft: { xs: 0, md: "250px" },
+            marginLeft: { md: "250px" },
             display: "flex",
             flexDirection: "column",
             width: "100%",

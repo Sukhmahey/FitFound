@@ -3,52 +3,52 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
 import { useAuth } from "../../contexts/AuthContext";
-import { CircularProgress, Backdrop } from "@mui/material";
+import { CircularProgress, Backdrop, Button } from "@mui/material";
 import { scoreCandidates } from "./GenerateCandidateScore";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
 
 import {
-  FormControl,
   InputLabel,
   MenuItem,
   Select,
   TextField,
-  Input,
+  Checkbox,
+  FormControl,
+  FormGroup,
+  FormControlLabel,
+  Typography,
 } from "@mui/material";
 
 import { employerApi } from "../../services/api";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
-import { Javascript } from "@mui/icons-material";
 
-const dummyobj1 = {
-  employerId: "68659ec4901fec3956f9280f",
-  jobTitle: "FullStack Developer",
+const dummyObj = {
+  employerId: "68741350ffbc20e8c92aa48b",
+  jobTitle: "Full Stack Developer",
   jobDescription:
-    'Job Title: Junior React Developer\nLocation: [Your Location or "Remote"]\nJob Type: Full-Time / Part-Time / Contract\nExperience Level: Entry-Level (0–2 years)\n\nAbout the Role:\nWe are looking for a motivated and detail-oriented Junior React Developer to join our growing development team. In this role, you will help build and maintain responsive, user-friendly web applications using React.js. You’ll work closely with designers, product managers, and senior developers to turn design mockups into interactive, high-performance web interfaces.\n\nKey Responsibilities:\n\nDevelop and maintain front-end features using React.js\n\nCollaborate with team members in writing clean, maintainable code\n\nConvert Figma or design files into reusable React components\n\nIntegrate RESTful APIs and handle asynchronous data\n\nAssist in debugging, testing, and optimizing code for performance\n\nParticipate in code reviews and team meetings\n\nRequired Skills & Qualifications:\n\nBasic understanding of React.js and its core principles (JSX, components, props, state, lifecycle)\n\nProficiency in HTML5, CSS3, and JavaScript (ES6+)\n\nFamiliarity with version control systems (e.g., Git)\n\nUnderstanding of responsive and mobile-first design\n\nWillingness to learn and grow in a fast-paced environment\n\nGood communication and teamwork skills\n\nPreferred (Not Required):\n\nExperience with tools like Redux, Next.js, or Tailwind CSS\n\nExposure to backend technologies (Node.js, Express)\n\nUnderstanding of testing frameworks (Jest, React Testing Library)\n\nPerks & Benefits:\n\nFlexible work hours and remote work options\n\nLearning and mentorship opportunities\n\nFriendly, collaborative team environment\n\nCompetitive salary based on experience\n\n',
+    "About the Role:\nWe are looking for a skilled and passionate Frontend Developer to join our dynamic team. You will be responsible for creating intuitive, visually appealing, and responsive web interfaces. You will work closely with designers, backend developers, and product managers to bring our user-facing products to life.\n\nKey Responsibilities:\nTranslate UI/UX designs and wireframes into responsive, high-quality code.\n\nDevelop and maintain reusable components and frontend libraries.\n\nOptimize applications for maximum speed and scalability.\n\nEnsure cross-browser compatibility and responsiveness across devices.\n\nCollaborate with backend developers and stakeholders to integrate APIs.\n\nParticipate in code reviews and contribute to improving development processes.\n\nStay up to date with emerging frontend technologies and trends.\n\nRequired Skills & Qualifications:\nProficiency in HTML5, CSS3, JavaScript, and modern frameworks such as React, Vue.js, or Angular.\n\nExperience with RESTful APIs and asynchronous request handling.\n\nFamiliarity with version control tools like Git.\n\nKnowledge of responsive design, accessibility standards, and performance best practices.\n\nExperience with build tools like Webpack, Vite, or Parcel.\n\nBasic understanding of SEO principles.\n\nNice to Have:\nExperience with TypeScript.\n\nFamiliarity with Tailwind CSS, SASS, or Styled Components.\n\nUnderstanding of backend technologies (Node.js, Express) is a plus.\n\nExposure to design tools such as Figma, Sketch, or Adobe XD.\n\nKnowledge of testing frameworks (Jest, React Testing Library, Cypress).\n\nWhat We Offer:\nCompetitive salary and benefits.\n\nFlexible working hours and remote-friendly environment.\n\nOpportunities for career growth and professional development.\n\nA collaborative and inclusive team culture.",
   requiredSkills: [
     {
       skill: "Html",
     },
+    {
+      skill: "CSS",
+    },
   ],
   mustHaveCriteria: "NA",
   salaryRange: {
-    min: "19",
-    max: "31",
+    min: "20",
+    max: "70",
     perHour: true,
     perYear: false,
   },
   location: "Vancouver",
-  jobType: "part-time",
+  jobType: "internship",
   workEnvironment: "remote",
   requiredWorkAuthorization: ["PR Citizen", "Work Permit"],
 };
 
 const Search = () => {
   const [loading, setLoading] = useState(false);
-  const [snackOpen, setSnackOpen] = useState(false);
-const [snackMessage, setSnackMessage] = useState("");
-const [snackSeverity, setSnackSeverity] = useState("error");
   const [searchQuery, setSearchQuery] = useState({
     title: "",
     location: "",
@@ -63,35 +63,18 @@ const [snackSeverity, setSnackSeverity] = useState("error");
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
 
+  const primaryColor = "#062F54";
+
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "Candidate Search" });
   }, []);
-
-  const validateSearchForm = () => {
-  const errors = [];
-
-  if (!searchQuery.title?.trim()) errors.push("Job title is required");
-  if (!searchQuery.location?.trim()) errors.push("Location is required");
-  if (!searchQuery.jobDescription?.trim()) errors.push("Job description is required");
-  if (!searchQuery.jobType?.trim()) errors.push("Job type is required");
-  if (!searchQuery.locationType?.trim()) errors.push("Location type is required");
-  if (!searchQuery.salaryFrom || !searchQuery.salaryTo) {
-    errors.push("Salary range (From and To) is required");
-  }
-  if (!searchQuery.skills?.trim()) errors.push("At least one skill is required");
-
-  return errors;
-};
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useAuth();
 
-  console.log("Hereee", user);
-
   const userId = user.profileId;
 
-  console.log("searchQuery", searchQuery);
   const onChangeInputFiels = (value, type) => {
     setSearchQuery((data) => {
       return { ...data, [type]: value };
@@ -112,14 +95,6 @@ const [snackSeverity, setSnackSeverity] = useState("error");
   };
 
   const handleSubmit = async () => {
-    const errors = validateSearchForm();
-if (errors.length > 0) {
-  setSnackMessage(errors.join(" , "));
-  setSnackSeverity("error");
-  setSnackOpen(true);
-  setLoading(false);
-  return;
-}
     setLoading(true);
     const paramObj = {
       employerId: userId,
@@ -143,24 +118,14 @@ if (errors.length > 0) {
       requiredWorkAuthorization: ["PR Citizen", "Work Permit"],
     };
 
-    console.log("Param Object", paramObj);
-
     try {
-      const employerDD = await employerApi.saveJob(paramObj);
+      const employerDD = await employerApi.saveJob(dummyObj);
       const candidateList = await employerApi
         .getAllCandidates()
         .then(async (data) => {
           const scoredC = await scoreCandidates(
             data.data.slice(0, 2),
-            paramObj.jobDescription
-          );
-
-          console.log(
-            "ID's Array",
-            scoredC,
-            (scoredC || []).map((element) => {
-              return element._id;
-            })
+            dummyObj.jobDescription
           );
 
           const arrayOfCandidateIds = [];
@@ -180,26 +145,11 @@ if (errors.length > 0) {
               });
             });
 
-          console.log("scoredC", scoredC);
           dispatch(setSearchForm(paramObj));
           dispatch(setCandidates(scoredC));
           navigate(`/employer/searchResults?jobId=${employerDD?.data._id}`);
         });
 
-      console.log("Candidate List", candidateList);
-      // await employerApi.getSearchedCandidates({
-      //   title: dataParams.jobTitle,
-      //   jobType: dataParams.jobType,
-      //   location: dataParams.location,
-      //   salaryFrom: dataParams.salaryRange.min,
-      //   salaryTo: dataParams.salaryRange.max,
-      //   jobDescription: dataParams.jobDescription,
-      //   workStatus: dataParams.requiredWorkAuthorization[0], \
-      //   skills: "html",
-      // });
-
-      if (candidateList) {
-      }
       setLoading(false);
     } catch (c) {
       console.log("here");
@@ -209,11 +159,6 @@ if (errors.length > 0) {
 
   return (
     <>
-    <Snackbar open={snackOpen} autoHideDuration={5000} onClose={() => setSnackOpen(false)}>
-  <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} elevation={6} variant="filled">
-    {snackMessage}
-  </MuiAlert>
-</Snackbar>
       <Backdrop
         sx={{
           color: "#fff",
@@ -230,8 +175,7 @@ if (errors.length > 0) {
 
       <div className="container">
         <div className="row">
-          {/* LEFT COLUMN */}
-          <div className="col-md-6">
+          <div className="m-0 p-0">
             <div className="mb-3">
               <TextField
                 className="w-100"
@@ -244,101 +188,102 @@ if (errors.length > 0) {
                 }}
               />
             </div>
-            <div className="mb-3">
-              <TextField
-                className="w-100"
-                id="outlined-multiline-flexible"
-                value={searchQuery?.location}
-                onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "location");
-                }}
-                label="Location"
-                multiline
-                maxRows={2}
-              />
-            </div>
-            <div className="mb-3">
-              <TextField
-                className="w-100"
-                id="outlined-multiline-flexible"
-                value={searchQuery?.jobDescription}
-                onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "jobDescription");
-                }}
-                label="Job Description"
-                multiline
-                maxRows={20}
-              />
-            </div>
-          </div>
-          {/* RIGHT COLUMN */}
-          <div className="col-md-6">
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel id="demo-simple-select-label">Job Type</InputLabel>
-              <Select
-                labelId="jobType"
-                id="jobType"
-                value={searchQuery?.jobType}
-                label="jobType"
-                onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "jobType");
-                }}
-              >
-                <MenuItem value={"full-time"}>Full-time</MenuItem>
-                <MenuItem value={"part-time"}>Part-time</MenuItem>
-                <MenuItem value={"contract"}>Contract</MenuItem>
-                <MenuItem value={"internship"}>Internship</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">
-                Location Type
-              </InputLabel>
-              <Select
-                labelId="jobType"
-                id="jobType"
-                value={searchQuery?.locationType}
-                label="jobType"
-                onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "locationType");
-                }}
-              >
-                <MenuItem value={"onsite"}>On Site</MenuItem>
-                <MenuItem value={"remotee"}>Remote</MenuItem>
-                <MenuItem value={"hybrid"}>Hybrid</MenuItem>
-              </Select>
-            </FormControl>
-            <div className="mb-3">
-              <label htmlFor="jobType" className="form-label">
-                Salary Range
-              </label>
-              <div>
-                <input
-                  type="number"
-                  className="form-control form-control-sm"
-                  name="startRange"
-                  id="startRange"
-                  placeholder="From"
-                  value={searchQuery?.salaryFrom}
+            <div className="row">
+              <div className="mb-3 col-md-6">
+                <TextField
+                  className="w-100"
+                  id="outlined-multiline-flexible"
+                  value={searchQuery?.location}
                   onChange={(e) => {
-                    onChangeInputFiels(e.target.value, "salaryFrom");
+                    onChangeInputFiels(e.target.value, "location");
                   }}
-                />
-                <input
-                  type="number"
-                  className="form-control form-control-sm"
-                  placeholder="To"
-                  name="endRange"
-                  id="endRange"
-                  value={searchQuery?.salaryTo}
-                  onChange={(e) => {
-                    onChangeInputFiels(e.target.value, "salaryTo");
-                  }}
+                  label="Location"
+                  multiline
+                  maxRows={2}
                 />
               </div>
+              <FormControl
+                component="fieldset"
+                className="col-md-6"
+                sx={{ alignItems: "center" }}
+              >
+                <FormGroup row>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={
+                          searchQuery?.locationType?.includes("onsite") || false
+                        }
+                        onChange={(e) =>
+                          onChangeInputFiels(
+                            "onsite",
+                            "locationType",
+                            e.target.checked
+                          )
+                        }
+                      />
+                    }
+                    label="On Site"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={
+                          searchQuery?.locationType?.includes("remotee") ||
+                          false
+                        }
+                        onChange={(e) =>
+                          onChangeInputFiels(
+                            "remotee",
+                            "locationType",
+                            e.target.checked
+                          )
+                        }
+                      />
+                    }
+                    label="Remote"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={
+                          searchQuery?.locationType?.includes("hybrid") || false
+                        }
+                        onChange={(e) =>
+                          onChangeInputFiels(
+                            "hybrid",
+                            "locationType",
+                            e.target.checked
+                          )
+                        }
+                      />
+                    }
+                    label="Hybrid"
+                  />
+                </FormGroup>
+              </FormControl>
             </div>
-            <div className="mb-3">
-              <FormControl fullWidth>
+          </div>
+          <FormControl className="">
+            <div className="flex flex-row">
+              <FormControl className="col-md-6" sx={{ mb: 2, pr: 1 }}>
+                <InputLabel id="demo-simple-select-label">Job Type</InputLabel>
+                <Select
+                  labelId="jobType"
+                  id="jobType"
+                  value={searchQuery?.jobType}
+                  label="jobType"
+                  onChange={(e) => {
+                    onChangeInputFiels(e.target.value, "jobType");
+                  }}
+                >
+                  <MenuItem value={"full-time"}>Full-time</MenuItem>
+                  <MenuItem value={"part-time"}>Part-time</MenuItem>
+                  <MenuItem value={"contract"}>Contract</MenuItem>
+                  <MenuItem value={"internship"}>Internship</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl className="col-md-6">
                 <InputLabel id="demo-simple-select-label">
                   Work Status
                 </InputLabel>
@@ -360,6 +305,41 @@ if (errors.length > 0) {
                 </Select>
               </FormControl>
             </div>
+            <Typography
+              sx={{
+                mb: 2,
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 700,
+                fontSize: 16,
+                color: primaryColor,
+              }}
+            >
+              Salary Range (per hour)
+            </Typography>
+            <FormControl
+              fullWidth
+              sx={{ display: "flex", flexDirection: "row", gap: "8px" }}
+            >
+              <TextField
+                fullWidth
+                label="Salary From"
+                type="number"
+                variant="outlined"
+                value={searchQuery.salaryFrom}
+                onChange={(e) =>
+                  onChangeInputFiels(e.target.value, "salaryFrom")
+                }
+              />
+              <TextField
+                fullWidth
+                label="Salary To"
+                type="number"
+                variant="outlined"
+                value={searchQuery.salaryTo}
+                onChange={(e) => onChangeInputFiels(e.target.value, "salaryTo")}
+              />
+            </FormControl>
+            <div className="mb-3"></div>
             <div className="mb-3">
               <TextField
                 className="w-100"
@@ -372,18 +352,65 @@ if (errors.length > 0) {
                 maxRows={5}
               />
             </div>
-          </div>
+            <div className="mb-3">
+              <TextField
+                className="w-100"
+                id="outlined-multiline-flexible"
+                value={searchQuery?.jobDescription}
+                onChange={(e) => {
+                  onChangeInputFiels(e.target.value, "jobDescription");
+                }}
+                label="Job Description"
+                multiline
+                maxRows={20}
+              />
+            </div>
+          </FormControl>
         </div>
-        <div className="d-flex justify-content-end gap-4">
-          <button onClick={clearForm} className="btn btn-primary btn-sm mb-3">
-            Reset
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="btn btn-primary btn-sm mb-3"
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "1rem",
+            marginTop: "2rem",
+          }}
+        >
+          <Button
+            variant="outlined"
+            sx={{
+              fontFamily: "Poppins, sans-serif",
+              textTransform: "none",
+              borderRadius: 3,
+              px: 3,
+              py: 1.5,
+              "&:hover": {
+                backgroundColor: "#041f39",
+                color: "white",
+              },
+            }}
+            onClick={clearForm}
           >
-            Search
-          </button>
+            Clear All Fields
+          </Button>
+
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#062F54",
+              fontFamily: "Poppins, sans-serif",
+              textTransform: "none",
+              borderRadius: 3,
+              px: 3,
+              py: 1.5,
+              "&:hover": {
+                backgroundColor: "#041f39",
+              },
+            }}
+            onClick={handleSubmit}
+          >
+            Find Matching Candidates
+          </Button>
         </div>
       </div>
     </>

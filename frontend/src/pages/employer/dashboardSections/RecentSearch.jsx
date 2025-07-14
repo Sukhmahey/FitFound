@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { employerApi, candidateApi } from "../../../services/api";
 
 import {
@@ -12,6 +13,7 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  Paper,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { LocationOn, AttachMoney } from "@mui/icons-material";
@@ -28,6 +30,7 @@ const censorName = (firstName = "", lastName = "") => {
 };
 
 const RecentSearch = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [job, setJob] = useState({});
   const [candidates, setCandidates] = useState([]);
@@ -81,20 +84,22 @@ const RecentSearch = () => {
         {`Recent Search "${job?.jobTitle || "No searches"}"`}
       </Typography>
 
-      <Typography
-        sx={{
-          mb: 3,
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 700,
-          fontSize: 16,
-          color: primaryColor,
-        }}
-      >
-        Top Candidates
-      </Typography>
+      {candidates.length > 0 && (
+        <Typography
+          sx={{
+            mb: 3,
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 700,
+            fontSize: 16,
+            color: primaryColor,
+          }}
+        >
+          Top Candidates
+        </Typography>
+      )}
 
       <Stack spacing={2}>
-        {candidates.length > 0 &&
+        {candidates.length > 0 ? (
           candidates.map((candidate) => {
             const { firstName, lastName } = candidate?.personalInfo || {};
             return (
@@ -273,7 +278,61 @@ const RecentSearch = () => {
                 </Dialog>
               </Box>
             );
-          })}
+          })
+        ) : (
+          <Paper
+            elevation={3}
+            sx={{
+              borderRadius: 3,
+              backgroundColor: "#fff",
+              padding: 4,
+              textAlign: "center",
+              maxWidth: 500,
+              margin: "0 auto",
+              alignSelf: "center",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 700,
+                color: primaryColor,
+                mb: 1,
+              }}
+            >
+              Welcome to your dashboard!
+            </Typography>
+            <Typography
+              sx={{
+                fontFamily: "Figtree, sans-serif",
+                color: "#666",
+                fontSize: 14,
+                mb: 3,
+              }}
+            >
+              You haven't started searching for candidates yet. Start exploring
+              now and find the best talent for your team.
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/employer/search")}
+              sx={{
+                backgroundColor: primaryColor,
+                fontFamily: "Figtree, sans-serif",
+                borderRadius: 3,
+                textTransform: "none",
+                px: 3,
+                py: 1.5,
+                "&:hover": {
+                  backgroundColor: "#041f39",
+                },
+              }}
+            >
+              Start Searching
+            </Button>
+          </Paper>
+        )}
       </Stack>
     </Box>
   );
