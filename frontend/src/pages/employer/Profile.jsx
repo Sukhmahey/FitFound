@@ -1,129 +1,175 @@
-import { useEffect, useState, useContext } from "react";
-import { Box, Typography, Tabs, Tab, Button, Paper } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Box, Typography, Tabs, Tab, Button, Paper } from "@mui/material";
+
 import { employerApi } from "../../services/api";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from '../../contexts/AuthContext';
+import { updateFileByUrl } from "../../utils/supabaseStorage";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
-import CompanyInfo from "./onboardingSteps/CompanyInfo";
-import UserContactInfo from "./onboardingSteps/UserContactInfo";
-import useNotify from "../../utils/notificationService";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
+
+import CompanyInfo from './onboardingSteps/CompanyInfo';
+import UserContactInfo from './onboardingSteps/UserContactInfo';
 
 const EmployerProfile = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
-  const notify = useNotify();
-  const [formSection, setFormSection] = useState(0);
+  const [formSection, setFormSection] = useState("details"); // the other is contact
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
-  const [message, setMessage] = useState("");
+  const [userProfile, setUserProfile] = useState({});
+  const [logoUrl, setLogoUrl] = useState("");
+  let profilePictureUrl;
+  const [detailsIsActive, setDetailsIsActive] = useState(true);
+  const [contactIsActive, setContactIsActive] = useState(false);
+  const [message, setMessage] = useState('');
   const [messageClass, setMessageClass] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
 const [snackMessage, setSnackMessage] = useState("");
 const [snackSeverity, setSnackSeverity] = useState("error");
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
+  
+    useEffect(() => {
+        setAppGeneralInfo({ pageTitle: "My Profile"});
+    }, []);
 
-  useEffect(() => {
-    setAppGeneralInfo({ pageTitle: "My Profile" });
-  }, [setAppGeneralInfo]);
+  const handleFormSectionClick = (e) => {
+    setFormSection(e.target.id);
+    
+    // console.log(e.target.id);
 
-  const validateForm = (data) => {
-  const errors = [];
+    // when the user changes the form section
+    if (e.target.id == "details") {
+      methods.reset(companyInfo);
 
-  if (formSection === 0) {
-    if (!data.companyName?.trim()) errors.push("Company name is required");
-    if (!data.establishedYear || data.establishedYear < 1900 || data.establishedYear > new Date().getFullYear()) {
-      errors.push("Established year must be between 1900 and the current year");
+      setDetailsIsActive(true);
+      setContactIsActive(false);
     }
-    if (!data.businessRegisteredNumber?.trim()) errors.push("Business Reg. Number is required");
-    if (!data.industrySector?.trim()) errors.push("Industry sector is required");
-    if (!data.companySize?.trim()) errors.push("Company size is required");
-    if (!data.workLocation?.trim()) errors.push("Work location is required");
-    if (!data.companyWebsite?.trim()) errors.push("Company website is required");
-    if (!data.companyDescription?.trim() || data.companyDescription.length < 10) {
-      errors.push("Description must be at least 10 characters");
+    else {
+      methods.reset(contactInfo);
+
+      setDetailsIsActive(false);
+      setContactIsActive(true);
     }
-  }
-
-  if (formSection === 1) {
-    if (!data.firstName?.trim()) errors.push("First name is required");
-    if (!data.lastName?.trim()) errors.push("Last name is required");
-    if (!data.phone?.trim()) errors.push("Phone number is required");
-    if (!data.email?.trim()) errors.push("Email is required");
-    if (!data.designation?.trim()) errors.push("Designation is required");
-
-    if (data.linkedInProfile?.trim() &&
-        !/^https?:\/\/(www\.)?linkedin\.com\/.*$/.test(data.linkedInProfile)) {
-      errors.push("Invalid LinkedIn URL");
-    }
-  }
-
-  return errors;
-};
-
-  useEffect(() => {
-    employerApi
-      .getEmployerProfile(userId)
-      .then((result) => {
-        const { contactInfo, ...company } = result.data;
-        setCompanyInfo(company);
-        setContactInfo(contactInfo);
-        methods.reset(company);
-      })
-      .catch(() => navigate("/employer/onboarding"));
-  }, [userId, navigate, methods]);
-
-  const handleTabChange = (event, newValue) => {
-    setFormSection(newValue);
-    methods.reset(newValue === 0 ? companyInfo : contactInfo);
   };
 
-  const onSubmit = (data) => {
-    const errors = validateForm(data);
-  if (errors.length > 0) {
-    setSnackMessage(errors.join(" | "));
-    setSnackSeverity("error");
-    setSnackOpen(true);
-    return;
-  }
-    const employerProfile =
-      formSection === 0
-        ? { ...data, contactInfo }
-        : { ...companyInfo, contactInfo: { ...data } };
+  useEffect(() => {
+    // Getting the user profile by ID
+    employerApi.getEmployerProfile(userId)
+    .then( result => {
+      setUserProfile(result.data);
+      // setting the data for every form section
+      const { contactInfo, ...companyInfo } = result.data; 
+      setCompanyInfo( companyInfo );
+      methods.reset( companyInfo );
+      setContactInfo(result.data.contactInfo);
 
-    employerApi
-      .updateEmployerProfile(userId, employerProfile)
-      .then(() => {
-        notify.success("Your profile has been saved successfully.")
-        // setMessage("Your profile has been saved successfully.");
-        // setMessageClass("alert alert-success");
-        setTimeout(() => setMessage(""), 5000);
+    })
+    .catch( error => {
+      console.log(error);
+    });
+  }, []);
+
+  const onSubmit = (data) => {
+
+    let employerProfile;
+    
+    if (formSection == "details") {
+      
+      // console.log(typeof data.companyLogo != "string");
+      // updating the logo url
+      if (data.companyLogo) {
+        updateFileByUrl(companyInfo.companyLogo, data.companyLogo)
+        .then( result => console.log(result) )
+        .catch( error => console.log(error) );
+      }
+
+      employerProfile = {
+        userId: userId,
+        companyLogo: companyInfo.companyLogo,
+        companyName: data.companyName,
+        establishedYear: data.establishedYear,
+        businessRegisteredNumber: data.businessRegisteredNumber,
+        industrySector: data.industrySector,
+        companySize: data.companySize,
+        workLocation: data.workLocation,
+        companyWebsite: data.companyWebsite,
+        companyDescription: data.companyDescription,
+        contactInfo: contactInfo
+      };
+      setCompanyInfo(data);
+    }
+    else {
+
+      if (data.profilePicture) {
+        updateFileByUrl(contactInfo.profilePicture, data.profilePicture)
+        .then( result => console.log(result) )
+        .catch( error => console.log(error) );
+      }
+
+      let newContactInfo = {
+        profilePicture: contactInfo.profilePicture,
+        firstName: data.firstName,
+        middleName: data.middleName,
+        lastName: data.lastName,
+        designation: data.designation,
+        phone: data.phone,
+        email: data.email,
+        linkedInProfile: data.linkedInProfile,
+        additionalDetails: data.additionalDetails
+      };
+      employerProfile = {...companyInfo , contactInfo: newContactInfo };
+      setContactInfo(data);
+    }
+
+      
+      // save data
+      employerApi.updateEmployerProfile(userId, employerProfile)
+      .then( result => {
+        console.log(result);
+        setMessage(`Success: Info saved.`);
+        setMessageClass("alert alert-success");
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+          setMessage('');
+        }, 5000);
+
       })
-      .catch((err) => {
-        setMessage(err.response?.data?.details || "An error occurred.");
-        setMessageClass("alert alert-danger");
-        setTimeout(() => setMessage(""), 5000);
+      .catch( error => {
+        console.log(error);
+        setMessage(`Error: Info not saved.`);
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+          setMessage('');
+          setMessageClass("alert alert-danger");
+        }, 5000);
       });
+      
+    
   };
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
-      {/* <Typography
-        variant="h5"
-        sx={{ fontFamily: "Montserrat", fontWeight: 700, mb: 3 }}
-      >
-        My Profile
-      </Typography> */}
+      {/* <div>
+        <ul className="nav nav-underline">
+          <li className="nav-item">
+            <a className={`nav-link ${detailsIsActive ? 'active' : ''}`} aria-current="page" 
+            id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</a>
+          </li>
+          <li className="nav-item">
+            <a className={`nav-link ${contactIsActive ? 'active' : ''}`} aria-disabled="true"
+            id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</a>
+          </li>
+        </ul>
+      </div> */}
 
       <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
         <Button
-          variant={formSection === 0 ? "contained" : "outlined"}
-          onClick={() => handleTabChange(null, 0)}
+          variant={formSection === "contact" ? "contained" : "outlined"}
+          id="details"
+          onClick={(e) => handleFormSectionClick(e)}
           sx={{
             borderRadius: "999px",
             fontFamily: "Poppins, sans-serif",
@@ -143,8 +189,9 @@ const [snackSeverity, setSnackSeverity] = useState("error");
         </Button>
 
         <Button
-          variant={formSection === 1 ? "contained" : "outlined"}
-          onClick={() => handleTabChange(null, 1)}
+          variant={formSection === "details" ? "contained" : "outlined"}
+          id="contact"
+          onClick={(e) => handleFormSectionClick(e)}
           sx={{
             borderRadius: "999px",
             fontFamily: "Poppins, sans-serif",
@@ -164,6 +211,8 @@ const [snackSeverity, setSnackSeverity] = useState("error");
         </Button>
       </Box>
 
+      {/* <div id="message">{ message }</div> */}
+
       {message && (
         <Box className={messageClass} sx={{ mb: 2 }}>
           {message}
@@ -181,35 +230,70 @@ const [snackSeverity, setSnackSeverity] = useState("error");
               backgroundColor: "#fff",
             }}
           >
-            {formSection === 0 ? <CompanyInfo /> : <UserContactInfo />}
-          </Paper>
+            { formSection === "details" && (<>
+              <div className="container">
+                <div className="row">
+                  <CompanyInfo />
+                  <div className="d-flex justify-content-end gap-4">
+                    {/* <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" /> */}
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#062F54",
+                        fontFamily: "Poppins, sans-serif",
+                        textTransform: "none",
+                        borderRadius: 3,
+                        px: 3,
+                        py: 1.5,
+                        "&:hover": {
+                          backgroundColor: "#041f39",
+                        },
+                      }}
+                      >
+                        Save Changes
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>) }
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                backgroundColor: "#062F54",
-                fontFamily: "Poppins, sans-serif",
-                textTransform: "none",
-                borderRadius: 3,
-                px: 3,
-                py: 1.5,
-                "&:hover": {
-                  backgroundColor: "#041f39",
-                },
-              }}
-            >
-              Save Changes
-            </Button>
-          </Box>
+            { formSection === "contact" && (
+              <>
+              <div className="container">
+                <div className="row">
+                  <UserContactInfo />
+                  <div className="d-flex justify-content-end gap-4">
+                    {/* <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" /> */}
+
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#062F54",
+                        fontFamily: "Poppins, sans-serif",
+                        textTransform: "none",
+                        borderRadius: 3,
+                        px: 3,
+                        py: 1.5,
+                        "&:hover": {
+                          backgroundColor: "#041f39",
+                        },
+                      }}
+                    >
+                      Save Changes
+                  </Button>
+                </div>
+              </div>
+              </div>
+            </>) }
+            
+          </Paper>
+          
         </form>
       </FormProvider>
-      <Snackbar open={snackOpen} autoHideDuration={5000} onClose={() => setSnackOpen(false)}>
-  <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} sx={{ width: '100%' }} elevation={6} variant="filled">
-    {snackMessage}
-  </MuiAlert>
-</Snackbar>
+      
+      
     </Box>
   );
 };

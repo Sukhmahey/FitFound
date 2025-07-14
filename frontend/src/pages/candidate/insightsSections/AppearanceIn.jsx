@@ -15,7 +15,9 @@ const AppearanceIn = () => {
         .then(result => { 
             setSkillsData([...result.data]);
         })
-        .catch();
+        .catch( error => 
+            console.log(error)
+        );
     }, []);
 
     function capitalizeWords(text) {
@@ -31,7 +33,7 @@ const AppearanceIn = () => {
     return (
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexDirection:'column' }}>
             <p>Appearance In</p>
-            {skillsData.length > 0 && skillsData.map((skill, index) => {
+            {skillsData.length > 0 ? ( skillsData.map((skill, index) => {
                 const appearances = Math.trunc(((skill.candidateAppearances / skill.totalPlatformSearches) * 100) * 100) / 100;
                 const chartData = [
                     { name: "Appearances", value:  appearances},
@@ -39,9 +41,9 @@ const AppearanceIn = () => {
                 ];
                 
             return (
-                <div>
-                    <p>{capitalizeWords(skill.skill)}</p>
-                    <div key={index} style={{ width: 250, height: 250 }}>
+                <div key={index}>
+                    <p>{capitalizeWords(skill?.skill || "")}</p>
+                    <div style={{ width: 250, height: 250 }}>
                         <ResponsiveContainer key={skill.skill}>
                             <PieChart>
                             <Pie
@@ -58,10 +60,25 @@ const AppearanceIn = () => {
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <p>{`${skill.candidateAppearances}/${skill.totalPlatformSearches} Searches`}</p>
+                    <p>{`${skill?.candidateAppearances || 0}/${skill?.totalPlatformSearches || 0} Searches`}</p>
                 </div>
             );
-            })}
+            })) : (<div style={{ width: 250, height: 250 }}>
+                <ResponsiveContainer>
+                    <PieChart>
+                        <Pie
+                        data={[{ name: "No Data", value: 100 }]}
+                        dataKey="value"
+                        outerRadius={60}
+                        fill="#ccc"
+                        >
+                        <Cell fill="#ccc" />
+                        </Pie>
+                        <Tooltip />
+                    </PieChart>
+                </ResponsiveContainer>
+                <p>No skills data available</p>
+            </div>)}
         </div>
     );
 };
