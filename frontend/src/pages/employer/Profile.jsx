@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useContext } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
+import { Box, Typography, Tabs, Tab, Button, Paper } from "@mui/material";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,6 +24,7 @@ const EmployerProfile = () => {
   const [detailsIsActive, setDetailsIsActive] = useState(true);
   const [contactIsActive, setContactIsActive] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageClass, setMessageClass] = useState("");
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
   
@@ -125,6 +127,7 @@ const EmployerProfile = () => {
       .then( result => {
         console.log(result);
         setMessage(`Success: Info saved.`);
+        setMessageClass("alert alert-success");
         // Hide the message after 3 seconds
         setTimeout(() => {
           setMessage('');
@@ -137,6 +140,7 @@ const EmployerProfile = () => {
         // Hide the message after 3 seconds
         setTimeout(() => {
           setMessage('');
+          setMessageClass("alert alert-danger");
         }, 5000);
       });
       
@@ -144,8 +148,8 @@ const EmployerProfile = () => {
   };
 
   return (
-    <div>
-      <div>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      {/* <div>
         <ul className="nav nav-underline">
           <li className="nav-item">
             <a className={`nav-link ${detailsIsActive ? 'active' : ''}`} aria-current="page" 
@@ -156,44 +160,138 @@ const EmployerProfile = () => {
             id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</a>
           </li>
         </ul>
-      </div>
-
-      <div id="message">{ message }</div>
-
-      {/* <div>
-        <div id="details" onClick={ (e) => handleFormSectionClick(e) }>Organisation Details</div>
-        <div id="contact" onClick={ (e) => handleFormSectionClick(e) }>Primary Contact</div>
       </div> */}
+
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        <Button
+          variant={formSection === "contact" ? "contained" : "outlined"}
+          id="details"
+          onClick={(e) => handleFormSectionClick(e)}
+          sx={{
+            borderRadius: "999px",
+            fontFamily: "Poppins, sans-serif",
+            textTransform: "none",
+            fontWeight: 600,
+            backgroundColor: formSection === 0 ? "#062F54" : "#fff",
+            color: formSection === 0 ? "#fff" : "#062F54",
+            borderColor: "#062F54",
+            px: 3,
+            "&:hover": {
+              backgroundColor: formSection === 0 ? "#041f39" : "#f5f5f5",
+              borderColor: "#062F54",
+            },
+          }}
+        >
+          🏢 Organization Details
+        </Button>
+
+        <Button
+          variant={formSection === "details" ? "contained" : "outlined"}
+          id="contact"
+          onClick={(e) => handleFormSectionClick(e)}
+          sx={{
+            borderRadius: "999px",
+            fontFamily: "Poppins, sans-serif",
+            textTransform: "none",
+            fontWeight: 600,
+            backgroundColor: formSection === 1 ? "#062F54" : "#fff",
+            color: formSection === 1 ? "#fff" : "#062F54",
+            borderColor: "#062F54",
+            px: 3,
+            "&:hover": {
+              backgroundColor: formSection === 1 ? "#041f39" : "#f5f5f5",
+              borderColor: "#062F54",
+            },
+          }}
+        >
+          👤 Primary Contact
+        </Button>
+      </Box>
+
+      {/* <div id="message">{ message }</div> */}
+
+      {message && (
+        <Box className={messageClass} sx={{ mb: 2 }}>
+          {message}
+        </Box>
+      )}
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
-          { formSection === "details" && (<>
-            <div className="container">
-              <div className="row">
-                <CompanyInfo />
-                <div className="d-flex justify-content-end gap-4">
-                  <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" />
+          <Paper
+            elevation={3}
+            sx={{
+              p: { xs: 2, md: 4 },
+              borderRadius: 4,
+              mb: 3,
+              backgroundColor: "#fff",
+            }}
+          >
+            { formSection === "details" && (<>
+              <div className="container">
+                <div className="row">
+                  <CompanyInfo />
+                  <div className="d-flex justify-content-end gap-4">
+                    {/* <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" /> */}
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#062F54",
+                        fontFamily: "Poppins, sans-serif",
+                        textTransform: "none",
+                        borderRadius: 3,
+                        px: 3,
+                        py: 1.5,
+                        "&:hover": {
+                          backgroundColor: "#041f39",
+                        },
+                      }}
+                      >
+                        Save Changes
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </>) }
+            </>) }
 
-          { formSection === "contact" && (
-            <>
-            <div className="container">
-              <div className="row">
-                <UserContactInfo />
-                <div className="d-flex justify-content-end gap-4">
-                  <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" />
+            { formSection === "contact" && (
+              <>
+              <div className="container">
+                <div className="row">
+                  <UserContactInfo />
+                  <div className="d-flex justify-content-end gap-4">
+                    {/* <input type="submit" value="save" className="btn btn-primary btn-sm mb-3" /> */}
+
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#062F54",
+                        fontFamily: "Poppins, sans-serif",
+                        textTransform: "none",
+                        borderRadius: 3,
+                        px: 3,
+                        py: 1.5,
+                        "&:hover": {
+                          backgroundColor: "#041f39",
+                        },
+                      }}
+                    >
+                      Save Changes
+                  </Button>
                 </div>
               </div>
-            </div>
-          </>) }
+              </div>
+            </>) }
+            
+          </Paper>
+          
         </form>
       </FormProvider>
       
       
-    </div>
+    </Box>
   );
 };
 
