@@ -17,6 +17,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
+import logo from "../../assets/logo-blue.svg";
+
 const Login = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState("candidate");
@@ -86,14 +88,17 @@ const Login = () => {
           sx={{
             width: 120,
             height: 40,
-            bgcolor: "#ccc",
             borderRadius: "8px",
             textAlign: "center",
             lineHeight: "40px",
             fontWeight: 600,
           }}
         >
-          LOGO
+          <img
+            src={logo}
+            alt="FitFound Logo"
+            style={{ height: "40px", color: "blue" }}
+          />
         </Box>
       </Box>
 

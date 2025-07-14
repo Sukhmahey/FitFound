@@ -71,7 +71,9 @@ const Sidebar = () => {
   const displayName =
     user?.role === "candidate"
       ? userProfile?.personalInfo?.firstName || "Candidate"
-      : userProfile?.contactInfo?.firstName + " " + userProfile?.contactInfo?.lastName || "";
+      : userProfile?.contactInfo?.firstName +
+          " " +
+          userProfile?.contactInfo?.lastName || "";
 
   const menuItemStyle = (tab) => ({
     borderRadius: "8px",
@@ -95,7 +97,7 @@ const Sidebar = () => {
   return (
     <Box
       sx={{
-        width: { xs: "100%", sm: 250 },
+        width: { sm: 250 },
         minHeight: "100vh",
         bgcolor: primaryColor,
         p: 2,
