@@ -61,6 +61,21 @@ const Connections = () => {
     setSelectedEmployer(null);
   };
 
+  const filterBySearch = (data) => {
+  return data.filter((emp) => {
+    const companyName = emp?.employerId?.companyName?.toLowerCase() || "";
+    const firstName = emp?.employerId?.contactInfo?.firstName?.toLowerCase() || "";
+    const designation = emp?.employerId?.contactInfo?.designation?.toLowerCase() || "";
+    const keyword = search.toLowerCase();
+
+    return (
+      companyName.includes(keyword) ||
+      firstName.includes(keyword) ||
+      designation.includes(keyword)
+    );
+  });
+};
+
   const getCurrentEmployees = async (userId) => {
     const candidateData = await candidateApi.fetchInteractions(userId);
 
@@ -190,19 +205,22 @@ const Connections = () => {
 
       <TabPanel value={tabIndex} index={0}>
         <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
-          {renderCards(pending, true)}
+          {/* {renderCards(pending, true)} */}
+          {renderCards(filterBySearch(pending), true)}
         </Box>
       </TabPanel>
 
       <TabPanel value={tabIndex} index={1}>
         <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
-          {renderCards(accepted)}
+          {/* {renderCards(accepted)} */}
+          {renderCards(filterBySearch(accepted))}
         </Box>
       </TabPanel>
 
       <TabPanel value={tabIndex} index={2}>
         <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
-          {renderCards(archived)}
+          {/* {renderCards(archived)} */}
+          {renderCards(filterBySearch(archived))}
         </Box>
       </TabPanel>
 
