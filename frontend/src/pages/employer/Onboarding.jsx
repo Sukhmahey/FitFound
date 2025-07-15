@@ -44,6 +44,8 @@ const EmployerOnboarding = () => {
     const errors = {};
 
     if (formSection === 0) {
+      if(!data.companyLogo)
+        errors.companyLogo = "Company logo image is required";
       if (!data.companyName?.trim())
         errors.companyName = "Company name is required";
       if (
@@ -87,6 +89,7 @@ const EmployerOnboarding = () => {
     }
 
     if (formSection === 1) {
+      if (!data.profilePicture) errors.profilePicture = "Profile picture image is required";
       if (!data.firstName?.trim()) errors.firstName = "First name is required";
       if (!data.lastName?.trim()) errors.lastName = "Last name is required";
       if (!data.phone?.trim()) errors.phone = "Phone number is required";
