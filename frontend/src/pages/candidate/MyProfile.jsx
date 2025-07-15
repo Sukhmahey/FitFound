@@ -121,7 +121,7 @@ export default function MyProfile() {
   if (activeTab === 'Work') {
     (formData.workHistory || []).forEach((exp, i) => {
       if (!exp.companyName) errors[`companyName_${i}`] = "Company name is required";
-      if (!exp.jobTitle) errors[`jobTitle_${i}`] = "Job title is required";
+      if (!exp.role) errors[`role_${i}`] = "Job Role is required";
       if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
       if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
       if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
