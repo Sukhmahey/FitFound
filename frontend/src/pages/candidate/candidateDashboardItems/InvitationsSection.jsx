@@ -1,7 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
-import { candidateApi } from '../../../services/api';
-import InvitationSectionDialogbox from './InvitationSectionDialogbox';
+import React, { useEffect, useState, useRef } from "react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { candidateApi } from "../../../services/api";
+import InvitationSectionDialogbox from "./InvitationSectionDialogbox";
+import useNotify from "../../../utils/notificationService";
+
 import {
   Box,
   Typography,
@@ -10,8 +12,11 @@ import {
   Stack,
   List,
   ListItem,
-} from '@mui/material';
-import useNotify from '../../../utils/notificationService';
+  Divider,
+} from "@mui/material";
+
+const primaryColor = "#0E3A62";
+const cardBg = "#F5F7FA";
 
 export default function InvitationsSection({ setInvitationCount }) {
   const notify = useNotify();
@@ -22,25 +27,26 @@ export default function InvitationsSection({ setInvitationCount }) {
   const { user } = useAuth();
   const profileId = user?.profileId;
 
+  const alreadyNotified = useRef(new Set());
+
   useEffect(() => {
     const fetchInvitations = async () => {
       try {
         const response = await candidateApi.fetchInteractions(profileId);
-        console.log(response.data);
         const unfiltered = response.data;
         const filtered = response.data
           .filter((obj) => obj.candidateConsentToReveal === false)
           .map((obj) => ({
             invitationId: obj._id,
             employerId: obj.employerId?._id || null,
-            contactPerson: obj.employerId?.contactInfo?.firstName || 'Unknown',
-            employerName: obj.employerId?.companyName || 'Unknown Company',
+            contactPerson: obj.employerId?.contactInfo?.firstName || "Unknown",
+            employerName: obj.employerId?.companyName || "Unknown Company",
             outreachMessage: obj.outreachMessage,
             job: obj.jobId,
             date: new Date(obj.updatedAt).toLocaleDateString(),
           }));
         setInvitations(filtered);
-        setInvitationCount(unfiltered.length)
+        setInvitationCount(unfiltered.length);
       } catch (error) {
         console.error(error);
       }
@@ -48,94 +54,141 @@ export default function InvitationsSection({ setInvitationCount }) {
     if (profileId) fetchInvitations();
   }, [profileId]);
 
-//   useEffect(() => {
-//   if (invitations.length !== 0) {
-//     const seen = new Set();
-    
-//     const uniqueInvitations = invitations.filter((inv) => {
-//       if (seen.has(inv.invitationId)) return false;
-//       seen.add(inv.invitationId);
-//       return true;
-//     });
+  useEffect(() => {
+    if (invitations.length !== 0) {
+      const seen = new Set();
+      const newUniques = invitations.filter((inv) => {
+        if (seen.has(inv.invitationId)) return false;
+        seen.add(inv.invitationId);
+        return true;
+      });
 
-//     uniqueInvitations.forEach((inv) => {
-//       console.log(`🔔 New unique invitation from ${inv.employerName}`);
-//       notify.info(`🔔 New invitation from ${inv.employerName}`)
-      
-//     });
-
-    
-//   }
-// }, [invitations]);
-const alreadyNotified = useRef(new Set());
-
-useEffect(() => {
-  if (invitations.length !== 0) {
-    const seen = new Set();
-    const newUniques = invitations.filter((inv) => {
-      if (seen.has(inv.invitationId)) return false;
-      seen.add(inv.invitationId);
-      return true;
-    });
-
-    newUniques.forEach((inv) => {
-      if (!alreadyNotified.current.has(inv.invitationId)) {
-        console.log(`🔔 New unique invitation from ${inv.employerName}`);
-        notify.info(`🔔 New invitation from ${inv.employerName}`)
-        alreadyNotified.current.add(inv.invitationId); 
-      }
-    });
-  }
-}, [invitations]);
-
+      newUniques.forEach((inv) => {
+        if (!alreadyNotified.current.has(inv.invitationId)) {
+          notify.info(`🔔 New invitation from ${inv.employerName}`);
+          alreadyNotified.current.add(inv.invitationId);
+        }
+      });
+    }
+  }, [invitations]);
 
   return (
     <Box mt={4}>
-      <Typography variant="h5" gutterBottom>
+      <Typography
+        variant="h5"
+        sx={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 600,
+          color: primaryColor,
+          mb: 2,
+        }}
+      >
         Invitations
       </Typography>
-      <Box p={2} border="1px solid #ccc" borderRadius={2}>
-        <List>
+
+      <Paper
+        elevation={3}
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          backgroundColor: cardBg,
+        }}
+      >
+        <List disablePadding>
           {invitations.map((invitation) => (
-            <Paper sx={{ mb: 2, p: 2, borderRadius: 2 }} key={invitation.invitationId}>
+            <Paper
+              key={invitation.invitationId}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: "white",
+                mb: 2,
+              }}
+              elevation={1}
+            >
               <ListItem
+                disableGutters
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
                 }}
               >
                 <Stack spacing={0.5}>
-                  <Typography>
-                    {invitation.contactPerson} is inviting you to connect
+                  <Typography
+                    sx={{
+                      fontFamily: "Figtree, sans-serif",
+                      fontSize: 14,
+                      color: "#333",
+                    }}
+                  >
+                    <strong>{invitation.contactPerson}</strong> is inviting you
+                    to connect
                   </Typography>
-                  <Typography fontWeight="bold">
+                  <Typography
+                    sx={{
+                      fontFamily: "Montserrat, sans-serif",
+                      fontWeight: 600,
+                      fontSize: 16,
+                      color: primaryColor,
+                    }}
+                  >
                     {invitation.employerName}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontFamily: "Figtree, sans-serif",
+                      fontSize: 12,
+                      color: "#777",
+                    }}
+                  >
                     {invitation.date}
                   </Typography>
                 </Stack>
+
                 <Button
-                  variant="outlined"
-                  color="primary"
+                  variant="contained"
                   onClick={() => {
                     setSelectedInvitation(invitation);
                     setOpen(true);
                   }}
+                  sx={{
+                    fontFamily: "Figtree, sans-serif",
+                    textTransform: "none",
+                    backgroundColor: primaryColor,
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1,
+                    fontSize: 13,
+                    mt: { xs: 1, sm: 0 },
+                    "&:hover": {
+                      backgroundColor: "#062F54",
+                    },
+                  }}
                 >
-                  Details
+                  View Details
                 </Button>
               </ListItem>
             </Paper>
           ))}
         </List>
+
         {invitations.length === 0 && (
-          <Typography textAlign="center" color="text.secondary">
+          <Typography
+            textAlign="center"
+            color="text.secondary"
+            sx={{
+              fontFamily: "Figtree, sans-serif",
+              fontSize: 14,
+              mt: 2,
+            }}
+          >
             No invitations yet.
           </Typography>
         )}
-      </Box>
+      </Paper>
 
       {selectedInvitation && (
         <InvitationSectionDialogbox

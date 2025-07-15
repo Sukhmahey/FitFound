@@ -1,68 +1,116 @@
-import React from 'react'
-import { Box, Typography, Paper, Container,Divider } from '@mui/material';
+import React from "react";
+import { Box, Typography, Paper, Divider, Chip, Stack } from "@mui/material";
+import NewReleasesIcon from "@mui/icons-material/NewReleases";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
+const primaryColor = "#0E3A62";
+const newSkillColor = "#3B67F6";
+const existingSkillColor = "#A5CCF7";
 
-function TrendingKeywordsSection({suggestedSkills=[], alreadySkills=[]}) {
+function TrendingKeywordsSection({ suggestedSkills = [], alreadySkills = [] }) {
+  const alreadySet = new Set(alreadySkills.map((s) => s.toLowerCase()));
 
-    const [trendingKeywords, setTrendingKeywords] = React.useState([]);
-    // console.log("Already",allreadySkills)
-
-     const alreadySet = new Set(alreadySkills.map(s => s.toLowerCase()));
-
-
-
-
-    // const keyWordsArray = [
-    //     { id: 1, keyword: "Python" },
-    //     { id: 2, keyword: "JavaScript" },
-    //     { id: 3, keyword: "React" },
-    //     { id: 4, keyword: "Angular" },
-    //     { id: 5, keyword: "Vue" },
-    //     { id: 6, keyword: "Node.js" },
-    //     { id: 7, keyword: "Express" },
-    //     { id: 8, keyword: "MongoDB" },
-    //     { id: 9, keyword: "SQL" },
-    //     { id: 10, keyword: "NoSQL" },
-        
-        
-    // ]
+  const newSkills = suggestedSkills.filter(
+    (skill) => !alreadySet.has(skill.toLowerCase())
+  );
+  const existingSkills = suggestedSkills.filter((skill) =>
+    alreadySet.has(skill.toLowerCase())
+  );
 
   return (
-    
-    
-     <Box>
-      <Divider className=' mb-4'></Divider>
-              <Typography variant="h4" gutterBottom>Trending Keywords</Typography>
+    <Box>
+      <Divider sx={{ mb: 3 }} />
 
-       <Box my={4} p={1} border={1} borderColor="gray.200" rounded="md" shadow="lg" borderRadius={2}>
-          <Box component="ul" sx={{ display: 'flex', flexWrap: 'wrap', listStyle: 'none', p: 3, m: 0 }}>
-            {suggestedSkills.map((item, indx) => {
-              const isNew = !alreadySkills.some(skill => skill.toLowerCase() === item.toLowerCase());
-              return (
-                <Box
-                  component="li"
-                  key={indx}
+      <Typography
+        variant="h5"
+        sx={{
+          mb: 2,
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 600,
+          color: primaryColor,
+        }}
+      >
+        Trending Keywords for You
+      </Typography>
+
+      <Paper
+        elevation={3}
+        sx={{
+          borderRadius: 3,
+          p: 3,
+          backgroundColor: "#F5F7FA",
+        }}
+      >
+        {/* New Suggestions */}
+        {newSkills.length > 0 && (
+          <Box sx={{ mb: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <NewReleasesIcon sx={{ color: newSkillColor, mr: 1 }} />
+              <Typography
+                sx={{
+                  fontFamily: "Figtree, sans-serif",
+                  fontWeight: 500,
+                  fontSize: 16,
+                  color: newSkillColor,
+                }}
+              >
+                New Suggestions
+              </Typography>
+            </Box>
+
+            <Stack direction="row" flexWrap="wrap" gap={1}>
+              {newSkills.map((skill, index) => (
+                <Chip
+                  key={index}
+                  label={skill}
                   sx={{
-                    backgroundColor: isNew ? 'tomato' : 'darkgray',
-                    color: 'white',
-                    px: 2,
-                    py: 1,
-                    m: 0.5,
-                    borderRadius: 2,
-                    fontSize: 14
+                    backgroundColor: newSkillColor,
+                    color: "white",
+                    fontFamily: "Figtree, sans-serif",
+                    fontSize: 13,
                   }}
-                >
-                  {item}
-                </Box>
-              );
-            })}
+                />
+              ))}
+            </Stack>
           </Box>
-        </Box>
-     </Box>
+        )}
 
-  )
+        {/* Already in Your Profile */}
+        {existingSkills.length > 0 && (
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <CheckCircleIcon sx={{ color: primaryColor, mr: 1 }} />
+              <Typography
+                sx={{
+                  fontFamily: "Figtree, sans-serif",
+                  fontWeight: 500,
+                  fontSize: 16,
+                  color: primaryColor,
+                }}
+              >
+                Already in Your Profile
+              </Typography>
+            </Box>
+
+            <Stack direction="row" flexWrap="wrap" gap={1}>
+              {existingSkills.map((skill, index) => (
+                <Chip
+                  key={index}
+                  label={skill}
+                  sx={{
+                    backgroundColor: existingSkillColor,
+                    color: primaryColor,
+                    fontFamily: "Figtree, sans-serif",
+                    fontSize: 13,
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        )}
+      </Paper>
+    </Box>
+  );
 }
 
-export default TrendingKeywordsSection
-
-
+export default TrendingKeywordsSection;

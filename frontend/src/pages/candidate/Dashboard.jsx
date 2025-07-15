@@ -1,21 +1,33 @@
-import React from 'react'
-import { useState, useEffect, useRef } from 'react';
-import { candidateApi } from '../../services/api';
-import ProfileSummary from './candidateDashboardItems/ProfileSummary';
-import TrendingKeywordsSection from './candidateDashboardItems/TrendingKeywordsSection';
-import InvitationsSection from './candidateDashboardItems/InvitationsSection';
-import { useAuth } from '../../contexts/AuthContext';
-import Allroles from '../../ScoringUtil/skillsFromJob'
-import { Container } from '@mui/material'
-import useNotify from '../../utils/notificationService';
+// CandidateDashboard.jsx
 
-export default function Dashboard() {
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Container,
+  Box,
+  Typography,
+  Paper,
+  Avatar,
+  Button,
+  Chip,
+  Stack,
+} from "@mui/material";
+import { useAuth } from "../../contexts/AuthContext";
+import { candidateApi } from "../../services/api";
+import useNotify from "../../utils/notificationService";
+import Allroles from "../../ScoringUtil/skillsFromJob";
+import TrendingKeywordsSection from "./candidateDashboardItems/TrendingKeywordsSection";
+import InvitationsSection from "./candidateDashboardItems/InvitationsSection";
+
+const primaryColor = "#062F54";
+const cardColors = ["#E3F2FD", "#FCE4EC", "#FFF3E0", "#E8F5E9", "#F3E5F5"];
+
+export default function CandidateDashboard() {
   const { user } = useAuth();
   const userId = user?.userId;
   const profileId = user?.profileId;
   const notify = useNotify();
 
-  const [candidateName, setCandidateName] = useState("Name");
+  const [candidateName, setCandidateName] = useState("Candidate");
   const [profileScore, setProfileScore] = useState(0);
   const [profileView, setProfileView] = useState(0);
   const [desiredJobRole, setDesiredJobRole] = useState("");
@@ -24,141 +36,168 @@ export default function Dashboard() {
   const [invitationCount, setInvitationCount] = useState(0);
   const [workHistory, setWorkHistory] = useState([]);
 
-  // console.log(Allroles)
+  const hasFetchedProfile = useRef(false);
+  const notifiedHires = useRef(new Set());
 
   useEffect(() => {
     fetchProfileData();
-    fetchAppearance()
-  }, [])
+    fetchAppearance();
+  }, []);
 
-
-
-  const hasFetchedProfile = useRef(false);
   useEffect(() => {
-    if (workHistory.length > 0) {
-      hasFetchedProfile.current = true;
-    }
+    if (workHistory.length > 0) hasFetchedProfile.current = true;
   }, [workHistory]);
 
-  const fetchAppearance = async () => {
-  try {
-    const response = await candidateApi.getAppearanceCount(profileId);
-
-    const totalAppearances = response.data.reduce(
-      (sum, item) => sum + item.appearances,
-      0
-    );
-    setProfileView(totalAppearances);
-    
-  } catch (error) {
-    console.error("Error fetching appearances:", error);
-    
-  }
-};
-
-
-  const fetchProfileData = async () => {
-    try {
-      const response = await candidateApi.getProfileByUserId(userId);
-      const data = response.data;
-      // console.log(data);
-      setCandidateName(data.personalInfo.firstName);
-      setWorkHistory(await data.workHistory);
-      setProfileScore(data.profileScore);
-      if (data.jobPreference?.desiredJobTitle?.length > 0) {
-        setDesiredJobRole(data.jobPreference.desiredJobTitle[0]);
-      } else {
-        setDesiredJobRole("");
-      }
-      if (data.skills?.length > 0) {
-        setAlreadySkills(data.skills.map(item => item.skill));
-        // console.log("alreadySkills type:", typeof alreadySkills, Array.isArray(alreadySkills), alreadySkills);
-
-      } else {
-        setAlreadySkills([]);
-      }
-      // setProfileView(data.view);
-
-    } catch (error) {
-      console.error(error);
-    }
-  }
-  const notifiedHires = useRef(new Set());
   useEffect(() => {
-    console.log(workHistory);
-    const fetchHiringNotifications = async () => {
-      try {
-        const res = await candidateApi.fetchInteractions(profileId);
-
-        const hired = res.data.filter(i => i.finalStatus === 'hired');
-
-        const workCompanies = workHistory.map(w => w.companyName.toLowerCase());
-
-        const newHires = hired.filter(i => {
-          const companyName = i.employerId?.companyName?.toLowerCase() || '';
-
-          return !workCompanies.includes(companyName) && !notifiedHires.current.has(i._id);
-        });
-
-        newHires.forEach(hire => {
-          notify.success(`🎉 You've been hired at ${hire.employerId?.companyName || "a company"}!`);
-
-          notifiedHires.current.add(hire._id);
-        });
-
-      } catch (err) {
-        console.error("Error fetching hiring notifications", err);
-      }
-    };
-
-    if (hasFetchedProfile.current && workHistory.length >= 0) {
-      fetchHiringNotifications();
-    }
+    if (hasFetchedProfile.current) fetchHiringNotifications();
   }, [workHistory]);
 
   useEffect(() => {
     if (desiredJobRole) {
-      const normalizedFetchedRole = desiredJobRole.toLowerCase();
-
-      let matchedTemplate = null;
-
-      for (const roleKey in Allroles) {
-        if (Object.hasOwnProperty.call(Allroles, roleKey)) {
-          const template = Allroles[roleKey];
-          if (template.relevantTitles.includes(normalizedFetchedRole)) {
-            matchedTemplate = template;
-            break;
-          }
-        }
-      }
-      // console.log(matchedTemplate)
-      if (matchedTemplate) {
-        setSuggestedSkills(matchedTemplate.requiredSkills);
-        // console.log("Matching template found. Suggested Skills:", matchedTemplate.requiredSkills);
-
-        // console.log(suggestedSkills)
-      } else {
-        setSuggestedSkills([]);
-      }
-    } else {
-      setSuggestedSkills([]);
+      const roleKey = desiredJobRole.toLowerCase();
+      const template = Object.values(Allroles).find((tpl) =>
+        tpl.relevantTitles.includes(roleKey)
+      );
+      setSuggestedSkills(template?.requiredSkills || []);
     }
   }, [desiredJobRole]);
 
+  const fetchAppearance = async () => {
+    try {
+      const res = await candidateApi.getAppearanceCount(profileId);
+      const views = res.data.reduce((acc, cur) => acc + cur.appearances, 0);
+      setProfileView(views);
+    } catch (err) {
+      console.error("Appearance Error", err);
+    }
+  };
 
+  const fetchProfileData = async () => {
+    try {
+      const res = await candidateApi.getProfileByUserId(userId);
+      const data = res.data;
+      setCandidateName(data.personalInfo?.firstName || "Candidate");
+      setWorkHistory(data.workHistory || []);
+      setProfileScore(data.profileScore || 0);
+      setAlreadySkills(data.skills?.map((s) => s.skill) || []);
+      if (data.jobPreference?.desiredJobTitle?.length)
+        setDesiredJobRole(data.jobPreference.desiredJobTitle[0]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
+  const fetchHiringNotifications = async () => {
+    try {
+      const res = await candidateApi.fetchInteractions(profileId);
+      const hired = res.data.filter((i) => i.finalStatus === "hired");
+      const companies = workHistory.map((w) => w.companyName.toLowerCase());
 
+      hired.forEach((h) => {
+        const name = h.employerId?.companyName?.toLowerCase();
+        if (!companies.includes(name) && !notifiedHires.current.has(h._id)) {
+          notify.success(
+            `🎉 You've been hired at ${
+              h.employerId?.companyName || "a company"
+            }!`
+          );
+          notifiedHires.current.add(h._id);
+        }
+      });
+    } catch (err) {
+      console.error("Hiring Notification Error", err);
+    }
+  };
+
+  const InfoCard = ({ label, value, icon, color }) => (
+    <Paper
+      elevation={3}
+      sx={{
+        flex: 1,
+        minWidth: 150,
+        p: 3,
+        borderRadius: 3,
+        backgroundColor: color,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Avatar
+        sx={{
+          bgcolor: primaryColor,
+          width: 48,
+          height: 48,
+          mb: 1,
+        }}
+      >
+        {icon}
+      </Avatar>
+      <Typography
+        sx={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 700,
+          fontSize: 22,
+          color: primaryColor,
+        }}
+      >
+        {value}
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: "Figtree, sans-serif",
+          fontSize: 14,
+          color: "#444",
+        }}
+      >
+        {label}
+      </Typography>
+    </Paper>
+  );
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }} >     <h1>Dashboard</h1>
-      <h2> Hello 👋, {candidateName}</h2>
-      <ProfileSummary profileScore={profileScore} invitationCount={invitationCount} profileView={profileView}></ProfileSummary>
-      <TrendingKeywordsSection suggestedSkills={suggestedSkills} alreadySkills={alreadySkills}></TrendingKeywordsSection>
-      <InvitationsSection setInvitationCount={setInvitationCount}></InvitationsSection>
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 3,
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 700,
+          color: primaryColor,
+        }}
+      >
+        Welcome, {candidateName} 👋
+      </Typography>
 
-      <div >
-      </div>
+      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 4 }}>
+        <InfoCard
+          label="Profile Score"
+          value={`${profileScore}%`}
+          icon="📊"
+          color={cardColors[0]}
+        />
+        <InfoCard
+          label="Views"
+          value={profileView}
+          icon="👀"
+          color={cardColors[1]}
+        />
+        <InfoCard
+          label="Invitations"
+          value={invitationCount}
+          icon="✉️"
+          color={cardColors[2]}
+        />
+      </Box>
+
+      <TrendingKeywordsSection
+        suggestedSkills={suggestedSkills}
+        alreadySkills={alreadySkills}
+      />
+
+      <Box sx={{ mt: 4 }}>
+        <InvitationsSection setInvitationCount={setInvitationCount} />
+      </Box>
     </Container>
-  )
+  );
 }
-
