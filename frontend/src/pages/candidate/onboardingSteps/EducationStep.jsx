@@ -1,42 +1,35 @@
-import React from 'react';
-import { Box, TextField, Button } from '@mui/material';
+import React from "react";
+import { Box, TextField, Button } from "@mui/material";
 
-
-export default function EducationStep({ data = [], onUpdate,errors = {}}) {
-
-  
-
+export default function EducationStep({ data = [], onUpdate, errors = {} }) {
   const handleChange = (index, field, value) => {
-  const updated = [...data];
+    const updated = [...data];
 
-  if (field === 'startDate' || field === 'endDate') {
-    const [year, month] = value.split('-');
-    updated[index][field] = `${month}-${year}`;
-  } else {
-    updated[index][field] = value;
-  }
+    if (field === "startDate" || field === "endDate") {
+      const [year, month] = value.split("-");
+      updated[index][field] = `${month}-${year}`;
+    } else {
+      updated[index][field] = value;
+    }
 
-  onUpdate(updated);
-};
+    onUpdate(updated);
+  };
 
- 
   const normalizeDate = (dateStr) => {
-  if (!dateStr) return '';
-  const [month, year] = dateStr.split('-');
-  return `${year}-${month}`;  
-};
-
-  
+    if (!dateStr) return "";
+    const [month, year] = dateStr.split("-");
+    return `${year}-${month}`;
+  };
 
   const addEducation = () => {
     onUpdate([
       ...data,
       {
-        instituteName: '',
-        credentials: '',
-        startDate: '',
-        endDate: ''
-      }
+        instituteName: "",
+        credentials: "",
+        startDate: "",
+        endDate: "",
+      },
     ]);
   };
 
@@ -46,14 +39,13 @@ export default function EducationStep({ data = [], onUpdate,errors = {}}) {
     onUpdate(updated);
   };
   return (
-    <div className='d-flex justify-content-center w-80 flex-column mx-auto'>
-      <h3>Education</h3>
+    <div className="d-flex justify-content-center w-80 flex-column mx-auto">
       <div className="d-flex flex-column w-75 mx-auto gap-4">
         {data.map((edu, index) => (
           <Box
             component="form"
             key={index}
-            sx={{ '& > :not(style)': { m: 1, width: '25ch' } }}
+            sx={{ "& > :not(style)": { m: 1, width: "25ch" } }}
             noValidate
             autoComplete="off"
           >
@@ -62,29 +54,33 @@ export default function EducationStep({ data = [], onUpdate,errors = {}}) {
               id="outlined-basic"
               variant="outlined"
               value={edu.instituteName}
-              onChange={(e) => handleChange(index, 'instituteName', e.target.value)}
+              onChange={(e) =>
+                handleChange(index, "instituteName", e.target.value)
+              }
             />
             <TextField
               label="Credentials"
               variant="outlined"
               value={edu.credentials}
-              onChange={(e) => handleChange(index, 'credentials', e.target.value)}
+              onChange={(e) =>
+                handleChange(index, "credentials", e.target.value)
+              }
             />
 
             <TextField
               type="month"
               label="Start Date"
               InputLabelProps={{ shrink: true }}
-              value={normalizeDate(edu.startDate) || ''}
-              onChange={(e) => handleChange(index, 'startDate', e.target.value)}
+              value={normalizeDate(edu.startDate) || ""}
+              onChange={(e) => handleChange(index, "startDate", e.target.value)}
             />
 
             <TextField
               type="month"
               label="End Date"
               InputLabelProps={{ shrink: true }}
-              value={normalizeDate(edu.endDate) || ''}
-              onChange={(e) => handleChange(index, 'endDate', e.target.value)}
+              value={normalizeDate(edu.endDate) || ""}
+              onChange={(e) => handleChange(index, "endDate", e.target.value)}
             />
             <Button
               variant="outlined"
