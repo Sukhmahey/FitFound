@@ -1,165 +1,185 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { candidateApi, jobVerificationApi , employerApi} from '../../services/api';
+import React, { useState, useEffect, useContext } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import {
-    Container,
-    Box,
-    Typography,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    TextField,
-    Button,
-    Alert,
-    AlertTitle
-} from '@mui/material';
-import useNotify from '../../utils/notificationService';
+  candidateApi,
+  jobVerificationApi,
+  employerApi,
+} from "../../services/api";
+import {
+  Container,
+  Box,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Button,
+  Alert,
+  AlertTitle,
+} from "@mui/material";
+import useNotify from "../../utils/notificationService";
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 export default function ExperienceVerificationReqPage() {
-    const [selectedCompany, setSelectedCompany] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [companyNames, setCompanyNames] = useState([]);
-    const [workHistory, setWorkHistory] = useState([]);
-    const [submitStatus, setSubmitStatus] = useState('');
-    const [jobRole, setJobRole] = useState('');
-    const [employerNames, setEmployerNames] = useState([]);
-    const notify = useNotify();
+  const [selectedCompany, setSelectedCompany] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [companyNames, setCompanyNames] = useState([]);
+  const [workHistory, setWorkHistory] = useState([]);
+  const [submitStatus, setSubmitStatus] = useState("");
+  const [jobRole, setJobRole] = useState("");
+  const [employerNames, setEmployerNames] = useState([]);
+  const notify = useNotify();
 
+  const { user } = useAuth();
+  const userId = user?.userId;
+  const profileId = user?.profileId;
 
-    const { user } = useAuth();
-    const userId = user?.userId;
-        const profileId = user?.profileId;
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+  useEffect(() => {
+    setAppGeneralInfo({ pageTitle: "Verification" });
+  }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await candidateApi.getProfileByUserId(userId);
+        const history = response.data?.workHistory || [];
+        setWorkHistory(history);
 
+        const historyNames = history
+          .map((entry) => entry.companyName)
+          .filter(Boolean);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await candidateApi.getProfileByUserId(userId);
-      const history = response.data?.workHistory || [];
-      setWorkHistory(history);
+        const employerRes = await employerApi.getAllEmployers();
+        const employers = employerRes.data || [];
+        const employerNameList = employers.map((emp) =>
+          emp.companyName.toLowerCase()
+        );
+        setEmployerNames(employerNameList);
 
-      const historyNames = history.map((entry) => entry.companyName).filter(Boolean);
+        const filtered = historyNames.filter((name) =>
+          employerNameList.includes(name.toLowerCase())
+        );
+        setCompanyNames(filtered);
+      } catch (err) {
+        console.error("Failed to load profile or employers:", err);
+      }
+    };
 
-      const employerRes = await employerApi.getAllEmployers();
-      const employers = employerRes.data || [];
-      const employerNameList = employers.map(emp => emp.companyName.toLowerCase());
-      setEmployerNames(employerNameList);
+    if (userId) {
+      fetchData();
+    }
+  }, [userId]);
 
-      const filtered = historyNames.filter(name =>
-        employerNameList.includes(name.toLowerCase())
+  useEffect(() => {
+    if (selectedCompany && workHistory.length) {
+      const companyDetails = workHistory.find(
+        (company) =>
+          company.companyName.toLowerCase() === selectedCompany.toLowerCase()
       );
-      setCompanyNames(filtered);
+      if (companyDetails) {
+        console.log("Selected company details:", companyDetails);
+        setStartDate(companyDetails.startDate);
+        setEndDate(companyDetails.endDate);
+        setJobRole(companyDetails.jobTitle);
+      }
+    }
+  }, [selectedCompany]);
 
+  const handleSubmit = async () => {
+    console.log("Submitted:", {
+      profileId,
+      selectedCompany,
+      startDate,
+      endDate,
+    });
+    const dataBody = {
+      candidateId: profileId,
+      companyName: selectedCompany,
+      startDate: startDate,
+      endDate: endDate,
+      position: jobRole,
+    };
+    try {
+      const res = await jobVerificationApi.verifyJob(dataBody);
+      if (res.status === 200 || res.status === 201) {
+        // setSubmitStatus('success');
+        notify.success("Your request has been submitted successfully.");
+        setSelectedCompany("");
+        setStartDate("");
+        setEndDate("");
+      } else {
+        // setSubmitStatus('error');
+        notify.error("Failed to submit request.");
+      }
     } catch (err) {
-      console.error('Failed to load profile or employers:', err);
+      console.log("Submission error:", err);
+      // setSubmitStatus('error');
+      notify.error("Failed to submit request.");
     }
   };
 
-  if (userId) {
-    fetchData();
-  }
-}, [userId]);
-
-
-    useEffect(() => {
-        if (selectedCompany && workHistory.length) {
-            const companyDetails = workHistory.find(
-                (company) =>
-                    company.companyName.toLowerCase() === selectedCompany.toLowerCase()
-            );
-            if (companyDetails) {
-                console.log('Selected company details:', companyDetails);
-                setStartDate(companyDetails.startDate);
-                setEndDate(companyDetails.endDate);
-                setJobRole(companyDetails.jobTitle);
+  return (
+    <Container>
+      <Container maxWidth="sm">
+        <Box sx={{ mt: 5, p: 4, border: "1px solid #ccc", borderRadius: 2 }}>
+          <Typography variant="h5" gutterBottom textAlign="center">
+            Experience Verification Request
+          </Typography>
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel>Company</InputLabel>
+            <Select
+              value={selectedCompany}
+              label="Company"
+              onChange={(e) => setSelectedCompany(e.target.value)}
+            >
+              <MenuItem value="">Select Company</MenuItem>
+              {companyNames.map((company, idx) => (
+                <MenuItem key={idx} value={company}>
+                  {company}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            fullWidth
+            type="month"
+            label="Start Date"
+            InputLabelProps={{ shrink: true }}
+            value={
+              startDate
+                ? `${startDate.split("-")[1]}-${startDate.split("-")[0]}`
+                : ""
             }
-        }
-    }, [selectedCompany]);
-
-    const handleSubmit = async () => {
-        console.log('Submitted:', { profileId, selectedCompany, startDate, endDate });
-        const dataBody = {
-            candidateId: profileId,
-            companyName: selectedCompany,
-            startDate: startDate,
-            endDate: endDate,
-            position: jobRole
-        }
-        try {
-            const res = await jobVerificationApi.verifyJob(dataBody);
-            if (res.status === 200 || res.status === 201) {
-                // setSubmitStatus('success');
-                notify.success("Your request has been submitted successfully.");
-                setSelectedCompany('');
-                setStartDate('');
-                setEndDate('');
-            } else {
-                // setSubmitStatus('error');
-                notify.error("Failed to submit request.");
+            onChange={(e) => {
+              const [year, month] = e.target.value.split("-");
+              setStartDate(`${month}-${year}`);
+            }}
+            sx={{ mb: 3 }}
+          />
+          <TextField
+            fullWidth
+            type="month"
+            label="End Date"
+            InputLabelProps={{ shrink: true }}
+            value={
+              endDate ? `${endDate.split("-")[1]}-${endDate.split("-")[0]}` : ""
             }
-        } catch (err) {
-            console.log("Submission error:", err);
-            // setSubmitStatus('error');
-            notify.error("Failed to submit request.");
-        }
-    };
-
-    return (
-        <Container>
-            <Container maxWidth="sm">
-                <Box sx={{ mt: 5, p: 4, border: '1px solid #ccc', borderRadius: 2 }}>
-                    <Typography variant="h5" gutterBottom textAlign="center">
-                        Experience Verification Request
-                    </Typography>
-                    <FormControl fullWidth sx={{ mb: 3 }}>
-                        <InputLabel>Company</InputLabel>
-                        <Select
-                            value={selectedCompany}
-                            label="Company"
-                            onChange={(e) => setSelectedCompany(e.target.value)}
-                        >
-                            <MenuItem value="">Select Company</MenuItem>
-                            {companyNames.map((company, idx) => (
-                                <MenuItem key={idx} value={company}>
-                                    {company}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <TextField
-                        fullWidth
-                        type="month"
-                        label="Start Date"
-                        InputLabelProps={{ shrink: true }}
-                        value={startDate ? `${startDate.split('-')[1]}-${startDate.split('-')[0]}` : ''}
-                        onChange={(e) => {
-                            const [year, month] = e.target.value.split('-');
-                            setStartDate(`${month}-${year}`);
-                        }}
-                        sx={{ mb: 3 }}
-                    />
-                    <TextField
-                        fullWidth
-                        type="month"
-                        label="End Date"
-                        InputLabelProps={{ shrink: true }}
-                        value={endDate ? `${endDate.split('-')[1]}-${endDate.split('-')[0]}` : ''}
-                        onChange={(e) => {
-                            const [year, month] = e.target.value.split('-');
-                            setEndDate(`${month}-${year}`);
-                        }}
-                        sx={{ mb: 4 }}
-                    />
-                    <Button variant="contained" fullWidth onClick={handleSubmit}>
-                        Submit Verification Request
-                    </Button>
-                </Box>
-            </Container>
-            <Box>
-                {/* {submitStatus === 'success' && (
+            onChange={(e) => {
+              const [year, month] = e.target.value.split("-");
+              setEndDate(`${month}-${year}`);
+            }}
+            sx={{ mb: 4 }}
+          />
+          <Button variant="contained" fullWidth onClick={handleSubmit}>
+            Submit Verification Request
+          </Button>
+        </Box>
+      </Container>
+      <Box>
+        {/* {submitStatus === 'success' && (
                     <Box mt={2}>
                         <Alert severity="success">
                             <AlertTitle>Success</AlertTitle>
@@ -176,9 +196,7 @@ useEffect(() => {
                         </Alert>
                     </Box>
                 )} */}
-
-            </Box>
-        </Container>
-
-    );
+      </Box>
+    </Container>
+  );
 }

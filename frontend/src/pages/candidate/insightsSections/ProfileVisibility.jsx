@@ -1,91 +1,94 @@
-import React, { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
-import { candidateApi } from '../../../services/api';
-import { useAuth } from '../../../contexts/AuthContext';
+import { candidateApi } from "../../../services/api";
+import { useAuth } from "../../../contexts/AuthContext";
+import { Box, Typography, Paper } from "@mui/material";
 
-// const data = [
-  
-//     {
-//         date: "2025-06-30",
-//         appearances: 7
-//     },
-//     {
-//         date: "2025-07-01",
-//         cnt: 8
-//     },
-//     {
-//         date: "2025-07-02",
-//         cnt: 5
-//     },
-//     {
-//         date: "2025-07-03",
-//         cnt: 20
-//     },
-//     {
-//         date: "2025-07-04",
-//         cnt: 30
-//     },
-//     {
-//         date: "2025-07-05",
-//         cnt: 14
-//     },
-//     {
-//         date: "2025-07-06",
-//         cnt: 12
-//     },
-//     {
-//         date: "2025-07-07",
-//         cnt: 10
-//     },
-//     {
-//         date: "2025-07-08",
-//         cnt: 8
-//     },
-//     {
-//         date: "2025-07-09",
-//         cnt: 15
-//     }
-// ];
-
+const primaryColor = "#0E3A62";
+const accentColor = "#3B67F6";
+const gridColor = "#e0e0e0";
 
 const ProfileVisibility = () => {
-    const { user } = useAuth();
-    const [visibilityData, setVisibilityData] = useState([]);
+  const { user } = useAuth();
+  const [visibilityData, setVisibilityData] = useState([]);
 
-    useEffect(() => {
-        candidateApi.getVisibilityTimeline(user.profileId)//("6867037fab263ff7903b8f21")
-        .then(result => {
-            setVisibilityData([...result.data]);
-        })
-        .catch();
-    }, []);
+  useEffect(() => {
+    candidateApi
+      .getVisibilityTimeline(user.profileId)
+      .then((result) => {
+        setVisibilityData([...result.data]);
+      })
+      .catch((err) => console.error("Error fetching visibility data", err));
+  }, [user.profileId]);
 
-    return (
-        <div style={{ width: "60%", height: 300 }}>
-            <p>Profile Visibility</p>
-            <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                width={500}
-                height={300}
-                data={visibilityData}
-                margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                }}
-                >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="appearances" stroke="#8884d8" activeDot={{ r: 8 }} />
-                </LineChart>
-            </ResponsiveContainer>
-        </div>
-    );
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        p: 3,
+        mt: 4,
+        borderRadius: 3,
+        backgroundColor: "#F5F7FA",
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 600,
+          mb: 2,
+          color: primaryColor,
+        }}
+      >
+        Profile Visibility Over Time
+      </Typography>
+
+      <Box sx={{ width: "100%", height: 300 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={visibilityData}
+            margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis
+              dataKey="date"
+              tick={{ fontFamily: "Figtree, sans-serif", fontSize: 12 }}
+            />
+            <YAxis tick={{ fontFamily: "Figtree, sans-serif", fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                fontFamily: "Figtree, sans-serif",
+                fontSize: 13,
+              }}
+            />
+            <Legend
+              wrapperStyle={{
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: 13,
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="appearances"
+              stroke={accentColor}
+              strokeWidth={2}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </Box>
+    </Paper>
+  );
 };
 
 export default ProfileVisibility;

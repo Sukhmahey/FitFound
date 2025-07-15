@@ -5,24 +5,21 @@ import ProfileVisibility from "./insightsSections/ProfileVisibility";
 import RecommendedActions from "./insightsSections/RecommendedActions";
 import SuggestionBoard from "./insightsSections/SuggestionBoard";
 
-
-
 const Insights = () => {
-    const { setAppGeneralInfo } = useContext(AppInfoContext);
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
 
-    useEffect(() => {
-        setAppGeneralInfo({ pageTitle: "Insigths" });
-    }, [setAppGeneralInfo]);
+  useEffect(() => {
+    setAppGeneralInfo({ pageTitle: "Insights" });
+  }, [setAppGeneralInfo]);
 
-    return (
-        <div>
-            <ProfileVisibility></ProfileVisibility>
-            <RecommendedActions></RecommendedActions>
-            <SuggestionBoard></SuggestionBoard>
-            <AppearanceIn></AppearanceIn>
-        </div>
-    );
-
+  return (
+    <div>
+      <ProfileVisibility></ProfileVisibility>
+      <RecommendedActions></RecommendedActions>
+      <SuggestionBoard></SuggestionBoard>
+      <AppearanceIn></AppearanceIn>
+    </div>
+  );
 };
 
 export default Insights;
