@@ -70,7 +70,7 @@ const [snackSeverity, setSnackSeverity] = useState("error");
   const validateSearchForm = () => {
   const errors = [];
 
-  if (!searchQuery.title?.trim()) errors.push("Job title is required.");
+  if (!searchQuery.title?.trim()) errors.push("Job title is required");
   if (!searchQuery.location?.trim()) errors.push("Location is required");
   if (!searchQuery.jobDescription?.trim()) errors.push("Job description is required");
   if (!searchQuery.jobType?.trim()) errors.push("Job type is required");
