@@ -42,7 +42,7 @@ const Connections = () => {
   const { setAppGeneralInfo } = useContext(AppInfoContext);
 
   useEffect(() => {
-    setAppGeneralInfo({ pageTitle: "Search" });
+    setAppGeneralInfo({ pageTitle: "Connections" });
   }, []);
 
   const handleTabChange = (e, newValue) => {

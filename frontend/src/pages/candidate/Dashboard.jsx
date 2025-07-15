@@ -1,6 +1,6 @@
 // CandidateDashboard.jsx
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   Container,
   Box,
@@ -17,6 +17,8 @@ import useNotify from "../../utils/notificationService";
 import Allroles from "../../ScoringUtil/skillsFromJob";
 import TrendingKeywordsSection from "./candidateDashboardItems/TrendingKeywordsSection";
 import InvitationsSection from "./candidateDashboardItems/InvitationsSection";
+
+import { AppInfoContext } from "../../contexts/AppInfoContext";
 
 const primaryColor = "#062F54";
 const cardColors = ["#E3F2FD", "#FCE4EC", "#FFF3E0", "#E8F5E9", "#F3E5F5"];
@@ -38,6 +40,11 @@ export default function CandidateDashboard() {
 
   const hasFetchedProfile = useRef(false);
   const notifiedHires = useRef(new Set());
+
+  const { setAppGeneralInfo } = useContext(AppInfoContext);
+  useEffect(() => {
+    setAppGeneralInfo({ pageTitle: "Dashboard" });
+  }, []);
 
   useEffect(() => {
     fetchProfileData();
