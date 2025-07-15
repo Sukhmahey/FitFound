@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from "react";
+import { useNavigate } from 'react-router-dom';
 import { useForm, FormProvider } from "react-hook-form";
 import { Box, Typography, Button, Paper } from "@mui/material";
 
@@ -11,6 +12,7 @@ import CompanyInfo from "./onboardingSteps/CompanyInfo";
 import UserContactInfo from "./onboardingSteps/UserContactInfo";
 
 const EmployerProfile = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId;
   const methods = useForm();
@@ -47,7 +49,10 @@ const EmployerProfile = () => {
         methods.reset(companyData);
         setContactInfo(contactInfo);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        navigate('/employer/onboarding');
+      });
   }, []);
 
   const onSubmit = (data) => {
