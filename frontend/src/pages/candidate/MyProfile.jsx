@@ -128,17 +128,15 @@ export default function MyProfile() {
         errors.skills = "Add at least one skill";
     }
 
-    if (activeTab === "Work") {
-      (formData.workHistory || []).forEach((exp, i) => {
-        if (!exp.companyName)
-          errors[`companyName_${i}`] = "Company name is required";
-        if (!exp.jobTitle) errors[`jobTitle_${i}`] = "Job title is required";
-        if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
-        if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
-        if (!exp.experienceLevel)
-          errors[`experienceLevel_${i}`] = "Experience Level is required";
-      });
-    }
+  if (activeTab === 'Work') {
+    (formData.workHistory || []).forEach((exp, i) => {
+      if (!exp.companyName) errors[`companyName_${i}`] = "Company name is required";
+      if (!exp.role) errors[`role_${i}`] = "Job Role is required";
+      if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
+      if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
+      if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
+    });
+  }
 
     if (activeTab === "Job") {
       const desired = formData.jobPreference?.desiredJobTitle;
