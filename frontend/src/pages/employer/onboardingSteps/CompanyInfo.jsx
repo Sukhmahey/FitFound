@@ -170,7 +170,8 @@ const CompanyInfo = ({errors}) => {
               <option value="51-200">51–200 employees</option>
               <option value="201-500">201–500 employees</option>
               <option value="501-1000">501–1,000 employees</option>
-              <option value="1001+">1,001+ employees</option>
+              <option value="1001-5000">501–1,000 employees</option>
+              <option value="5000+">5,001+ employees</option>
             </select>
           </div>
         </div>
