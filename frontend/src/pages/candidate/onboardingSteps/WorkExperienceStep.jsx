@@ -1,6 +1,4 @@
-
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -11,12 +9,17 @@ import {
   FormControl,
   Stack,
   Typography,
-} from '@mui/material';
-import { useAuth } from '../../../contexts/AuthContext';
-import { candidateApi } from '../../../services/api';
-import useNotify from '../../../utils/notificationService';
+} from "@mui/material";
+import { useAuth } from "../../../contexts/AuthContext";
+import { candidateApi } from "../../../services/api";
+import useNotify from "../../../utils/notificationService";
 
-export default function WorkExperienceStep({ data = [], onUpdate, verificationCompany = [] ,errors = {}}) {
+export default function WorkExperienceStep({
+  data = [],
+  onUpdate,
+  verificationCompany = [],
+  errors = {},
+}) {
   // const handleChange = (index, field, value) => {
   //   const updated = [...data];
   //   updated[index][field] = value;
@@ -40,24 +43,23 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
   const handleChange = (index, field, value) => {
     const updated = [...data];
 
-
-    if (field === 'startDate' || field === 'endDate') {
-      const [year, month] = value.split('-');
+    if (field === "startDate" || field === "endDate") {
+      const [year, month] = value.split("-");
       value = `${month}-${year}`;
     }
 
     updated[index][field] = value;
 
-    if (field === 'role') {
-      updated[index]['jobTitle'] = value;
+    if (field === "role") {
+      updated[index]["jobTitle"] = value;
     }
 
     onUpdate(updated);
   };
 
   const normalizeDate = (dateStr) => {
-    if (!dateStr) return '';
-    const parts = dateStr.split('-');
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
     if (parts[0].length === 4) return dateStr;
     return `${parts[1]}-${parts[0]}`;
   };
@@ -70,7 +72,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
 
   const addAchievement = (index) => {
     const updated = [...data];
-    updated[index].achievements.push('');
+    updated[index].achievements.push("");
     onUpdate(updated);
   };
 
@@ -78,15 +80,15 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
     onUpdate([
       ...data,
       {
-        companyName: '',
-        jobTitle: '',
-        achievements: [''],
-        startDate: '',
-        endDate: '',
-        role: '',
-        experienceLevel: '',
-        remarkFromEmployer: ''
-      }
+        companyName: "",
+        jobTitle: "",
+        achievements: [""],
+        startDate: "",
+        endDate: "",
+        role: "",
+        experienceLevel: "",
+        remarkFromEmployer: "",
+      },
     ]);
   };
 
@@ -98,49 +100,43 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
         const unfiltered = response.data;
 
         const filtered = response.data
-          .filter((obj) => obj.finalStatus === 'hired')
+          .filter((obj) => obj.finalStatus === "hired")
           .map((obj) => ({
             invitationId: obj._id,
             employerId: obj.employerId?._id || null,
-            contactPerson: obj.employerId?.contactInfo?.firstName || 'Unknown',
-            employerName: obj.employerId?.companyName || 'Unknown Company',
+            contactPerson: obj.employerId?.contactInfo?.firstName || "Unknown",
+            employerName: obj.employerId?.companyName || "Unknown Company",
             job: obj.jobId,
             finalStatus: obj.finalStatus,
             date: (() => {
               const d = new Date(obj.updatedAt);
-              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const month = String(d.getMonth() + 1).padStart(2, "0");
               const year = d.getFullYear();
               return `${month}-${year}`;
             })(),
           }));
-        console.log(unfiltered)
+        console.log(unfiltered);
         setHiredCompany(filtered);
-
       } catch (error) {
         console.error(error);
       }
     };
     if (profileId) fetchInvitations();
-  }, [profileId])
-
-
-
+  }, [profileId]);
 
   useEffect(() => {
     if (hiredCompany.length === 0) return;
 
-
-
     const hiredWorkHistory = hiredCompany.map((item) => ({
       companyName: item.employerName,
-      jobTitle: item.job?.jobTitle || 'Developer',
-      role: item.job?.jobTitle || 'Developer',
-      startDate: item.date || '2024-01',
-      endDate: item.date || '2024-01',
+      jobTitle: item.job?.jobTitle || "Developer",
+      role: item.job?.jobTitle || "Developer",
+      startDate: item.date || "2024-01",
+      endDate: item.date || "2024-01",
       achievements: [],
-      experienceLevel: '',
-      remarkFromEmployer: '',
-      fromHiredCompany: true
+      experienceLevel: "",
+      remarkFromEmployer: "",
+      fromHiredCompany: true,
     }));
 
     const existingCompanies = data.map((d) => d.companyName.toLowerCase());
@@ -151,16 +147,12 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
     if (newEntries.length === 0) return;
 
     const updatedData = [...data, ...newEntries];
-    notify.success("You have been hired by a new company! kindly update it in profile");
+    notify.success(
+      "You have been hired by a new company! kindly update it in profile"
+    );
 
     onUpdate(updatedData);
-
-
   }, [hiredCompany]);
-
-
-
-
 
   const removeExperience = (index) => {
     const updated = [...data];
@@ -168,62 +160,68 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
     onUpdate(updated);
   };
 
-
- 
   const getVerificationStatus = (companyName) => {
     if (!companyName) return null;
     const match = verificationCompany.find(
-      v =>
+      (v) =>
         v.company &&
         v.company.trim().toLowerCase() === companyName.trim().toLowerCase()
     );
     return match?.status || null;
   };
 
-
   return (
     <div className="d-flex justify-content-center w-80 flex-column mx-auto">
-      <h3>Work History</h3>
       <div className="d-flex flex-column w-75 mx-auto gap-4">
         {data.map((exp, index) => {
-          const status = data.length > 0 && verificationCompany.length > 0
-            ? getVerificationStatus(exp.companyName)
-            : null;
-          const isVerified = status === 'verified';
-
+          const status =
+            data.length > 0 && verificationCompany.length > 0
+              ? getVerificationStatus(exp.companyName)
+              : null;
+          const isVerified = status === "verified";
 
           return (
             <Box
               key={index}
               sx={{
-                border: exp.fromHiredCompany ? '2px solid #fbc02d' : '1px solid #ccc',
-                backgroundColor: exp.fromHiredCompany ? '#fffde7' : '#fff',
+                border: exp.fromHiredCompany
+                  ? "2px solid #fbc02d"
+                  : "1px solid #ccc",
+                backgroundColor: exp.fromHiredCompany ? "#fffde7" : "#fff",
                 borderRadius: 2,
-                p: 3
+                p: 3,
               }}
               className="d-flex flex-column gap-3"
             >
               {exp.fromHiredCompany && (
                 <Typography
                   variant="body2"
-                  sx={{ color: '#f57f17', fontWeight: 'bold', mb: 1 }}
+                  sx={{ color: "#f57f17", fontWeight: "bold", mb: 1 }}
                 >
-                  ⓘ This work experience was added based on your recent hiring. Kindly ensure all relevant details are accurate and up to date.
+                  ⓘ This work experience was added based on your recent hiring.
+                  Kindly ensure all relevant details are accurate and up to
+                  date.
                 </Typography>
               )}
               <TextField
                 label="Company Name"
                 variant="outlined"
                 value={exp.companyName}
-                onChange={(e) => handleChange(index, 'companyName', e.target.value)}
+                onChange={(e) =>
+                  handleChange(index, "companyName", e.target.value)
+                }
                 disabled={isVerified}
                 error={!!errors.companyName}
                 helperText={errors.companyName}
               />
 
               {status && (
-                <Typography variant="subtitle2" sx={{ color: status === 'verified' ? 'green' : 'orange' }}>
-                  Verification Status: {status.charAt(0).toUpperCase() + status.slice(1)}
+                <Typography
+                  variant="subtitle2"
+                  sx={{ color: status === "verified" ? "green" : "orange" }}
+                >
+                  Verification Status:{" "}
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
                 </Typography>
               )}
 
@@ -231,7 +229,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 label="Role"
                 variant="outlined"
                 value={exp.role}
-                onChange={(e) => handleChange(index, 'role', e.target.value)}
+                onChange={(e) => handleChange(index, "role", e.target.value)}
                 disabled={isVerified}
                 error={!!errors.jobTitle}
                 helperText={errors.jobTitle}
@@ -248,8 +246,10 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 type="month"
                 label="Start Date"
                 InputLabelProps={{ shrink: true }}
-                value={normalizeDate(exp.startDate) || ''}
-                onChange={(e) => handleChange(index, 'startDate', e.target.value)}
+                value={normalizeDate(exp.startDate) || ""}
+                onChange={(e) =>
+                  handleChange(index, "startDate", e.target.value)
+                }
                 disabled={isVerified}
                 error={!!errors.startDate}
                 helperText={errors.startDate}
@@ -259,13 +259,12 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                 type="month"
                 label="End Date"
                 InputLabelProps={{ shrink: true }}
-                value={normalizeDate(exp.endDate) || ''}
-                onChange={(e) => handleChange(index, 'endDate', e.target.value)}
+                value={normalizeDate(exp.endDate) || ""}
+                onChange={(e) => handleChange(index, "endDate", e.target.value)}
                 disabled={isVerified}
                 error={!!errors.endDate}
                 helperText={errors.endDate}
               />
-
 
               <FormControl fullWidth>
                 <InputLabel id={`exp-level-label`}>Experience Level</InputLabel>
@@ -274,9 +273,11 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                   value={exp.experienceLevel}
                   label="Experience Level"
                   disabled={isVerified}
-                  onChange={(e) => handleChange(index, 'experienceLevel', e.target.value)}
+                  onChange={(e) =>
+                    handleChange(index, "experienceLevel", e.target.value)
+                  }
                   error={!!errors.experienceLevel}
-                helperText={errors.experienceLevel}
+                  helperText={errors.experienceLevel}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="junior">Junior</MenuItem>
@@ -286,7 +287,7 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
               </FormControl>
 
               <Box>
-                <h6 className='text-decoration-underline'>Achievements</h6>
+                <h6 className="text-decoration-underline">Achievements</h6>
                 <Stack spacing={2} mt={4}>
                   {exp.achievements.map((a, i) => (
                     <TextField
@@ -295,7 +296,9 @@ export default function WorkExperienceStep({ data = [], onUpdate, verificationCo
                       label={`Achievement ${i + 1}`}
                       variant="outlined"
                       value={a}
-                      onChange={(e) => handleAchievementChange(index, i, e.target.value)}
+                      onChange={(e) =>
+                        handleAchievementChange(index, i, e.target.value)
+                      }
                     />
                   ))}
                 </Stack>

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Box, TextField, Button, Chip, Stack } from '@mui/material';
+import React, { useState } from "react";
+import { Box, TextField, Button, Chip, Stack } from "@mui/material";
 
-export default function SkillsStep({ data = [], onUpdate,errors = {} }) {
-  const [skill, setSkill] = useState('');
-  console.log(data[1])
+export default function SkillsStep({ data = [], onUpdate, errors = {} }) {
+  const [skill, setSkill] = useState("");
+  console.log(data[1]);
 
   const addSkill = () => {
     if (skill.trim()) {
       onUpdate([...data, { skill: skill.trim() }]);
-      setSkill('');
+      setSkill("");
     }
   };
 
@@ -20,7 +20,6 @@ export default function SkillsStep({ data = [], onUpdate,errors = {} }) {
 
   return (
     <div className="d-flex justify-content-center w-80 flex-column mx-auto">
-      <h3>Skills</h3>
       <div className="d-flex flex-column w-50 mx-auto gap-3">
         <Box className="d-flex gap-2 align-items-center">
           <TextField
@@ -32,7 +31,7 @@ export default function SkillsStep({ data = [], onUpdate,errors = {} }) {
             helperText={errors.skills}
             onChange={(e) => setSkill(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 addSkill();
               }

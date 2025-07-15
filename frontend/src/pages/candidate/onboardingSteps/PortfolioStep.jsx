@@ -1,19 +1,18 @@
-import React from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Stack
-} from '@mui/material';
+import React from "react";
+import { Box, TextField, Button, Stack } from "@mui/material";
 
-export default function PortfolioStep({ data = { socialLinks: {} }, onUpdate ,errors = {}}) {
+export default function PortfolioStep({
+  data = { socialLinks: {} },
+  onUpdate,
+  errors = {},
+}) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     onUpdate({
       socialLinks: {
         ...data.socialLinks,
-        [name]: value
-      }
+        [name]: value,
+      },
     });
   };
 
@@ -23,18 +22,18 @@ export default function PortfolioStep({ data = { socialLinks: {} }, onUpdate ,er
     onUpdate({
       socialLinks: {
         ...data.socialLinks,
-        additionalLinks: updated
-      }
+        additionalLinks: updated,
+      },
     });
   };
 
   const addLink = () => {
-    const updated = [...(data.socialLinks.additionalLinks || []), ''];
+    const updated = [...(data.socialLinks.additionalLinks || []), ""];
     onUpdate({
       socialLinks: {
         ...data.socialLinks,
-        additionalLinks: updated
-      }
+        additionalLinks: updated,
+      },
     });
   };
 
@@ -44,27 +43,26 @@ export default function PortfolioStep({ data = { socialLinks: {} }, onUpdate ,er
     onUpdate({
       socialLinks: {
         ...data.socialLinks,
-        additionalLinks: updated
-      }
+        additionalLinks: updated,
+      },
     });
   };
 
   return (
     <div className="d-flex justify-content-center w-80 flex-column mx-auto">
-      <h3>Portfolio Links</h3>
       <div className="d-flex flex-column w-75 mx-auto gap-4">
         <TextField
           label="LinkedIn URL"
           name="linkedin"
           variant="outlined"
-          value={data.socialLinks?.linkedin || ''}
+          value={data.socialLinks?.linkedin || ""}
           onChange={handleChange}
         />
         <TextField
           label="Personal Website"
           name="personalPortfolioWebsite"
           variant="outlined"
-          value={data.socialLinks?.personalPortfolioWebsite || ''}
+          value={data.socialLinks?.personalPortfolioWebsite || ""}
           onChange={handleChange}
         />
 

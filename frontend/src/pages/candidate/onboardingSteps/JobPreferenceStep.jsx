@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -13,47 +13,49 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  TextField
-} from '@mui/material';
+  TextField,
+} from "@mui/material";
 
 const predefinedJobTitles = [
   "frontend developer",
   "backend developer",
   "fullstack developer",
   "ux designer",
-  "ui designer"
+  "ui designer",
 ];
 
-export default function JobPreferenceStep({ data, onUpdate,errors = {} }) {
-  const [selectedRole, setSelectedRole] = useState(data.desiredJobTitle?.[0] || '');
+export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
+  const [selectedRole, setSelectedRole] = useState(
+    data.desiredJobTitle?.[0] || ""
+  );
 
   const handleChange = (event, newRole) => {
     if (newRole) {
       setSelectedRole(newRole);
       onUpdate({
         ...data,
-        desiredJobTitle: newRole
+        desiredJobTitle: newRole,
       });
     }
   };
 
   const handleSalaryChange = (e) => {
     const { name, value, checked, type } = e.target;
-    if (name === 'perHour' || name === 'perYear') {
+    if (name === "perHour" || name === "perYear") {
       onUpdate({
         ...data,
         salaryExpectation: {
           ...data.salaryExpectation,
-          [name]: checked
-        }
+          [name]: checked,
+        },
       });
-    } else if (name === 'min') {
+    } else if (name === "min") {
       onUpdate({
         ...data,
         salaryExpectation: {
           ...data.salaryExpectation,
-          min: Number(value)
-        }
+          min: Number(value),
+        },
       });
     } else {
       onUpdate({ ...data, [name]: value });
@@ -62,11 +64,10 @@ export default function JobPreferenceStep({ data, onUpdate,errors = {} }) {
 
   return (
     <div className="d-flex justify-content-center w-80 flex-column mx-auto">
-      <h4>Job Preferences</h4>
       <div className="d-flex flex-column w-75 mx-auto gap-4">
-
-        {/*selectable role */}
-        <Typography variant="subtitle1">Select Your Preferred Job Role</Typography>
+        <Typography variant="subtitle1">
+          Select Your Preferred Job Role
+        </Typography>
         <ToggleButtonGroup
           value={selectedRole}
           exclusive
@@ -77,7 +78,11 @@ export default function JobPreferenceStep({ data, onUpdate,errors = {} }) {
           helperText={errors.selectedRole}
         >
           {predefinedJobTitles.map((role) => (
-            <ToggleButton key={role} value={role} sx={{ textTransform: 'capitalize' }}>
+            <ToggleButton
+              key={role}
+              value={role}
+              sx={{ textTransform: "capitalize" }}
+            >
               {role}
             </ToggleButton>
           ))}
@@ -111,7 +116,7 @@ export default function JobPreferenceStep({ data, onUpdate,errors = {} }) {
             type="number"
             name="min"
             label="Minimum Salary"
-            value={data.salaryExpectation?.min || ''}
+            value={data.salaryExpectation?.min || ""}
             onChange={handleSalaryChange}
             InputProps={{ startAdornment: <span>$</span> }}
           />
