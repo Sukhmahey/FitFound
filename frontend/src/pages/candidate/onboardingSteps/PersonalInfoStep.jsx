@@ -81,6 +81,7 @@ export default function PersonalInfoStep({
           name="currentStatus"
           value={data.currentStatus}
           onChange={handleChange}
+          placeholder="Student,Full-time"
           fullWidth
         />
         <TextField
