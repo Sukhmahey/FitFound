@@ -137,6 +137,17 @@ export default function MyProfile() {
       if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
     });
   }
+  if (activeTab === "Education") {
+    formData.education.forEach((edu, i) => {
+      if (!edu.instituteName?.trim())
+        errors[`instituteName_${i}`] = "Institute name is required";
+      if (!edu.credentials?.trim())
+        errors[`credentials_${i}`] = "Credentials are required";
+      if (!edu.startDate)
+        errors[`eduStartDate_${i}`] = "Start date is required";
+      if (!edu.endDate) errors[`eduEndDate_${i}`] = "End date is required";
+    });
+  }
 
     if (activeTab === "Job") {
       const desired = formData.jobPreference?.desiredJobTitle;

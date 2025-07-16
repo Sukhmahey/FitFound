@@ -215,6 +215,17 @@ export default function CandidateOnboarding() {
           errors[`experienceLevel_${i}`] = "Experience Level is required";
       });
     }
+    if (stepIndex === 6) {
+    formData.education.forEach((edu, i) => {
+      if (!edu.instituteName?.trim())
+        errors[`instituteName_${i}`] = "Institute name is required";
+      if (!edu.credentials?.trim())
+        errors[`credentials_${i}`] = "Credentials are required";
+      if (!edu.startDate)
+        errors[`eduStartDate_${i}`] = "Start date is required";
+      if (!edu.endDate) errors[`eduEndDate_${i}`] = "End date is required";
+    });
+  }
     if (stepIndex === 7) {
       const desired = formData.jobPreference.desiredJobTitle;
       const jobType = formData.jobPreference.jobType;
