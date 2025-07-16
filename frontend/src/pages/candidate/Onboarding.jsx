@@ -1,6 +1,6 @@
 // CandidateOnboarding.jsx (Unified file including redesigned ProfileSetupOption)
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { candidateApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -178,6 +178,17 @@ export default function CandidateOnboarding() {
 
   const handleManual = () => setStepIndex(1);
   const handleUpload = () => setStepIndex(14);
+  useEffect(() => {
+  if (userEmail && !formData.personalInfo.email) {
+    setFormData((prev) => ({
+      ...prev,
+      personalInfo: {
+        ...prev.personalInfo,
+        email: userEmail,
+      },
+    }));
+  }
+}, [userEmail]);
 
   const convertMonthFormat = (value) => {
     if (!value || typeof value !== "string") return "";
