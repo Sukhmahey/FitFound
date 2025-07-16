@@ -18,7 +18,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+
+  DialogActions,
 } from "@mui/material";
+
 import CloseIcon from "@mui/icons-material/Close";
 import { employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
@@ -28,12 +31,73 @@ const TabPanel = ({ children, value, index }) => {
   return value === index ? <Box p={2}>{children}</Box> : null;
 };
 
+// const TaskCard = ({ task, getCurrentEmployees, userId }) => {
+//   console.log("tasksks", task);
+//   const verifyRequest = async () => {
+//     await employerApi.verifyTask(task?._id);
+//     getCurrentEmployees(userId);
+//   };
+
+//   return (
+//     <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
+//       <Box
+//         sx={{
+//           display: "flex",
+//           alignItems: "center",
+//           backgroundColor: "#f5f5f5",
+//           borderRadius: 2,
+//           p: 2,
+//         }}
+//       >
+//         <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
+//         <Box>
+//           <Typography variant="body1">
+//             <strong>UserName:</strong>{" "}
+//             {task?.candidateId?.personalInfo?.firstName}
+//           </Typography>
+//         </Box>
+//       </Box>
+
+//       <Box sx={{ mt: 2 }}>
+//         <Typography variant="h6" gutterBottom>
+//           Work Authorization Badge
+//         </Typography>
+//         <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
+//           <Typography>
+//             From {task?.employmentDates?.startDate} To “Current”
+//           </Typography>
+//           <Box sx={{ mt: 2 }}>
+//             <Button onClick={verifyRequest} variant="outlined">
+//               Verify
+//             </Button>
+//           </Box>
+//         </Box>
+//       </Box>
+//     </Card>
+//   );
+// };
+
 const TaskCard = ({ task, getCurrentEmployees, userId }) => {
-  console.log("tasksks", task);
-  const verifyRequest = async () => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  // const verifyRequest = async () => {
+  //   await employerApi.verifyTask(task?._id);
+  //   getCurrentEmployees(userId);
+  // };
+  const handleVerifyClick = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = async () => {
     await employerApi.verifyTask(task?._id);
     getCurrentEmployees(userId);
+    setConfirmOpen(false);
   };
+
+  const handleCancel = () => {
+    setConfirmOpen(false);
+  };
+
+  const personal = task?.candidateId?.personalInfo || {};
 
   return (
     <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
@@ -48,9 +112,15 @@ const TaskCard = ({ task, getCurrentEmployees, userId }) => {
       >
         <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
         <Box>
-          <Typography variant="body1">
-            <strong>UserName:</strong>{" "}
-            {task?.candidateId?.personalInfo?.firstName}
+          <Typography variant="subtitle1">
+            <strong>Name:</strong> {personal.firstName} {personal.lastName}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Email:</strong> {personal.email || "N/A"}
+          </Typography>
+
+          <Typography variant="body2">
+            <strong>Role:</strong> {task?.position || "N/A"}
           </Typography>
         </Box>
       </Box>
@@ -61,19 +131,35 @@ const TaskCard = ({ task, getCurrentEmployees, userId }) => {
         </Typography>
         <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
           <Typography>
-            From {task?.employmentDates?.startDate} To “Current”
+            From {task?.employmentDates?.startDate} To{" "}
+            {task?.employmentDates?.endDate || "Current"}
           </Typography>
           <Box sx={{ mt: 2 }}>
-            <Button onClick={verifyRequest} variant="outlined">
+            <Button onClick={handleVerifyClick} variant="outlined">
               Verify
             </Button>
           </Box>
         </Box>
       </Box>
+      <Dialog open={confirmOpen} onClose={handleCancel}>
+        <DialogTitle>Confirm Verification</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to verify this candidate?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} variant="contained" color="primary">
+            Yes, Verify
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 };
-
 const Connections = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [search, setSearch] = useState("");
@@ -291,7 +377,7 @@ const Connections = () => {
               </Typography>
               <Typography variant="body2" gutterBottom>
                 <strong>Status:</strong>{" "}
-                {getPersonalInfo(selectedCandidate).currentStatus || "N/A"}
+                {getPersonalInfo(selectedCandidate).currentStatus || "Hired"}
               </Typography>
             </Box>
           )}
