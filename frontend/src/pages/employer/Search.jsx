@@ -5,6 +5,8 @@ import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
 import { useAuth } from "../../contexts/AuthContext";
 import { CircularProgress, Backdrop, Button } from "@mui/material";
 import { scoreCandidates } from "./GenerateCandidateScore";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 import {
   InputLabel,
@@ -29,9 +31,6 @@ const predefinedJobTitles = [
   "ui designer",
 ];
 
-// Removed dummyObj as it's unused
-// const dummyObj = { /* ... your dummy object ... */ };
-
 const Search = () => {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState({
@@ -45,6 +44,9 @@ const Search = () => {
     skills: "",
     locationType: "", // This will hold the single selected work environment type
   });
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
+  const [snackSeverity, setSnackSeverity] = useState("error");
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
 
@@ -52,7 +54,7 @@ const Search = () => {
 
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "Candidate Search" });
-  }, [setAppGeneralInfo]); // Added setAppGeneralInfo to dependency array
+  }, [setAppGeneralInfo]);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -60,13 +62,30 @@ const Search = () => {
 
   const userId = user.profileId;
 
-  // Modified onChangeInputFiels to correctly handle locationType
+  const validateSearchForm = () => {
+    const errors = [];
+
+    if (!searchQuery.title?.trim()) errors.push("Job title is required.");
+    if (!searchQuery.location?.trim()) errors.push("Location is required.");
+    if (!searchQuery.jobDescription?.trim())
+      errors.push("Job description is required.");
+    if (!searchQuery.jobType?.trim()) errors.push("Job type is required.");
+    if (!searchQuery.locationType?.trim())
+      errors.push("Work environment (On Site, Remote, Hybrid) is required.");
+    if (!searchQuery.salaryFrom || !searchQuery.salaryTo) {
+      errors.push("Salary range (From and To) is required.");
+    } else if (Number(searchQuery.salaryFrom) >= Number(searchQuery.salaryTo)) {
+      errors.push("Salary 'From' must be less than 'To'.");
+    }
+    if (!searchQuery.skills?.trim()) errors.push("At least one skill is required.");
+
+    return errors;
+  };
+
   const onChangeInputFiels = (value, type, isChecked = true) => {
     setSearchQuery((data) => {
       if (type === "locationType") {
-        // If a checkbox is being checked, set it as the value.
-        // If it's being unchecked, clear locationType.
-        // This assumes only one work environment can be selected at a time.
+
         return { ...data, [type]: isChecked ? value : "" };
       }
       return { ...data, [type]: value };
@@ -90,8 +109,17 @@ const Search = () => {
   const handleSubmit = async () => {
     setLoading(true);
 
-    // Ensure workEnvironment matches backend enum values
-    const finalWorkEnvironment = searchQuery.locationType || "remote"; // Defaults to "remote" if nothing is selected
+    const errors = validateSearchForm();
+    if (errors.length > 0) {
+      setSnackMessage(errors.join(" ")); // Join errors with a space for better readability
+      setSnackSeverity("error");
+      setSnackOpen(true);
+      setLoading(false);
+      return;
+    }
+
+    // Ensure workEnvironment matches backend enum values (on-site, remote, hybrid)
+    const finalWorkEnvironment = searchQuery.locationType; // locationType is now guaranteed to be set by validation
 
     const jobToSave = {
       employerId: userId,
@@ -106,13 +134,13 @@ const Search = () => {
       salaryRange: {
         min: searchQuery.salaryFrom ? Number(searchQuery.salaryFrom) : 0,
         max: searchQuery.salaryTo ? Number(searchQuery.salaryTo) : 0,
-        perHour: true,
+        perHour: true, // Assuming perHour is always true for simplicity based on previous context
         perYear: false,
       },
       location: searchQuery.location,
       jobType: searchQuery.jobType,
-      workEnvironment: finalWorkEnvironment, // This will now correctly be "on-site", "remote", or "hybrid"
-      requiredWorkAuthorization: ["PR Citizen", "Work Permit"],
+      workEnvironment: finalWorkEnvironment,
+      requiredWorkAuthorization: ["PR Citizen", "Work Permit"], // Hardcoded as per previous context
     };
 
     console.log("Job data being prepared to save:", jobToSave);
@@ -147,9 +175,10 @@ const Search = () => {
       );
       console.log("All Scored Candidates:", scoredCandidates);
 
+      // FIX: Use c.matchingScore as per GenerateCandidateScore.js output
       const relevantScoredCandidates = scoredCandidates
-        .filter((c) => c.score > 0)
-        .sort((a, b) => b.score - a.score);
+        .filter((c) => c.matchingScore > 0) // Changed c.score to c.matchingScore
+        .sort((a, b) => b.matchingScore - a.matchingScore); // Changed b.score - a.score to b.matchingScore - a.matchingScore
       console.log(
         "Relevant Scored Candidates (filtered & sorted):",
         relevantScoredCandidates
@@ -165,14 +194,20 @@ const Search = () => {
       });
       console.log("Top candidates saved successfully.");
 
-      await employerApi.saveCandidateAppearance({
-        employerId: userId,
-        skills: searchQuery.skills
-          ? searchQuery.skills.split(",").map((s) => s.trim())
-          : [],
-        candidateIds: arrayOfCandidateIds,
-      });
-      console.log("Candidate appearance logged successfully.");
+      // Only call saveCandidateAppearance if there are candidates to log
+      if (arrayOfCandidateIds.length > 0) {
+        await employerApi.saveCandidateAppearance({
+          employerId: userId,
+          skills: searchQuery.skills
+            ? searchQuery.skills.split(",").map((s) => s.trim())
+            : [],
+          candidateIds: arrayOfCandidateIds,
+        });
+        console.log("Candidate appearance logged successfully.");
+      } else {
+        console.log("No relevant candidates found, skipping logging candidate appearance.");
+      }
+
 
       dispatch(setSearchForm(jobToSave));
       dispatch(setCandidates(relevantScoredCandidates));
@@ -181,9 +216,15 @@ const Search = () => {
     } catch (error) {
       console.error("Error during candidate search process:", error);
       if (error.response && error.response.data) {
-        // Log the full backend error response for more details
         console.error("Backend Error Details:", error.response.data);
+        setSnackMessage(
+          `Error: ${error.response.data.message || "Something went wrong."}`
+        );
+      } else {
+        setSnackMessage(`Error: ${error.message || "Network error."}`);
       }
+      setSnackSeverity("error");
+      setSnackOpen(true);
     } finally {
       setLoading(false);
     }
@@ -191,6 +232,12 @@ const Search = () => {
 
   return (
     <>
+      <Snackbar open={snackOpen} autoHideDuration={5000} onClose={() => setSnackOpen(false)}>
+        <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} elevation={6} variant="filled">
+          {snackMessage}
+        </MuiAlert>
+      </Snackbar>
+
       <Backdrop
         sx={{
           color: "#fff",
@@ -251,11 +298,10 @@ const Search = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        // Check against the correct value now
                         checked={searchQuery?.locationType === "on-site"}
                         onChange={(e) =>
                           onChangeInputFiels(
-                            "on-site", // Changed from "onsite" to "on-site"
+                            "on-site",
                             "locationType",
                             e.target.checked
                           )
@@ -267,11 +313,10 @@ const Search = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        // Check against the correct value now
                         checked={searchQuery?.locationType === "remote"}
                         onChange={(e) =>
                           onChangeInputFiels(
-                            "remote", // Changed from "remotee" to "remote"
+                            "remote",
                             "locationType",
                             e.target.checked
                           )
@@ -283,7 +328,6 @@ const Search = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        // Check against the correct value now
                         checked={searchQuery?.locationType === "hybrid"}
                         onChange={(e) =>
                           onChangeInputFiels(
