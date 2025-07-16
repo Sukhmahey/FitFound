@@ -119,13 +119,13 @@ const Search = () => {
     };
 
     try {
-      const employerDD = await employerApi.saveJob(dummyObj);
       const candidateList = await employerApi
         .getAllCandidates()
         .then(async (data) => {
+          const employerDD = await employerApi.saveJob(paramObj);
           const scoredC = await scoreCandidates(
-            data.data.slice(0, 2),
-            dummyObj.jobDescription
+            data.data.slice(0, 5),
+            paramObj.jobDescription
           );
 
           const arrayOfCandidateIds = [];

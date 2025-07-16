@@ -1,8 +1,14 @@
-const OPENROUTER_API_KEY =
-  "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";
-const SITE_URL = "http://localhost:3000"; // Change to your actual site domain
-const APP_NAME = "FitFound";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const API_KEY = "AIzaSyCTGrxYxiZVDtbLMpBoE_S36Ca15pBF6vI"; // Your Gemini API key
+
+// Initialize Gemini Model
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
+const model = genAI
+  ? genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+  : null;
+
+// Helper to format skills
 const formatSkills = (skills) => {
   if (!skills || skills.length === 0) return "N/A";
   return skills
@@ -10,16 +16,17 @@ const formatSkills = (skills) => {
     .join("; ");
 };
 
+// Helper to format work history
 const formatWorkHistory = (history) => {
   if (!history || history.length === 0) return "N/A";
   return history
     .map((entry) => {
       const achievements =
-        entry.achievements?.length > 0
+        entry.achievements && entry.achievements.length > 0
           ? `Achievements: ${entry.achievements.join(", ")}.`
           : "";
       const technologies =
-        entry.technologiesUsed?.length > 0
+        entry.technologiesUsed && entry.technologiesUsed.length > 0
           ? `Technologies: ${entry.technologiesUsed.join(", ")}.`
           : "";
       return `${entry.role} at ${entry.companyName} (${entry.startDate} - ${entry.endDate}). ${achievements} ${technologies}`.trim();
@@ -27,6 +34,7 @@ const formatWorkHistory = (history) => {
     .join("\n- ");
 };
 
+// Helper to format education
 const formatEducation = (education) => {
   if (!education || education.length === 0) return "N/A";
   return education
@@ -34,139 +42,141 @@ const formatEducation = (education) => {
     .join("; ");
 };
 
-const buildPrompt = (candidate, jobDescription) => `
-You are an expert HR recruiter. Evaluate the candidate based on the job description and give a compatibility score (0-100) and a short reasoning.
+// Main scoring function
+export const scoreCandidates = async (candidateArray, jobDescription) => {
+  if (!model) {
+    console.error("Gemini API model not initialized. Check API key.");
+    return candidateArray.map((candidate) => ({
+      ...candidate,
+      matchingScore: null,
+      reasoning: "Gemini API not initialized due to missing API key.",
+    }));
+  }
+
+  if (!jobDescription || jobDescription.trim() === "") {
+    console.error("Job description is empty.");
+    return candidateArray.map((candidate) => ({
+      ...candidate,
+      matchingScore: null,
+      reasoning: "Job description is empty.",
+    }));
+  }
+
+  if (!candidateArray || candidateArray.length === 0) {
+    console.warn("No candidates provided for scoring.");
+    return [];
+  }
+
+  const scoredCandidates = [];
+
+  for (const candidate of candidateArray) {
+    const prompt = `
+You are an expert HR recruiter. Your task is to evaluate a candidate's suitability for a job based on the provided job description and their detailed profile.
 
 **Job Description:**
 ${jobDescription}
 
-**Candidate Profile:**
-Name: ${candidate.name || "N/A"}
-Bio: ${candidate.bio || "N/A"}
-Main Role: ${candidate.mainRole || "N/A"}
-Experience Level: ${candidate.experienceLevel || "N/A"} (${
-  candidate.experienceYears || 0
-} years)
-Preferred Roles: ${(candidate.preferredRoles || []).join(", ") || "N/A"}
-Job Type Preference: ${candidate.jobType || "N/A"}
-Availability: ${candidate.availability?.hours || "N/A"} on ${
-  (candidate.availability?.days || []).join(", ") || "N/A"
-}
-Work Location Preference: ${(candidate.ableToWork || []).join(", ") || "N/A"}
-Salary Expectation: ${
-  candidate.salaryExpectation?.min
-    ? `${candidate.salaryExpectation.min} ${
-        candidate.salaryExpectation.perHour
-          ? "per hour"
-          : candidate.salaryExpectation.perYear
-          ? "per year"
-          : ""
-      }`
-    : "N/A"
-}
-Skills: ${formatSkills(candidate.skills)}
-Work History:
-- ${formatWorkHistory(candidate.workHistory)}
-Education: ${formatEducation(candidate.education)}
-Open To Work: ${candidate.isOpenToWork ? "Yes" : "No"}
-Visibility Count: ${candidate.visibilityCount || "N/A"}
-Verified Badge: ${candidate.verifiedBadge ? "Yes" : "No"}
-Portfolio Links: ${
-  candidate.portfolio?.socialLinks?.additionalLinks?.join(", ") || "N/A"
-}
+---
 
-Respond in the following format:
-Score: [0-100]
-Reasoning: [Short explanation]
+**Candidate Profile (Full Details):**
+**Name:** ${candidate.name || "N/A"}
+**Bio:** ${candidate.bio || "N/A"}
+**Main Role:** ${candidate.mainRole || "N/A"}
+**Experience Level:** ${candidate.experienceLevel || "N/A"} (${
+      candidate.experienceYears || 0
+    } years)
+**Preferred Roles:** ${
+      (candidate.preferredRoles && candidate.preferredRoles.join(", ")) || "N/A"
+    }
+**Job Type Preference:** ${candidate.jobType || "N/A"}
+**Availability:** ${
+      candidate.availability
+        ? `${candidate.availability.hours || "N/A"} on ${
+            candidate.availability.days?.join(", ") || "N/A"
+          }`
+        : "N/A"
+    }
+**Work Location Preference:** ${
+      (candidate.ableToWork || []).join(", ") || "N/A"
+    }
+**Salary Expectation:** ${
+      candidate.salaryExpectation &&
+      candidate.salaryExpectation.min !== undefined
+        ? `${candidate.salaryExpectation.min} ${
+            candidate.salaryExpectation.perHour
+              ? "per hour"
+              : candidate.salaryExpectation.perYear
+              ? "per year"
+              : ""
+          }`
+        : "N/A"
+    }
+**Skills:** ${formatSkills(candidate.skills)}
+**Work History:**
+- ${formatWorkHistory(candidate.workHistory)}
+**Education:** ${formatEducation(candidate.education)}
+**Is Open To Work:** ${
+      candidate.isOpenToWork !== undefined
+        ? candidate.isOpenToWork
+          ? "Yes"
+          : "No"
+        : "N/A"
+    }
+**Visibility Count:** ${candidate.visibilityCount ?? "N/A"}
+**Verified Badge:** ${candidate.verifiedBadge ? "Yes" : "No"}
+**Portfolio Links:** ${
+      candidate.portfolio?.socialLinks?.additionalLinks?.join(", ") || "N/A"
+    }
+
+---
+
+Based on the above candidate profile and job description, provide a comprehensive compatibility score as a percentage from 0 to 100, where 100% is a perfect match. Also, provide a brief, concise explanation (1-2 sentences) for the score, highlighting the main reasons for the match or mismatch.
+
+**Output Format:**
+Score: [Your Score Here]
+Reasoning: [Your Reasoning Here]
 `;
 
-const callOpenRouter = async (prompt, model) => {
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": SITE_URL,
-        "X-Title": APP_NAME,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw { status: response.status, ...errorData };
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
-};
-
-export const scoreCandidates = async (candidateArray, jobDescription) => {
-  if (!OPENROUTER_API_KEY) {
-    console.error("Missing API key.");
-    return candidateArray.map((c) => ({
-      ...c,
-      matchingScore: null,
-      reasoning: "Missing OpenRouter API key.",
-    }));
-  }
-
-  if (!jobDescription) {
-    return candidateArray.map((c) => ({
-      ...c,
-      matchingScore: null,
-      reasoning: "Job description is missing.",
-    }));
-  }
-
-  const scoredCandidates = [];
-  const primaryModel = "meta-llama/llama-4-maverick:free";
-  const fallbackModel = "mistralai/mistral-7b-instruct";
-
-  for (const candidate of candidateArray) {
-    const prompt = buildPrompt(candidate, jobDescription);
-
     try {
-      let responseText;
+      const result = await model.generateContent(prompt);
+      const textOutput = result.response.text();
 
-      try {
-        responseText = await callOpenRouter(prompt, primaryModel);
-      } catch (error) {
-        if (error.status === 503) {
-          console.warn("Primary model unavailable. Using fallback...");
-          responseText = await callOpenRouter(prompt, fallbackModel);
-        } else {
-          throw error;
-        }
+      let score = null;
+      let reasoning = "Could not extract reasoning.";
+
+      const scoreMatch = textOutput.match(/Score:\s*(\d+)/i);
+      if (scoreMatch && scoreMatch[1]) {
+        score = parseInt(scoreMatch[1], 10);
       }
 
-      const scoreMatch = responseText.match(/Score:\s*(\d+)/i);
-      const reasoningMatch = responseText.match(/Reasoning:\s*(.*)/i);
+      const reasoningMatch = textOutput.match(/Reasoning:\s*(.*)/i);
+      if (reasoningMatch && reasoningMatch[1]) {
+        reasoning = reasoningMatch[1].trim();
+      }
 
       scoredCandidates.push({
         ...candidate,
-        matchingScore: scoreMatch ? parseInt(scoreMatch[1]) : null,
-        reasoning: reasoningMatch
-          ? reasoningMatch[1].trim()
-          : "No reasoning found.",
+        matchingScore: score,
+        reasoning: reasoning,
       });
-    } catch (err) {
-      console.error("Error scoring candidate:", candidate.name, err);
+    } catch (error) {
+      console.error(
+        `Error calling Gemini API for candidate ${
+          candidate.name || "unknown"
+        }:`,
+        error
+      );
       scoredCandidates.push({
         ...candidate,
         matchingScore: null,
-        reasoning: "Error occurred: " + (err.message || "Unknown error"),
+        reasoning: `Error processing candidate: ${error.message}`,
       });
     }
   }
 
-  return scoredCandidates.sort(
+  scoredCandidates.sort(
     (a, b) => (b.matchingScore || 0) - (a.matchingScore || 0)
   );
+
+  return scoredCandidates;
 };
