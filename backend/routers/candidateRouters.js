@@ -9,6 +9,7 @@ router.get("/candidate/:candidateId", candidateController.getCandidateById);
 router.get("/", candidateController.getAllCandidateProfiles);
 router.patch("/:userId", candidateController.updateCandidateProfile);
 router.delete("/:userId", candidateController.deleteCandidateProfile);
+router.get("/search", candidateController.getAllCandidateProfiles);
 
 // Nested Object Update Endpoints
 router.patch("/:userId/personal-info", candidateController.updatePersonalInfo);

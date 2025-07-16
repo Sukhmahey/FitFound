@@ -21,31 +21,16 @@ import {
 import { employerApi } from "../../services/api";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
 
-const dummyObj = {
-  employerId: "68741350ffbc20e8c92aa48b",
-  jobTitle: "Full Stack Developer",
-  jobDescription:
-    "About the Role:\nWe are looking for a skilled and passionate Frontend Developer to join our dynamic team. You will be responsible for creating intuitive, visually appealing, and responsive web interfaces. You will work closely with designers, backend developers, and product managers to bring our user-facing products to life.\n\nKey Responsibilities:\nTranslate UI/UX designs and wireframes into responsive, high-quality code.\n\nDevelop and maintain reusable components and frontend libraries.\n\nOptimize applications for maximum speed and scalability.\n\nEnsure cross-browser compatibility and responsiveness across devices.\n\nCollaborate with backend developers and stakeholders to integrate APIs.\n\nParticipate in code reviews and contribute to improving development processes.\n\nStay up to date with emerging frontend technologies and trends.\n\nRequired Skills & Qualifications:\nProficiency in HTML5, CSS3, JavaScript, and modern frameworks such as React, Vue.js, or Angular.\n\nExperience with RESTful APIs and asynchronous request handling.\n\nFamiliarity with version control tools like Git.\n\nKnowledge of responsive design, accessibility standards, and performance best practices.\n\nExperience with build tools like Webpack, Vite, or Parcel.\n\nBasic understanding of SEO principles.\n\nNice to Have:\nExperience with TypeScript.\n\nFamiliarity with Tailwind CSS, SASS, or Styled Components.\n\nUnderstanding of backend technologies (Node.js, Express) is a plus.\n\nExposure to design tools such as Figma, Sketch, or Adobe XD.\n\nKnowledge of testing frameworks (Jest, React Testing Library, Cypress).\n\nWhat We Offer:\nCompetitive salary and benefits.\n\nFlexible working hours and remote-friendly environment.\n\nOpportunities for career growth and professional development.\n\nA collaborative and inclusive team culture.",
-  requiredSkills: [
-    {
-      skill: "Html",
-    },
-    {
-      skill: "CSS",
-    },
-  ],
-  mustHaveCriteria: "NA",
-  salaryRange: {
-    min: "20",
-    max: "70",
-    perHour: true,
-    perYear: false,
-  },
-  location: "Vancouver",
-  jobType: "internship",
-  workEnvironment: "remote",
-  requiredWorkAuthorization: ["PR Citizen", "Work Permit"],
-};
+const predefinedJobTitles = [
+  "frontend developer",
+  "backend developer",
+  "fullstack developer",
+  "ux designer",
+  "ui designer",
+];
+
+// Removed dummyObj as it's unused
+// const dummyObj = { /* ... your dummy object ... */ };
 
 const Search = () => {
   const [loading, setLoading] = useState(false);
@@ -55,10 +40,10 @@ const Search = () => {
     jobDescription: "",
     jobType: "",
     salaryFrom: "",
-    salaryTo: "",
+    salaryTo: "", // Keep this for the UI and the jobToSave object
     workStatus: "",
     skills: "",
-    locationType: "",
+    locationType: "", // This will hold the single selected work environment type
   });
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
@@ -67,7 +52,7 @@ const Search = () => {
 
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "Candidate Search" });
-  }, []);
+  }, [setAppGeneralInfo]); // Added setAppGeneralInfo to dependency array
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -75,8 +60,15 @@ const Search = () => {
 
   const userId = user.profileId;
 
-  const onChangeInputFiels = (value, type) => {
+  // Modified onChangeInputFiels to correctly handle locationType
+  const onChangeInputFiels = (value, type, isChecked = true) => {
     setSearchQuery((data) => {
+      if (type === "locationType") {
+        // If a checkbox is being checked, set it as the value.
+        // If it's being unchecked, clear locationType.
+        // This assumes only one work environment can be selected at a time.
+        return { ...data, [type]: isChecked ? value : "" };
+      }
       return { ...data, [type]: value };
     });
   };
@@ -91,68 +83,108 @@ const Search = () => {
       salaryTo: "",
       workStatus: "",
       skills: "",
+      locationType: "",
     });
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    const paramObj = {
+
+    // Ensure workEnvironment matches backend enum values
+    const finalWorkEnvironment = searchQuery.locationType || "remote"; // Defaults to "remote" if nothing is selected
+
+    const jobToSave = {
       employerId: userId,
       jobTitle: searchQuery.title,
       jobDescription: searchQuery.jobDescription,
-      requiredSkills: [
-        ...searchQuery.skills.split(",").map((skill) => ({
-          skill: skill.trim().charAt(0).toUpperCase() + skill.trim().slice(1),
-        })),
-      ],
+      requiredSkills: searchQuery.skills
+        ? searchQuery.skills.split(",").map((skill) => ({
+            skill: skill.trim().charAt(0).toUpperCase() + skill.trim().slice(1),
+          }))
+        : [],
       mustHaveCriteria: "NA",
       salaryRange: {
-        min: searchQuery.salaryFrom,
-        max: searchQuery.salaryTo,
+        min: searchQuery.salaryFrom ? Number(searchQuery.salaryFrom) : 0,
+        max: searchQuery.salaryTo ? Number(searchQuery.salaryTo) : 0,
         perHour: true,
         perYear: false,
       },
       location: searchQuery.location,
       jobType: searchQuery.jobType,
-      workEnvironment: "remote",
+      workEnvironment: finalWorkEnvironment, // This will now correctly be "on-site", "remote", or "hybrid"
       requiredWorkAuthorization: ["PR Citizen", "Work Permit"],
     };
 
+    console.log("Job data being prepared to save:", jobToSave);
+
     try {
-      const candidateList = await employerApi
-        .getAllCandidates()
-        .then(async (data) => {
-          const employerDD = await employerApi.saveJob(paramObj);
-          const scoredC = await scoreCandidates(
-            data.data.slice(0, 5),
-            paramObj.jobDescription
-          );
+      const savedJobResponse = await employerApi.saveJob(jobToSave);
+      const jobId = savedJobResponse?.data._id;
+      console.log("Response after saving job:", savedJobResponse.data);
 
-          const arrayOfCandidateIds = [];
+      const searchParams = {
+        title: searchQuery.title,
+        skills: searchQuery.skills,
+        jobType: searchQuery.jobType,
+        salaryFrom: searchQuery.salaryFrom,
+        salaryTo: searchQuery.salaryTo,
+      };
 
-          await employerApi
-            .saveTopCandidates(employerDD?.data._id, {
-              topMatchedCandidates: (scoredC || []).map((element) => {
-                arrayOfCandidateIds.push(element._id);
-                return element._id;
-              }),
-            })
-            .then(async () => {
-              await employerApi.saveCandidateAppearance({
-                employerId: userId,
-                skills: ["Html", "CSS", "Javascript"],
-                candidateIds: arrayOfCandidateIds,
-              });
-            });
+      console.log(
+        "Search parameters for employerApi.getSearchedCandidates:",
+        searchParams
+      );
 
-          dispatch(setSearchForm(paramObj));
-          dispatch(setCandidates(scoredC));
-          navigate(`/employer/searchResults?jobId=${employerDD?.data._id}`);
-        });
+      const searchCandidatesResponse = await employerApi.getSearchedCandidates(
+        searchParams
+      );
+      const candidates = searchCandidatesResponse.data;
+      console.log("Candidates received from search API:", candidates);
 
-      setLoading(false);
-    } catch (c) {
-      console.log("here");
+      const scoredCandidates = await scoreCandidates(
+        candidates,
+        searchQuery.jobDescription
+      );
+      console.log("All Scored Candidates:", scoredCandidates);
+
+      const relevantScoredCandidates = scoredCandidates
+        .filter((c) => c.score > 0)
+        .sort((a, b) => b.score - a.score);
+      console.log(
+        "Relevant Scored Candidates (filtered & sorted):",
+        relevantScoredCandidates
+      );
+
+      const arrayOfCandidateIds = relevantScoredCandidates.map(
+        (element) => element._id
+      );
+      console.log("Array of Candidate IDs for saving:", arrayOfCandidateIds);
+
+      await employerApi.saveTopCandidates(jobId, {
+        topMatchedCandidates: arrayOfCandidateIds,
+      });
+      console.log("Top candidates saved successfully.");
+
+      await employerApi.saveCandidateAppearance({
+        employerId: userId,
+        skills: searchQuery.skills
+          ? searchQuery.skills.split(",").map((s) => s.trim())
+          : [],
+        candidateIds: arrayOfCandidateIds,
+      });
+      console.log("Candidate appearance logged successfully.");
+
+      dispatch(setSearchForm(jobToSave));
+      dispatch(setCandidates(relevantScoredCandidates));
+
+      navigate(`/employer/searchResults?jobId=${jobId}`);
+    } catch (error) {
+      console.error("Error during candidate search process:", error);
+      if (error.response && error.response.data) {
+        // Log the full backend error response for more details
+        console.error("Backend Error Details:", error.response.data);
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -177,16 +209,24 @@ const Search = () => {
         <div className="row">
           <div className="m-0 p-0">
             <div className="mb-3">
-              <TextField
-                className="w-100"
-                id="outlined-basic"
-                label="Title"
-                variant="outlined"
-                value={searchQuery?.title}
-                onChange={(e) => {
-                  onChangeInputFiels(e.target.value, "title");
-                }}
-              />
+              <FormControl fullWidth>
+                <InputLabel id="job-title-select-label">Title</InputLabel>
+                <Select
+                  labelId="job-title-select-label"
+                  id="job-title-select"
+                  value={searchQuery?.title}
+                  label="Title"
+                  onChange={(e) => {
+                    onChangeInputFiels(e.target.value, "title");
+                  }}
+                >
+                  {predefinedJobTitles.map((title) => (
+                    <MenuItem key={title} value={title}>
+                      {title.charAt(0).toUpperCase() + title.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </div>
             <div className="row">
               <div className="mb-3 col-md-6">
@@ -211,12 +251,11 @@ const Search = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={
-                          searchQuery?.locationType?.includes("onsite") || false
-                        }
+                        // Check against the correct value now
+                        checked={searchQuery?.locationType === "on-site"}
                         onChange={(e) =>
                           onChangeInputFiels(
-                            "onsite",
+                            "on-site", // Changed from "onsite" to "on-site"
                             "locationType",
                             e.target.checked
                           )
@@ -228,13 +267,11 @@ const Search = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={
-                          searchQuery?.locationType?.includes("remotee") ||
-                          false
-                        }
+                        // Check against the correct value now
+                        checked={searchQuery?.locationType === "remote"}
                         onChange={(e) =>
                           onChangeInputFiels(
-                            "remotee",
+                            "remote", // Changed from "remotee" to "remote"
                             "locationType",
                             e.target.checked
                           )
@@ -246,9 +283,8 @@ const Search = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={
-                          searchQuery?.locationType?.includes("hybrid") || false
-                        }
+                        // Check against the correct value now
+                        checked={searchQuery?.locationType === "hybrid"}
                         onChange={(e) =>
                           onChangeInputFiels(
                             "hybrid",

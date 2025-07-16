@@ -156,7 +156,7 @@ Reasoning: [Your Reasoning Here]
 
       scoredCandidates.push({
         ...candidate,
-        matchingScore: score,
+        score: score,
         reasoning: reasoning,
       });
     } catch (error) {

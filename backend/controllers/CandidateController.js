@@ -93,7 +93,7 @@ exports.getCandidateByUserId = async (req, res) => {
 
     console.log("[DEBUG] Calculated Profile Score:", profileScore);
     candidate.profileScore = profileScore;
-    
+
     console.log(
       "[DEBUG] Candidate object BEFORE sending response (should contain profileScore):",
       candidate
@@ -112,19 +112,35 @@ exports.getAllCandidateProfiles = async (req, res) => {
     location,
     salaryFrom,
     salaryTo,
-    jobDescriptionKeywords,
+    // jobDescriptionKeywords, // Removed as it's not passed from frontend
     workStatus,
     skills,
   } = req.query;
 
   let filter = {};
 
+  // --- Start Debugging Logs ---
+  console.log("------------------------------------------");
+  console.log("Received search query parameters:");
+  console.log("  title:", title);
+  console.log("  jobType:", jobType);
+  console.log("  location:", location);
+  console.log("  salaryFrom:", salaryFrom, "(Type:", typeof salaryFrom, ")");
+  console.log("  salaryTo:", salaryTo, "(Type:", typeof salaryTo, ")");
+  // console.log("  jobDescriptionKeywords:", jobDescriptionKeywords); // Removed from log
+  console.log("  workStatus:", workStatus);
+  console.log("  skills:", skills);
+  console.log("------------------------------------------");
+  // --- End Debugging Logs ---
+
   if (title) {
-    filter["jobPreference.desiredJobTitle"] = { $regex: title, $options: "i" };
+    // Improved: Using $in with RegExp for array fields, though original $regex also works.
+    filter["jobPreference.desiredJobTitle"] = { $in: [new RegExp(title, "i")] };
   }
 
   if (jobType) {
-    filter["jobPreference.jobType"] = jobType;
+    // Recommended change: Make jobType filter case-insensitive
+    filter["jobPreference.jobType"] = { $regex: jobType, $options: "i" };
   }
 
   if (location) {
@@ -141,9 +157,11 @@ exports.getAllCandidateProfiles = async (req, res) => {
     }
   }
 
-  if (jobDescriptionKeywords) {
-    filter["basicInfo.bio"] = { $regex: jobDescriptionKeywords, $options: "i" };
-  }
+  // --- Removed this block as per your request ---
+  // if (jobDescriptionKeywords) {
+  //   filter["basicInfo.bio"] = { $regex: jobDescriptionKeywords, $options: "i" };
+  // }
+  // ---------------------------------------------
 
   if (workStatus) {
     const searchWorkStatuses = Array.isArray(workStatus)
@@ -161,8 +179,24 @@ exports.getAllCandidateProfiles = async (req, res) => {
     };
   }
 
+  // --- Start Debugging Logs ---
+  console.log("------------------------------------------");
+  console.log("Constructed MongoDB Filter Object:");
+  console.log(JSON.stringify(filter, null, 2)); // Pretty print the filter
+  console.log("------------------------------------------");
+  // --- End Debugging Logs ---
+
   try {
     const candidateProfiles = await Candidate.find(filter).lean();
+
+    // --- Start Debugging Logs ---
+    console.log("------------------------------------------");
+    console.log(
+      "Number of candidates found after DB query:",
+      candidateProfiles.length
+    );
+    console.log("------------------------------------------");
+    // --- End Debugging Logs ---
 
     const candidatesWithScores = candidateProfiles.map((candidate) => {
       const desiredRoleForScoring =
@@ -824,9 +858,6 @@ exports.markVerified = async (req, res) => {
     handleError(res, error, "Failed to mark profile as verified", 500);
   }
 };
-
-
-
 
 exports.getDashboardMainRoleCounts = async (req, res) => {
   try {
