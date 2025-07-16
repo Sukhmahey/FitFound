@@ -5,6 +5,9 @@ import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
 import { useAuth } from "../../contexts/AuthContext";
 import { CircularProgress, Backdrop, Button } from "@mui/material";
 import { scoreCandidates } from "./GenerateCandidateScore";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
 
 import {
   InputLabel,
@@ -60,6 +63,10 @@ const Search = () => {
     skills: "",
     locationType: "",
   });
+  const [snackOpen, setSnackOpen] = useState(false);
+const [snackMessage, setSnackMessage] = useState("");
+const [snackSeverity, setSnackSeverity] = useState("error");
+
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
 
@@ -74,6 +81,23 @@ const Search = () => {
   const { user } = useAuth();
 
   const userId = user.profileId;
+
+  const validateSearchForm = () => {
+  const errors = [];
+
+  if (!searchQuery.title?.trim()) errors.push("Job title is required");
+  if (!searchQuery.location?.trim()) errors.push("Location is required");
+  if (!searchQuery.jobDescription?.trim()) errors.push("Job description is required");
+  if (!searchQuery.jobType?.trim()) errors.push("Job type is required");
+  if (!searchQuery.locationType?.trim()) errors.push("Location type is required");
+  if (!searchQuery.salaryFrom || !searchQuery.salaryTo) {
+    errors.push("Salary range (From and To) is required");
+  }
+  if (!searchQuery.skills?.trim()) errors.push("At least one skill is required");
+
+  return errors;
+};
+
 
   const onChangeInputFiels = (value, type) => {
     setSearchQuery((data) => {
@@ -96,6 +120,15 @@ const Search = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
+    const errors = validateSearchForm();
+if (errors.length > 0) {
+  setSnackMessage(errors.join(" , "));
+  setSnackSeverity("error");
+  setSnackOpen(true);
+  setLoading(false);
+  return;
+}
+
     const paramObj = {
       employerId: userId,
       jobTitle: searchQuery.title,
@@ -159,6 +192,12 @@ const Search = () => {
 
   return (
     <>
+    <Snackbar open={snackOpen} autoHideDuration={5000} onClose={() => setSnackOpen(false)}>
+  <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} elevation={6} variant="filled">
+    {snackMessage}
+  </MuiAlert>
+</Snackbar>
+
       <Backdrop
         sx={{
           color: "#fff",
