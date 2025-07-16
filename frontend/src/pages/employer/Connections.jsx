@@ -111,6 +111,7 @@ const Connections = () => {
 
   const getCurrentEmployees = async (userId) => {
     const employeeData = await employerApi.fetchCurrentEmployees(userId);
+    console.log("employeeData", employeeData?.data);
     setCurrentEmployee(employeeData?.data);
     const accepted = await employerApi.fetchAcceptedCandidates(userId);
     const tasks = await employerApi.fetchEmployerTasks(userId);
@@ -163,7 +164,7 @@ const Connections = () => {
 
       <TabPanel value={tabIndex} index={0}>
         <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
-          {/* {currentEmployee.map((emp, index) => (
+          {currentEmployee.map((emp, index) => (
             <Card
               key={index}
               sx={{
@@ -193,7 +194,7 @@ const Connections = () => {
                 </Button>
               </Box>
             </Card>
-          ))} */}
+          ))}
         </Box>
       </TabPanel>
 

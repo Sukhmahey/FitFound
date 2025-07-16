@@ -865,7 +865,7 @@ exports.getDashboardMainRoleCounts = async (req, res) => {
     const rolesForDashboard = [
       "frontend developer", // Changed to lowercase
       "backend developer",
-      "full stack developer",
+      "fullstack developer",
       "ui designer",
       "ux designer",
     ];
