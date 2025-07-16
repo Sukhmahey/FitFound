@@ -8,10 +8,13 @@ exports.logAppearance = async (req, res) => {
     const { candidateId, employerId, skills } = req.body;
 
     // Basic validation
-    if (!candidateId || !employerId || !skills) {
+    if (!candidateId || !employerId || !skills || !Array.isArray(skills)) {
       return res
         .status(400)
-        .json({ message: "candidateId, employerId, and skills are required." });
+        .json({
+          message:
+            "candidateId, employerId, and skills (as an array) are required.",
+        });
     }
 
     // Create the new document with the data you provided
@@ -52,7 +55,6 @@ exports.getVisibilityTimeline = async (req, res) => {
       const startOfDay = new Date(date.setHours(0, 0, 0, 0));
       const endOfDay = new Date(date.setHours(23, 59, 59, 999));
       const appearances = await SearchAppearance.countDocuments({
-        // FIX: Added the 'new' keyword
         candidateId: new mongoose.Types.ObjectId(candidateId),
         createdAt: { $gte: startOfDay, $lte: endOfDay },
       });
@@ -77,33 +79,51 @@ exports.getSkillBreakdown = async (req, res) => {
       return res.status(400).json({ message: "Invalid candidate ID format." });
     }
 
-    const appearances = await SearchAppearance.find({
-      // FIX: Added the 'new' keyword
+    // Get all unique skills associated with this candidate's appearances
+    const candidateAppearancesRaw = await SearchAppearance.find({
       candidateId: new mongoose.Types.ObjectId(candidateId),
     }).select("searchQuery");
-    if (!appearances.length) {
-      return res.status(200).json([]);
+
+    if (!candidateAppearancesRaw.length) {
+      return res.status(200).json([]); // No appearances for this candidate
     }
+
+    // Extract all unique skills from these appearances
     const uniqueSkills = [
-      ...new Set(appearances.flatMap((app) => app.searchQuery)),
+      ...new Set(candidateAppearancesRaw.flatMap((app) => app.searchQuery)),
     ];
+
     const skillBreakdown = [];
+
     for (const skill of uniqueSkills) {
-      const candidateAppearances = appearances.filter((app) =>
-        app.searchQuery.includes(skill)
-      ).length;
+      // Calculate how many times THIS CANDIDATE appeared in searches that included this specific skill.
+      // This is the number of distinct SearchAppearance documents where candidateId matches
+      // AND the searchQuery array contains the current skill.
+      const candidateAppearancesCount = await SearchAppearance.countDocuments({
+        candidateId: new mongoose.Types.ObjectId(candidateId),
+        searchQuery: skill, // Checks if the array contains this skill
+      });
+
+      // Calculate the total number of searches on the platform that included this specific skill.
       const totalPlatformSearches = await SearchAppearance.countDocuments({
-        searchQuery: skill,
+        searchQuery: skill, // Checks if the array contains this skill
       });
-      skillBreakdown.push({
-        skill,
-        candidateAppearances,
-        totalPlatformSearches,
-      });
+
+      if (candidateAppearancesCount > 0) {
+        // Only add if the candidate actually appeared for this skill
+        skillBreakdown.push({
+          skill,
+          candidateAppearances: candidateAppearancesCount,
+          totalPlatformSearches,
+        });
+      }
     }
+
+    // Sort by candidateAppearances in descending order
     skillBreakdown.sort(
       (a, b) => b.candidateAppearances - a.candidateAppearances
     );
+
     res.status(200).json(skillBreakdown);
   } catch (error) {
     console.error("Error in getSkillBreakdown:", error);
@@ -119,12 +139,14 @@ exports.logBulkAppearance = async (req, res) => {
     if (
       !employerId ||
       !skills ||
+      !Array.isArray(skills) || // Ensure skills is an array
       !candidateIds ||
       !Array.isArray(candidateIds) ||
       candidateIds.length === 0
     ) {
       return res.status(400).json({
-        message: "employerId, skills, and a candidateIds array are required.",
+        message:
+          "employerId, skills (as an array), and a non-empty candidateIds array are required.",
       });
     }
 
