@@ -77,7 +77,7 @@ const CandidateCard = ({
               fontSize: 16,
             }}
           >
-            {data?.matchingScore ?? "-"}%
+            {data?.score ?? "-"}%
           </Avatar>
 
           <Box>
@@ -210,7 +210,7 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
           <Typography variant="h6">{fullName}</Typography>
           <Typography variant="caption" color="text.secondary">
             Profile Score: {candidate.profileScore}% • Matching Score:{" "}
-            {candidate.matchingScore}%
+            {candidate.score}%
           </Typography>
         </Stack>
 
@@ -304,7 +304,7 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+        {/* <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
           Portfolio Links
         </Typography>
         {candidate?.portfolio?.socialLinks?.linkedin && (
@@ -321,7 +321,7 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
               </a>
             </Typography>
           </Box>
-        )}
+        )} */}
       </DialogContent>
     </Dialog>
   );

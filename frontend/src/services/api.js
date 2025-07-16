@@ -84,10 +84,32 @@ export const employerApi = {
   saveJob: (data) => api.post(`/jobs`, data),
   getAllCandidates: () => api.get(`/candidates`),
   getCandidateById: () => api.get(`/candidates/user/6865bb2908ba7790a41621b3`),
-  getSearchedCandidates: (data) =>
-    api.get(
-      `/candidates?title=${data.title}&jobType=${data.jobType}&location=${data.location}&salaryFrom=${data.salaryFrom}&salaryTo=${data.salaryTo}&jobDescriptionKeywords=${data.jobDescription}&workStatus=${data.workStatus}&skills=${data.skills}`
-    ),
+
+  getSearchedCandidates: (searchData) => {
+    const params = new URLSearchParams();
+
+    if (searchData.title) {
+      params.append("title", searchData.title);
+    }
+    if (searchData.jobType) {
+      params.append("jobType", searchData.jobType);
+    }
+    if (searchData.salaryFrom) {
+      params.append("salaryFrom", searchData.salaryFrom);
+    }
+    // Keep salaryTo for filtering on candidate's 'min' salary.
+    if (searchData.salaryTo) {
+      params.append("salaryTo", searchData.salaryTo);
+    }
+    if (searchData.skills) {
+      params.append("skills", searchData.skills);
+    }
+
+    // No change needed for `jobDescriptionKeywords` here, as per previous discussion.
+
+    return api.get(`/candidates/search?${params.toString()}`);
+  },
+
   getLastJobSearch: (jobId) => api.get(`/jobs/lastJob/${jobId}`),
 
   sendConnectionRequest: (data) => api.post(`/interactions`, data),
