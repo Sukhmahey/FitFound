@@ -1,13 +1,9 @@
-// NEW: Added modal to display candidate information on 'View Details' click in employer side
-
 import React, { useEffect, useState, useContext } from "react";
 import {
   AppBar,
   Tabs,
   Tab,
   Box,
-  TextField,
-  InputAdornment,
   Card,
   CardContent,
   Typography,
@@ -18,141 +14,135 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-
   DialogActions,
+  TextField,
+  InputAdornment,
+  Container,
 } from "@mui/material";
-
 import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
 import { employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
 
-const TabPanel = ({ children, value, index }) => {
-  return value === index ? <Box p={2}>{children}</Box> : null;
-};
+const primaryColor = "#0E3A62";
 
-// const TaskCard = ({ task, getCurrentEmployees, userId }) => {
-//   console.log("tasksks", task);
-//   const verifyRequest = async () => {
-//     await employerApi.verifyTask(task?._id);
-//     getCurrentEmployees(userId);
-//   };
+const TabPanel = ({ children, value, index }) =>
+  value === index ? <Box pt={2}>{children}</Box> : null;
 
-//   return (
-//     <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
-//       <Box
-//         sx={{
-//           display: "flex",
-//           alignItems: "center",
-//           backgroundColor: "#f5f5f5",
-//           borderRadius: 2,
-//           p: 2,
-//         }}
-//       >
-//         <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
-//         <Box>
-//           <Typography variant="body1">
-//             <strong>UserName:</strong>{" "}
-//             {task?.candidateId?.personalInfo?.firstName}
-//           </Typography>
-//         </Box>
-//       </Box>
-
-//       <Box sx={{ mt: 2 }}>
-//         <Typography variant="h6" gutterBottom>
-//           Work Authorization Badge
-//         </Typography>
-//         <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
-//           <Typography>
-//             From {task?.employmentDates?.startDate} To “Current”
-//           </Typography>
-//           <Box sx={{ mt: 2 }}>
-//             <Button onClick={verifyRequest} variant="outlined">
-//               Verify
-//             </Button>
-//           </Box>
-//         </Box>
-//       </Box>
-//     </Card>
-//   );
-// };
-
-const TaskCard = ({ task, getCurrentEmployees, userId }) => {
+const TaskCard = ({ task, getCurrentEmployees, userId, onViewDetails }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  // const verifyRequest = async () => {
-  //   await employerApi.verifyTask(task?._id);
-  //   getCurrentEmployees(userId);
-  // };
-  const handleVerifyClick = () => {
-    setConfirmOpen(true);
-  };
 
+  const handleVerifyClick = () => setConfirmOpen(true);
   const handleConfirm = async () => {
     await employerApi.verifyTask(task?._id);
     getCurrentEmployees(userId);
     setConfirmOpen(false);
   };
-
-  const handleCancel = () => {
-    setConfirmOpen(false);
-  };
-
+  const handleCancel = () => setConfirmOpen(false);
   const personal = task?.candidateId?.personalInfo || {};
 
   return (
-    <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
+    <Card
+      variant="outlined"
+      sx={{ mb: 3, p: 2, fontFamily: "Montserrat, sans-serif" }}
+    >
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          backgroundColor: "#f5f5f5",
+          backgroundColor: "#F0F4F8",
           borderRadius: 2,
           p: 2,
         }}
       >
         <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
         <Box>
-          <Typography variant="subtitle1">
-            <strong>Name:</strong> {personal.firstName} {personal.lastName}
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+              color: primaryColor,
+              fontFamily: "Montserrat, sans-serif",
+            }}
+          >
+            {personal.firstName} {personal.lastName}
           </Typography>
-          <Typography variant="body2">
-            <strong>Email:</strong> {personal.email || "N/A"}
+          <Typography
+            variant="body2"
+            sx={{ fontFamily: "Montserrat, sans-serif" }}
+          >
+            Email: {personal.email || "N/A"}
           </Typography>
-
-          <Typography variant="body2">
-            <strong>Role:</strong> {task?.position || "N/A"}
+          <Typography
+            variant="body2"
+            sx={{ fontFamily: "Montserrat, sans-serif" }}
+          >
+            Role: {task?.position || "N/A"}
           </Typography>
         </Box>
       </Box>
 
       <Box sx={{ mt: 2 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 600,
+            color: primaryColor,
+            fontFamily: "Montserrat, sans-serif",
+          }}
+        >
           Work Authorization Badge
         </Typography>
         <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
-          <Typography>
+          <Typography sx={{ fontFamily: "Montserrat, sans-serif" }}>
             From {task?.employmentDates?.startDate} To{" "}
             {task?.employmentDates?.endDate || "Current"}
           </Typography>
-          <Box sx={{ mt: 2 }}>
-            <Button onClick={handleVerifyClick} variant="outlined">
+          <Stack direction="row" spacing={1} mt={2}>
+            <Button
+              onClick={handleVerifyClick}
+              variant="outlined"
+              color="primary"
+              sx={{ fontFamily: "Montserrat, sans-serif" }}
+            >
               Verify
             </Button>
-          </Box>
+            <Button
+              onClick={() => onViewDetails(task)}
+              variant="outlined"
+              color="primary"
+              sx={{ fontFamily: "Montserrat, sans-serif" }}
+            >
+              View Details
+            </Button>
+          </Stack>
         </Box>
       </Box>
+
       <Dialog open={confirmOpen} onClose={handleCancel}>
-        <DialogTitle>Confirm Verification</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ fontFamily: "Montserrat, sans-serif" }}>
+          Confirm Verification
+        </DialogTitle>
+        <DialogContent sx={{ fontFamily: "Montserrat, sans-serif" }}>
           <Typography>
             Are you sure you want to verify this candidate?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color="inherit">
+          <Button
+            onClick={handleCancel}
+            color="inherit"
+            sx={{ fontFamily: "Montserrat, sans-serif" }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirm} variant="contained" color="primary">
+          <Button
+            onClick={handleConfirm}
+            variant="contained"
+            color="primary"
+            sx={{ fontFamily: "Montserrat, sans-serif" }}
+          >
             Yes, Verify
           </Button>
         </DialogActions>
@@ -160,36 +150,29 @@ const TaskCard = ({ task, getCurrentEmployees, userId }) => {
     </Card>
   );
 };
+
 const Connections = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [currentEmployee, setCurrentEmployee] = useState([]);
   const [pendingTasks, setPendingTasks] = useState([]);
   const [acceptedCandidates, setAcceptedCandidates] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
   const { user } = useAuth();
-
-  console.log("PendingTaskss", pendingTasks);
-
   const { setAppGeneralInfo } = useContext(AppInfoContext);
+  const userId = user?.profileId;
 
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "Connections" });
+    getCurrentEmployees(userId);
   }, []);
 
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
-
-  const userId = user?.profileId;
-
-  const handleTabChange = (e, newValue) => {
-    setTabIndex(newValue);
-  };
-
+  const handleTabChange = (e, newValue) => setTabIndex(newValue);
   const handleViewDetails = (candidate) => {
     setSelectedCandidate(candidate);
     setOpenModal(true);
   };
-
   const handleCloseModal = () => {
     setOpenModal(false);
     setSelectedCandidate(null);
@@ -197,60 +180,89 @@ const Connections = () => {
 
   const getCurrentEmployees = async (userId) => {
     const employeeData = await employerApi.fetchCurrentEmployees(userId);
-    console.log("employeeData", employeeData?.data);
-    setCurrentEmployee(employeeData?.data);
     const accepted = await employerApi.fetchAcceptedCandidates(userId);
     const tasks = await employerApi.fetchEmployerTasks(userId);
-    setPendingTasks(
-      (tasks?.data || []).filter((emp) => emp?.status !== "verified")
-    );
+
+    setCurrentEmployee(employeeData?.data || []);
     setAcceptedCandidates(
       (accepted?.data || []).filter((emp) => emp.finalStatus !== "hired")
     );
+    setPendingTasks(
+      (tasks?.data || []).filter((emp) => emp?.status !== "verified")
+    );
   };
-
-  useEffect(() => {
-    getCurrentEmployees(userId);
-  }, []);
 
   const hireCandidate = async (id) => {
     await employerApi.setCandidateToHired(id);
     getCurrentEmployees(userId);
   };
 
-  const getPersonalInfo = (candidate) => {
-    return (
-      candidate?.candidateProfile?.personalInfo ||
-      candidate?.candidateId?.personalInfo ||
-      {}
-    );
-  };
+  const getPersonalInfo = (candidate) =>
+    candidate?.candidateProfile?.personalInfo ||
+    candidate?.candidateId?.personalInfo ||
+    {};
 
   return (
-    <Box sx={{ width: "100%", typography: "body1", p: 2 }}>
-      <AppBar position="static" color="default" elevation={0}>
-        <Tabs value={tabIndex} onChange={handleTabChange} centered>
-          <Tab label="Current Employees" />
-          <Tab label="Accepted Invitation" />
-          <Tab label="Task/Requests" />
-        </Tabs>
-      </AppBar>
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Typography
+        variant="h4"
+        sx={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 700,
+          color: primaryColor,
+          mb: 3,
+        }}
+      >
+        Connections
+      </Typography>
 
-      {/* <Box my={2}>
-        <TextField
-          variant="outlined"
-          placeholder="Search..."
-          fullWidth
-          size="small"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start" /> }}
-        />
-      </Box> */}
+      <Tabs
+        value={tabIndex}
+        onChange={handleTabChange}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{
+          mb: 2,
+          ".MuiTab-root": {
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 600,
+            textTransform: "none",
+            color: "#333",
+          },
+          ".Mui-selected": {
+            color: primaryColor + " !important",
+          },
+          ".MuiTabs-indicator": {
+            backgroundColor: primaryColor,
+          },
+        }}
+      >
+        <Tab label="Current Employees" />
+        <Tab label="Accepted Invitations" />
+        <Tab label="Tasks / Requests" />
+      </Tabs>
+
+      <TextField
+        variant="outlined"
+        fullWidth
+        size="small"
+        placeholder="Search by name or designation..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ mb: 3, fontFamily: "Montserrat, sans-serif" }}
+      />
 
       <TabPanel value={tabIndex} index={0}>
-        <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
-          {currentEmployee.map((emp, index) => (
+        {currentEmployee.map((emp, index) => {
+          const info = getPersonalInfo(emp);
+          return (
             <Card
               key={index}
               sx={{
@@ -258,35 +270,42 @@ const Connections = () => {
                 alignItems: "center",
                 mb: 2,
                 p: 2,
-                borderRadius: 2,
+                fontFamily: "Montserrat, sans-serif",
               }}
             >
               <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
               <CardContent sx={{ flexGrow: 1, p: 0 }}>
-                <Typography variant="subtitle1">
-                  <strong>UserName:</strong>{" "}
-                  {getPersonalInfo(emp).firstName || emp.username}
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={600}
+                  color={primaryColor}
+                  sx={{ fontFamily: "Montserrat, sans-serif" }}
+                >
+                  {info.firstName || emp.username}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Designation:</strong> {emp?.jobId?.jobTitle}
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "Montserrat, sans-serif" }}
+                >
+                  Designation: {emp?.jobId?.jobTitle}
                 </Typography>
               </CardContent>
-              <Box>
-                <Button
-                  variant="outlined"
-                  onClick={() => handleViewDetails(emp)}
-                >
-                  View Details
-                </Button>
-              </Box>
+              <Button
+                variant="outlined"
+                onClick={() => handleViewDetails(emp)}
+                sx={{ fontFamily: "Montserrat, sans-serif" }}
+              >
+                View Details
+              </Button>
             </Card>
-          ))}
-        </Box>
+          );
+        })}
       </TabPanel>
 
       <TabPanel value={tabIndex} index={1}>
-        <Box sx={{ maxHeight: "70vh", overflowY: "auto", pr: 1 }}>
-          {acceptedCandidates.map((emp, index) => (
+        {acceptedCandidates.map((emp, index) => {
+          const info = getPersonalInfo(emp);
+          return (
             <Card
               key={index}
               sx={{
@@ -294,39 +313,51 @@ const Connections = () => {
                 alignItems: "center",
                 mb: 2,
                 p: 2,
-                borderRadius: 2,
+                fontFamily: "Montserrat, sans-serif",
               }}
             >
               <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
               <CardContent sx={{ flexGrow: 1, p: 0 }}>
-                <Typography variant="subtitle1">
-                  <strong>UserName:</strong>{" "}
-                  {getPersonalInfo(emp).firstName || emp.username}
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={600}
+                  color={primaryColor}
+                  sx={{ fontFamily: "Montserrat, sans-serif" }}
+                >
+                  {info.firstName || emp.username}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Designation:</strong> {emp?.jobId?.jobTitle}
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "Montserrat, sans-serif" }}
+                >
+                  Designation: {emp?.jobId?.jobTitle}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Work Location:</strong> {emp?.jobId?.location}
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "Montserrat, sans-serif" }}
+                >
+                  Work Location: {emp?.jobId?.location}
                 </Typography>
               </CardContent>
-              <Box>
+              <Stack spacing={1}>
                 <Button
                   onClick={() => hireCandidate(emp?._id)}
                   variant="outlined"
+                  sx={{ fontFamily: "Montserrat, sans-serif" }}
                 >
-                  Hired
+                  Hire
                 </Button>
                 <Button
                   variant="outlined"
                   onClick={() => handleViewDetails(emp)}
+                  sx={{ fontFamily: "Montserrat, sans-serif" }}
                 >
                   View Details
                 </Button>
-              </Box>
+              </Stack>
             </Card>
-          ))}
-        </Box>
+          );
+        })}
       </TabPanel>
 
       <TabPanel value={tabIndex} index={2}>
@@ -336,8 +367,9 @@ const Connections = () => {
               <TaskCard
                 key={index}
                 task={emp}
-                getCurrentEmployees={getCurrentEmployees}
                 userId={userId}
+                getCurrentEmployees={getCurrentEmployees}
+                onViewDetails={handleViewDetails}
               />
             ))}
           </Stack>
@@ -350,7 +382,15 @@ const Connections = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>
+        <DialogTitle
+          sx={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 700,
+            color: primaryColor,
+            bgcolor: "#EDF9FF",
+            borderBottom: "1px solid #ccc",
+          }}
+        >
           Candidate Details
           <IconButton
             aria-label="close"
@@ -360,30 +400,65 @@ const Connections = () => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ fontFamily: "Montserrat, sans-serif" }}>
           {selectedCandidate && (
-            <Box>
-              <Typography variant="body2" gutterBottom>
-                <strong>First Name:</strong>{" "}
-                {getPersonalInfo(selectedCandidate).firstName || "N/A"}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                <strong>Last Name:</strong>{" "}
-                {getPersonalInfo(selectedCandidate).lastName || "N/A"}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                <strong>Email:</strong>{" "}
-                {getPersonalInfo(selectedCandidate).email || "N/A"}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                <strong>Status:</strong>{" "}
-                {getPersonalInfo(selectedCandidate).currentStatus || "Hired"}
-              </Typography>
-            </Box>
+            <Stack spacing={3}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Avatar sx={{ width: 64, height: 64 }} />
+                <Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontFamily: "Montserrat, sans-serif",
+                      color: primaryColor,
+                    }}
+                  >
+                    {getPersonalInfo(selectedCandidate).firstName}{" "}
+                    {getPersonalInfo(selectedCandidate).lastName}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontFamily: "Montserrat, sans-serif" }}
+                  >
+                    {selectedCandidate?.jobId?.jobTitle || "N/A"}
+                  </Typography>
+                </Box>
+              </Stack>
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontFamily: "Montserrat, sans-serif",
+                    color: primaryColor,
+                    mb: 1,
+                  }}
+                >
+                  📞 Contact Info
+                </Typography>
+                <Stack spacing={1}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontFamily: "Montserrat, sans-serif" }}
+                  >
+                    <strong>Email:</strong>{" "}
+                    {getPersonalInfo(selectedCandidate).email || "N/A"}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontFamily: "Montserrat, sans-serif" }}
+                  >
+                    <strong>Status:</strong>{" "}
+                    {getPersonalInfo(selectedCandidate).currentStatus ||
+                      "Hired"}
+                  </Typography>
+                </Stack>
+              </Box>
+            </Stack>
           )}
         </DialogContent>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 
