@@ -18,6 +18,8 @@ import {
   TextField,
   InputAdornment,
   Container,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
@@ -42,6 +44,9 @@ const TaskCard = ({ task, getCurrentEmployees, userId, onViewDetails }) => {
   const handleCancel = () => setConfirmOpen(false);
   const personal = task?.candidateId?.personalInfo || {};
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Card
       variant="outlined"
@@ -50,34 +55,26 @@ const TaskCard = ({ task, getCurrentEmployees, userId, onViewDetails }) => {
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "flex-start" : "center",
           backgroundColor: "#F0F4F8",
           borderRadius: 2,
           p: 2,
+          gap: 2,
         }}
       >
-        <Avatar sx={{ width: 64, height: 64, mr: 2 }} />
+        <Avatar sx={{ width: 64, height: 64 }} />
         <Box>
           <Typography
             variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              color: primaryColor,
-              fontFamily: "Montserrat, sans-serif",
-            }}
+            sx={{ fontWeight: 600, color: primaryColor }}
           >
             {personal.firstName} {personal.lastName}
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ fontFamily: "Montserrat, sans-serif" }}
-          >
+          <Typography variant="body2">
             Email: {personal.email || "N/A"}
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ fontFamily: "Montserrat, sans-serif" }}
-          >
+          <Typography variant="body2">
             Role: {task?.position || "N/A"}
           </Typography>
         </Box>
@@ -86,33 +83,48 @@ const TaskCard = ({ task, getCurrentEmployees, userId, onViewDetails }) => {
       <Box sx={{ mt: 2 }}>
         <Typography
           variant="subtitle1"
-          sx={{
-            fontWeight: 600,
-            color: primaryColor,
-            fontFamily: "Montserrat, sans-serif",
-          }}
+          sx={{ fontWeight: 600, color: primaryColor }}
         >
           Work Authorization Badge
         </Typography>
         <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
-          <Typography sx={{ fontFamily: "Montserrat, sans-serif" }}>
+          <Typography>
             From {task?.employmentDates?.startDate} To{" "}
             {task?.employmentDates?.endDate || "Current"}
           </Typography>
-          <Stack direction="row" spacing={1} mt={2}>
+          <Stack
+            direction={isMobile ? "column" : "row"}
+            spacing={1}
+            mt={2}
+            alignItems={isMobile ? "center" : "flex-start"}
+          >
             <Button
               onClick={handleVerifyClick}
-              variant="outlined"
-              color="primary"
-              sx={{ fontFamily: "Montserrat, sans-serif" }}
+              variant="contained"
+              sx={{
+                backgroundColor: primaryColor,
+                color: "#fff",
+                fontFamily: "Montserrat, sans-serif",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#041f39",
+                },
+              }}
             >
               Verify
             </Button>
             <Button
               onClick={() => onViewDetails(task)}
-              variant="outlined"
-              color="primary"
-              sx={{ fontFamily: "Montserrat, sans-serif" }}
+              variant="contained"
+              sx={{
+                backgroundColor: primaryColor,
+                color: "#fff",
+                fontFamily: "Montserrat, sans-serif",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#041f39",
+                },
+              }}
             >
               View Details
             </Button>
@@ -124,24 +136,17 @@ const TaskCard = ({ task, getCurrentEmployees, userId, onViewDetails }) => {
         <DialogTitle sx={{ fontFamily: "Montserrat, sans-serif" }}>
           Confirm Verification
         </DialogTitle>
-        <DialogContent sx={{ fontFamily: "Montserrat, sans-serif" }}>
-          <Typography>
+        <DialogContent>
+          <Typography sx={{ fontFamily: "Montserrat, sans-serif" }}>
             Are you sure you want to verify this candidate?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handleCancel}
-            color="inherit"
-            sx={{ fontFamily: "Montserrat, sans-serif" }}
-          >
-            Cancel
-          </Button>
+          <Button onClick={handleCancel}>Cancel</Button>
           <Button
             onClick={handleConfirm}
             variant="contained"
-            color="primary"
-            sx={{ fontFamily: "Montserrat, sans-serif" }}
+            sx={{ backgroundColor: primaryColor }}
           >
             Yes, Verify
           </Button>
@@ -162,6 +167,9 @@ const Connections = () => {
   const { user } = useAuth();
   const { setAppGeneralInfo } = useContext(AppInfoContext);
   const userId = user?.profileId;
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "Connections" });
@@ -207,8 +215,8 @@ const Connections = () => {
       <Typography
         variant="h4"
         sx={{
-          fontFamily: "Montserrat, sans-serif",
           fontWeight: 700,
+          fontFamily: "Montserrat, sans-serif",
           color: primaryColor,
           mb: 3,
         }}
@@ -221,6 +229,7 @@ const Connections = () => {
         onChange={handleTabChange}
         variant="scrollable"
         scrollButtons="auto"
+        orientation={isMobile ? "vertical" : "horizontal"}
         sx={{
           mb: 2,
           ".MuiTab-root": {
@@ -228,6 +237,7 @@ const Connections = () => {
             fontWeight: 600,
             textTransform: "none",
             color: "#333",
+            minWidth: isMobile ? "100%" : "auto",
           },
           ".Mui-selected": {
             color: primaryColor + " !important",
@@ -265,13 +275,7 @@ const Connections = () => {
           return (
             <Card
               key={index}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mb: 2,
-                p: 2,
-                fontFamily: "Montserrat, sans-serif",
-              }}
+              sx={{ display: "flex", alignItems: "center", mb: 2, p: 2 }}
             >
               <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
               <CardContent sx={{ flexGrow: 1, p: 0 }}>
@@ -279,21 +283,22 @@ const Connections = () => {
                   variant="subtitle1"
                   fontWeight={600}
                   color={primaryColor}
-                  sx={{ fontFamily: "Montserrat, sans-serif" }}
                 >
                   {info.firstName || emp.username}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ fontFamily: "Montserrat, sans-serif" }}
-                >
+                <Typography variant="body2">
                   Designation: {emp?.jobId?.jobTitle}
                 </Typography>
               </CardContent>
               <Button
-                variant="outlined"
+                variant="contained"
+                sx={{
+                  backgroundColor: primaryColor,
+                  color: "#fff",
+                  fontFamily: "Montserrat, sans-serif",
+                  textTransform: "none",
+                }}
                 onClick={() => handleViewDetails(emp)}
-                sx={{ fontFamily: "Montserrat, sans-serif" }}
               >
                 View Details
               </Button>
@@ -308,13 +313,7 @@ const Connections = () => {
           return (
             <Card
               key={index}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mb: 2,
-                p: 2,
-                fontFamily: "Montserrat, sans-serif",
-              }}
+              sx={{ display: "flex", alignItems: "center", mb: 2, p: 2 }}
             >
               <Avatar sx={{ width: 56, height: 56, mr: 2 }} />
               <CardContent sx={{ flexGrow: 1, p: 0 }}>
@@ -322,35 +321,36 @@ const Connections = () => {
                   variant="subtitle1"
                   fontWeight={600}
                   color={primaryColor}
-                  sx={{ fontFamily: "Montserrat, sans-serif" }}
                 >
                   {info.firstName || emp.username}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ fontFamily: "Montserrat, sans-serif" }}
-                >
+                <Typography variant="body2">
                   Designation: {emp?.jobId?.jobTitle}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ fontFamily: "Montserrat, sans-serif" }}
-                >
+                <Typography variant="body2">
                   Work Location: {emp?.jobId?.location}
                 </Typography>
               </CardContent>
               <Stack spacing={1}>
                 <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: primaryColor,
+                    color: "#fff",
+                    fontFamily: "Montserrat, sans-serif",
+                  }}
                   onClick={() => hireCandidate(emp?._id)}
-                  variant="outlined"
-                  sx={{ fontFamily: "Montserrat, sans-serif" }}
                 >
                   Hire
                 </Button>
                 <Button
-                  variant="outlined"
+                  variant="contained"
+                  sx={{
+                    backgroundColor: primaryColor,
+                    color: "#fff",
+                    fontFamily: "Montserrat, sans-serif",
+                  }}
                   onClick={() => handleViewDetails(emp)}
-                  sx={{ fontFamily: "Montserrat, sans-serif" }}
                 >
                   View Details
                 </Button>
@@ -388,21 +388,19 @@ const Connections = () => {
             fontWeight: 700,
             color: primaryColor,
             bgcolor: "#EDF9FF",
-            borderBottom: "1px solid #ccc",
           }}
         >
           Candidate Details
           <IconButton
-            aria-label="close"
             onClick={handleCloseModal}
             sx={{ position: "absolute", right: 8, top: 8 }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{ fontFamily: "Montserrat, sans-serif" }}>
+        <DialogContent dividers>
           {selectedCandidate && (
-            <Stack spacing={3}>
+            <Stack spacing={2}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Avatar sx={{ width: 64, height: 64 }} />
                 <Box>
@@ -416,11 +414,7 @@ const Connections = () => {
                     {getPersonalInfo(selectedCandidate).firstName}{" "}
                     {getPersonalInfo(selectedCandidate).lastName}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ fontFamily: "Montserrat, sans-serif" }}
-                  >
+                  <Typography variant="body2" color="text.secondary">
                     {selectedCandidate?.jobId?.jobTitle || "N/A"}
                   </Typography>
                 </Box>
@@ -431,28 +425,18 @@ const Connections = () => {
                   sx={{
                     fontFamily: "Montserrat, sans-serif",
                     color: primaryColor,
-                    mb: 1,
                   }}
                 >
                   📞 Contact Info
                 </Typography>
-                <Stack spacing={1}>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontFamily: "Montserrat, sans-serif" }}
-                  >
-                    <strong>Email:</strong>{" "}
-                    {getPersonalInfo(selectedCandidate).email || "N/A"}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontFamily: "Montserrat, sans-serif" }}
-                  >
-                    <strong>Status:</strong>{" "}
-                    {getPersonalInfo(selectedCandidate).currentStatus ||
-                      "Hired"}
-                  </Typography>
-                </Stack>
+                <Typography variant="body2">
+                  <strong>Email:</strong>{" "}
+                  {getPersonalInfo(selectedCandidate).email || "N/A"}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Status:</strong>{" "}
+                  {getPersonalInfo(selectedCandidate).currentStatus || "Hired"}
+                </Typography>
               </Box>
             </Stack>
           )}

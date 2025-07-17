@@ -20,13 +20,12 @@ import {
   IconButton,
   Snackbar,
   Alert,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
-import WorkIcon from "@mui/icons-material/Work";
-import SchoolIcon from "@mui/icons-material/School";
 import CloseIcon from "@mui/icons-material/Close";
-import LinkIcon from "@mui/icons-material/Link";
 
 import { employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
@@ -40,6 +39,133 @@ const censorName = (name) => {
   return name[0] + "*".repeat(name.length - 2) + name[name.length - 1];
 };
 
+// const CandidateCard = ({
+//   data,
+//   onViewDetails,
+//   onInviteClick,
+//   isInvited = false,
+// }) => {
+//   const firstName = censorName(data?.personalInfo?.firstName ?? "");
+//   const lastName = censorName(data?.personalInfo?.lastName ?? "");
+//   const fullName = `${firstName} ${lastName}`;
+
+//   const theme = useTheme();
+//   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+//   return (
+//     <Paper
+//       elevation={0}
+//       sx={{
+//         p: 2,
+//         mb: 3,
+//         borderRadius: 4,
+//         backgroundColor: "#FAFAFA",
+//         border: `1px solid #E0E0E0`,
+//         boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+//         transition: "0.3s",
+//         "&:hover": {
+//           boxShadow: "0px 10px 20px rgba(0,0,0,0.06)",
+//         },
+//       }}
+//     >
+//       <Stack
+//         direction={isMobile ? "column" : "row"}
+//         spacing={2}
+//         justifyContent="space-between"
+//         alignItems={isMobile ? "flex-start" : "center"}
+//       >
+//         <Stack direction="row" spacing={2} alignItems="center">
+//           <Avatar
+//             sx={{
+//               width: 60,
+//               height: 60,
+//               bgcolor: PRIMARY_COLOR,
+//               fontWeight: 600,
+//               fontSize: 16,
+//             }}
+//           >
+//             {data?.score ?? "-"}%
+//           </Avatar>
+
+//           <Box>
+//             <Typography
+//               variant="subtitle1"
+//               sx={{ fontWeight: 600, color: PRIMARY_COLOR }}
+//             >
+//               {fullName}
+//             </Typography>
+//             <Typography
+//               variant="body2"
+//               sx={{ color: "#666", fontSize: 13, mb: 0.5 }}
+//             >
+//               {data?.personalInfo?.specialization ?? "-"}
+//             </Typography>
+//             <Typography variant="body2" sx={{ color: "#999", fontSize: 12 }}>
+//               {data?.workHistory?.[0]?.role ?? "-"} •{" "}
+//               {data?.basicInfo?.workStatus ?? "-"}
+//             </Typography>
+//           </Box>
+//         </Stack>
+
+//         <Stack
+//           direction={isMobile ? "column" : "row"}
+//           spacing={1}
+//           alignItems={isMobile ? "flex-start" : "flex-end"}
+//           mt={isMobile ? 2 : 0}
+//           width={isMobile ? "100%" : "auto"}
+//         >
+//           <Typography
+//             variant="h6"
+//             sx={{
+//               color: ACCENT_COLOR,
+//               fontWeight: 700,
+//               fontSize: 16,
+//             }}
+//           >
+//             ${data?.jobPreference?.salaryExpectation?.min ?? "-"} /hr
+//           </Typography>
+//           <Stack direction="row" spacing={1}>
+//             <Button
+//               variant="outlined"
+//               size="small"
+//               disabled={isInvited}
+//               sx={{
+//                 color: isInvited ? "#ccc" : PRIMARY_COLOR,
+//                 borderColor: isInvited ? "#ccc" : PRIMARY_COLOR,
+//                 textTransform: "none",
+//                 fontWeight: 500,
+//                 borderRadius: "20px",
+//                 px: 2,
+//               }}
+//               onClick={() => onInviteClick(data)}
+//             >
+//               {isInvited ? "Invited" : "Invite"}
+//             </Button>
+//             <Button
+//               variant="contained"
+//               size="small"
+//               sx={{
+//                 backgroundColor: PRIMARY_COLOR,
+//                 color: "#fff",
+//                 textTransform: "none",
+//                 fontWeight: 500,
+//                 borderRadius: "20px",
+//                 px: 2,
+//                 "&:hover": {
+//                   backgroundColor: "#041f39",
+//                 },
+//               }}
+//               onClick={() => onViewDetails(data)}
+//             >
+//               View Details
+//             </Button>
+//           </Stack>
+//         </Stack>
+//       </Stack>
+//     </Paper>
+//   );
+// };
+
 const CandidateCard = ({
   data,
   onViewDetails,
@@ -50,11 +176,14 @@ const CandidateCard = ({
   const lastName = censorName(data?.personalInfo?.lastName ?? "");
   const fullName = `${firstName} ${lastName}`;
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: 2,
         mb: 3,
         borderRadius: 4,
         backgroundColor: "#FAFAFA",
@@ -66,7 +195,13 @@ const CandidateCard = ({
         },
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Stack
+        direction={isMobile ? "column" : "row"}
+        spacing={2}
+        justifyContent="space-between"
+        alignItems={isMobile ? "flex-start" : "center"}
+      >
+        {/* Left section */}
         <Stack direction="row" spacing={2} alignItems="center">
           <Avatar
             sx={{
@@ -100,18 +235,32 @@ const CandidateCard = ({
           </Box>
         </Stack>
 
-        <Stack spacing={1} alignItems="flex-end">
+        {/* Right section */}
+        <Stack
+          direction="column"
+          spacing={1}
+          alignItems={isMobile ? "center" : "flex-end"}
+          mt={isMobile ? 2 : 0}
+          width={isMobile ? "100%" : "auto"}
+        >
           <Typography
             variant="h6"
             sx={{
               color: ACCENT_COLOR,
               fontWeight: 700,
               fontSize: 16,
+              alignSelf: isMobile ? "center" : "flex-end",
             }}
           >
             ${data?.jobPreference?.salaryExpectation?.min ?? "-"} /hr
           </Typography>
-          <Stack direction="row" spacing={1}>
+
+          <Stack
+            direction={isMobile ? "column" : "row"}
+            spacing={1}
+            alignItems={isMobile ? "center" : "flex-end"}
+            width={isMobile ? "100%" : "auto"}
+          >
             <Button
               variant="outlined"
               size="small"
@@ -123,11 +272,13 @@ const CandidateCard = ({
                 fontWeight: 500,
                 borderRadius: "20px",
                 px: 2,
+                width: isMobile ? "100%" : "auto",
               }}
               onClick={() => onInviteClick(data)}
             >
               {isInvited ? "Invited" : "Invite"}
             </Button>
+
             <Button
               variant="contained"
               size="small"
@@ -138,6 +289,7 @@ const CandidateCard = ({
                 fontWeight: 500,
                 borderRadius: "20px",
                 px: 2,
+                width: isMobile ? "100%" : "auto",
                 "&:hover": {
                   backgroundColor: "#041f39",
                 },
@@ -148,8 +300,138 @@ const CandidateCard = ({
             </Button>
           </Stack>
         </Stack>
-      </Box>
+      </Stack>
     </Paper>
+  );
+};
+const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  if (!candidate) return null;
+
+  const firstName = censorName(candidate?.personalInfo?.firstName);
+  const lastName = censorName(candidate?.personalInfo?.lastName);
+  const fullName = `${firstName} ${lastName}`;
+
+  return (
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+      <DialogContent sx={{ p: isMobile ? 2 : 3, position: "relative" }}>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: PRIMARY_COLOR,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+
+        <Stack alignItems="center" spacing={1} mb={2}>
+          <Avatar sx={{ width: 80, height: 80, bgcolor: PRIMARY_COLOR }}>
+            {candidate?.personalInfo?.firstName?.charAt(0)}
+          </Avatar>
+          <Typography variant="h6" align="center" width="100%">
+            {fullName}
+          </Typography>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            align="center"
+            width="100%"
+          >
+            Profile Score: {candidate.profileScore}% • Matching Score:{" "}
+            {candidate.score}%
+          </Typography>
+        </Stack>
+
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Skills
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, my: 1 }}>
+          {candidate.skills?.length > 0 ? (
+            candidate.skills.map((s) => (
+              <Chip
+                key={s._id}
+                label={s.skill}
+                sx={{ color: PRIMARY_COLOR, borderColor: PRIMARY_COLOR }}
+                variant="outlined"
+              />
+            ))
+          ) : (
+            <Typography variant="body2">No skills listed.</Typography>
+          )}
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Work History
+        </Typography>
+        {candidate.workHistory?.length > 0 ? (
+          candidate.workHistory.map((job, index) => (
+            <Box key={index} sx={{ my: 1 }}>
+              <Typography variant="body2">
+                <strong>Company:</strong> {job.companyName}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Role:</strong> {job.role}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Duration:</strong> {job.startDate} - {job.endDate}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Experience Level:</strong> {job.experienceLevel}
+              </Typography>
+            </Box>
+          ))
+        ) : (
+          <Typography variant="body2">No work history available.</Typography>
+        )}
+
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Education
+        </Typography>
+        {candidate.education?.length > 0 ? (
+          candidate.education.map((edu, index) => (
+            <Box key={index} sx={{ my: 1 }}>
+              <Typography variant="body2">
+                <strong>Institute:</strong> {edu.instituteName}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Credential:</strong> {edu.credentials}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Duration:</strong> {edu.startDate} - {edu.endDate}
+              </Typography>
+            </Box>
+          ))
+        ) : (
+          <Typography variant="body2">
+            No education history available.
+          </Typography>
+        )}
+
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
+          Job Preferences
+        </Typography>
+        <Typography variant="body2">
+          <strong>Desired Title:</strong>{" "}
+          {candidate?.jobPreference?.desiredJobTitle?.join(", ") || "-"}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Job Type:</strong> {candidate?.jobPreference?.jobType || "-"}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Expected Salary:</strong> $
+          {candidate?.jobPreference?.salaryExpectation?.min || "-"} / hr
+        </Typography>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -180,152 +462,6 @@ const InviteConfirmModal = ({ open, onClose, onConfirm }) => (
     </DialogActions>
   </Dialog>
 );
-
-const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
-  if (!candidate) return null;
-
-  const firstName = censorName(candidate?.personalInfo?.firstName);
-  const lastName = censorName(candidate?.personalInfo?.lastName);
-  const fullName = `${firstName} ${lastName}`;
-
-  return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogContent sx={{ p: 3, position: "relative" }}>
-        <IconButton
-          onClick={handleClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: PRIMARY_COLOR,
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-
-        <Stack alignItems="center" spacing={1} mb={2}>
-          <Avatar sx={{ width: 80, height: 80, bgcolor: PRIMARY_COLOR }}>
-            {candidate?.personalInfo?.firstName?.charAt(0)}
-          </Avatar>
-          <Typography variant="h6">{fullName}</Typography>
-          <Typography variant="caption" color="text.secondary">
-            Profile Score: {candidate.profileScore}% • Matching Score:{" "}
-            {candidate.score}%
-          </Typography>
-        </Stack>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
-          Skills
-        </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, my: 1 }}>
-          {candidate.skills?.length > 0 ? (
-            candidate.skills.map((s) => (
-              <Chip
-                key={s._id}
-                label={s.skill}
-                sx={{ color: PRIMARY_COLOR, borderColor: PRIMARY_COLOR }}
-                variant="outlined"
-              />
-            ))
-          ) : (
-            <Typography variant="body2">No skills listed.</Typography>
-          )}
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
-          Work History
-        </Typography>
-        {candidate.workHistory?.length > 0 ? (
-          candidate.workHistory.map((job, index) => (
-            <Box key={index} sx={{ my: 1 }}>
-              <Typography variant="body2">
-                <strong>Company:</strong> {job.companyName}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Role:</strong> {job.role}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Duration:</strong> {job.startDate} - {job.endDate}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Experience Level:</strong> {job.experienceLevel}
-              </Typography>
-            </Box>
-          ))
-        ) : (
-          <Typography variant="body2">No work history available.</Typography>
-        )}
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
-          Education
-        </Typography>
-        {candidate.education?.length > 0 ? (
-          candidate.education.map((edu, index) => (
-            <Box key={index} sx={{ my: 1 }}>
-              <Typography variant="body2">
-                <strong>Institute:</strong> {edu.instituteName}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Credential:</strong> {edu.credentials}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Duration:</strong> {edu.startDate} - {edu.endDate}
-              </Typography>
-            </Box>
-          ))
-        ) : (
-          <Typography variant="body2">
-            No education history available.
-          </Typography>
-        )}
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
-          Job Preferences
-        </Typography>
-        <Typography variant="body2">
-          <strong>Desired Title:</strong>{" "}
-          {candidate?.jobPreference?.desiredJobTitle?.join(", ") || "-"}
-        </Typography>
-        <Typography variant="body2">
-          <strong>Job Type:</strong> {candidate?.jobPreference?.jobType || "-"}
-        </Typography>
-        <Typography variant="body2">
-          <strong>Expected Salary:</strong> $
-          {candidate?.jobPreference?.salaryExpectation?.min || "-"} / hr
-        </Typography>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR }}>
-          Portfolio Links
-        </Typography>
-        {candidate?.portfolio?.socialLinks?.linkedin && (
-          <Box sx={{ display: "flex", alignItems: "center", my: 1 }}>
-            <LinkIcon sx={{ fontSize: 18, mr: 1, color: PRIMARY_COLOR }} />
-            <Typography variant="body2">
-              <a
-                href={candidate.portfolio.socialLinks.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: "none", color: PRIMARY_COLOR }}
-              >
-                LinkedIn Profile
-              </a>
-            </Typography>
-          </Box>
-        )} */}
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 const SearchResults = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -381,7 +517,7 @@ const SearchResults = () => {
   };
 
   return (
-    <Box sx={{ p: 4, minHeight: "100vh" }}>
+    <Box sx={{ p: { xs: 2, md: 4 }, minHeight: "100vh" }}>
       <TextField
         variant="outlined"
         size="small"

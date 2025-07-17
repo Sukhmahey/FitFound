@@ -1,7 +1,14 @@
 import { useEffect, useState, useContext } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
-import { Box, Button, Paper, Snackbar } from "@mui/material";
+import {
+  Box,
+  Button,
+  Paper,
+  Snackbar,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 
 import { employerApi } from "../../services/api";
@@ -31,6 +38,8 @@ const EmployerProfile = () => {
   const notify = useNotify();
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "My Profile" });
@@ -38,7 +47,6 @@ const EmployerProfile = () => {
 
   const handleFormSectionClick = (e) => {
     setFormSection(e.target.id);
-
     if (e.target.id === "details") {
       methods.reset(companyInfo);
     } else {
@@ -53,12 +61,12 @@ const EmployerProfile = () => {
         setUserProfile(result.data);
         const { contactInfo, ...companyData } = result.data;
         setCompanyInfo(companyData);
-        methods.reset(companyData);
         setContactInfo(contactInfo);
+        methods.reset(companyData);
       })
       .catch((error) => {
         console.log(error);
-        navigate('/employer/onboarding');
+        navigate("/employer/onboarding");
       });
   }, []);
 
@@ -66,18 +74,16 @@ const EmployerProfile = () => {
     const errors = {};
 
     if (formSection === "details") {
-      if(!data.companyLogo)
-        errors.companyLogo = "Company logo image is required";
+      if (!data.companyLogo) errors.companyLogo = "Company logo is required";
       if (!data.companyName?.trim())
         errors.companyName = "Company name is required";
       if (
         !data.establishedYear ||
         data.establishedYear < 1900 ||
         data.establishedYear > new Date().getFullYear()
-      ) {
+      )
         errors.establishedYear =
           "Established year must be between 1900 and current year";
-      }
       if (!data.businessRegisteredNumber?.trim())
         errors.businessRegisteredNumber = "Business Reg. Number is required";
       if (!data.industrySector?.trim())
@@ -94,9 +100,8 @@ const EmployerProfile = () => {
           "1001-5000",
           "5000+",
         ].includes(data.companySize)
-      ) {
+      )
         errors.companySize = "Invalid company size option";
-      }
       if (!data.workLocation?.trim())
         errors.workLocation = "Work location is required";
       if (!data.companyWebsite?.trim())
@@ -104,14 +109,14 @@ const EmployerProfile = () => {
       if (
         !data.companyDescription?.trim() ||
         data.companyDescription.length < 10
-      ) {
+      )
         errors.companyDescription =
           "Description must be at least 10 characters";
-      }
     }
 
     if (formSection === "contact") {
-      if (!data.profilePicture) errors.profilePicture = "Profile picture image is required";
+      if (!data.profilePicture)
+        errors.profilePicture = "Profile picture is required";
       if (!data.firstName?.trim()) errors.firstName = "First name is required";
       if (!data.lastName?.trim()) errors.lastName = "Last name is required";
       if (!data.phone?.trim()) errors.phone = "Phone number is required";
@@ -131,28 +136,26 @@ const EmployerProfile = () => {
 
   const onSubmit = (data) => {
     const errors = validateForm(data);
-    
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
-      const messageText = Object.values(errors).join(" , ");
-      setSnackMessage(messageText);
+      setSnackMessage(Object.values(errors).join(" , "));
       setSnackSeverity("error");
       setSnackOpen(true);
       return;
     }
-    setFormErrors({});
 
+    setFormErrors({});
     let employerProfile;
 
     if (formSection === "details") {
       if (data.companyLogo) {
         updateFileByUrl(companyInfo.companyLogo, data.companyLogo)
-          .then((result) => console.log(result))
-          .catch((error) => console.log(error));
+          .then(console.log)
+          .catch(console.log);
       }
 
       employerProfile = {
-        userId: userId,
+        userId,
         companyLogo: companyInfo.companyLogo,
         companyName: data.companyName,
         establishedYear: data.establishedYear,
@@ -162,17 +165,17 @@ const EmployerProfile = () => {
         workLocation: data.workLocation,
         companyWebsite: data.companyWebsite,
         companyDescription: data.companyDescription,
-        contactInfo: contactInfo,
+        contactInfo,
       };
       setCompanyInfo(data);
     } else {
       if (data.profilePicture) {
         updateFileByUrl(contactInfo.profilePicture, data.profilePicture)
-          .then((result) => console.log(result))
-          .catch((error) => console.log(error));
+          .then(console.log)
+          .catch(console.log);
       }
 
-      let newContactInfo = {
+      const newContactInfo = {
         profilePicture: contactInfo.profilePicture,
         firstName: data.firstName,
         middleName: data.middleName,
@@ -189,14 +192,13 @@ const EmployerProfile = () => {
 
     employerApi
       .updateEmployerProfile(userId, employerProfile)
-      .then((result) => {
-        setMessage(`Success: Info saved.`);
+      .then(() => {
+        setMessage("Success: Info saved.");
         setMessageClass("alert alert-success");
         setTimeout(() => setMessage(""), 5000);
       })
-      .catch((error) => {
-        console.log(error);
-        setMessage(`Error: Info not saved.`);
+      .catch(() => {
+        setMessage("Error: Info not saved.");
         setMessageClass("alert alert-danger");
         setTimeout(() => setMessage(""), 5000);
       });
@@ -204,7 +206,15 @@ const EmployerProfile = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+      {/* Tabs */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          mb: 3,
+          flexDirection: { xs: "column", sm: "row" },
+        }}
+      >
         <Button
           variant={formSection === "details" ? "contained" : "outlined"}
           id="details"
@@ -269,58 +279,64 @@ const EmployerProfile = () => {
               backgroundColor: "#fff",
             }}
           >
-            {formSection === "details" && (
-              <div className="container">
-                <div className="row">
-                  <CompanyInfo />
-                  <div className="d-flex justify-content-end gap-4">
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "#062F54",
-                        fontFamily: "Poppins, sans-serif",
-                        textTransform: "none",
-                        borderRadius: 3,
-                        px: 3,
-                        py: 1.5,
-                        "&:hover": {
-                          backgroundColor: "#041f39",
-                        },
-                      }}
-                    >
-                      Save Changes
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {formSection === "contact" && (
-              <div className="container">
-                <div className="row">
-                  <UserContactInfo />
-                  <div className="d-flex justify-content-end gap-4">
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "#062F54",
-                        fontFamily: "Poppins, sans-serif",
-                        textTransform: "none",
-                        borderRadius: 3,
-                        px: 3,
-                        py: 1.5,
-                        "&:hover": {
-                          backgroundColor: "#041f39",
-                        },
-                      }}
-                    >
-                      Save Changes
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            {formSection === "details" ? (
+              <>
+                <CompanyInfo />
+                <Box
+                  sx={{
+                    mt: 3,
+                    display: "flex",
+                    justifyContent: { xs: "center", md: "flex-end" },
+                  }}
+                >
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#062F54",
+                      fontFamily: "Poppins, sans-serif",
+                      textTransform: "none",
+                      borderRadius: 3,
+                      px: 3,
+                      py: 1.5,
+                      "&:hover": {
+                        backgroundColor: "#041f39",
+                      },
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                </Box>
+              </>
+            ) : (
+              <>
+                <UserContactInfo />
+                <Box
+                  sx={{
+                    mt: 3,
+                    display: "flex",
+                    justifyContent: { xs: "center", md: "flex-end" },
+                  }}
+                >
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#062F54",
+                      fontFamily: "Poppins, sans-serif",
+                      textTransform: "none",
+                      borderRadius: 3,
+                      px: 3,
+                      py: 1.5,
+                      "&:hover": {
+                        backgroundColor: "#041f39",
+                      },
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                </Box>
+              </>
             )}
           </Paper>
         </form>

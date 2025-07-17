@@ -1,23 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { employerApi, candidateApi } from "../../../services/api";
-
 import {
   Box,
   Typography,
   Avatar,
   Button,
   Chip,
-  Stack,
   Dialog,
   DialogTitle,
   DialogContent,
   IconButton,
   Paper,
+  Grid,
+  useTheme,
+  useMediaQuery,
+  Stack,
 } from "@mui/material";
+
 import CloseIcon from "@mui/icons-material/Close";
 import { LocationOn, AttachMoney } from "@mui/icons-material";
+
 import { useAuth } from "../../../contexts/AuthContext";
+import { employerApi, candidateApi } from "../../../services/api";
 
 const primaryColor = "#062F54";
 const secondaryColor = "#F5F7FA";
@@ -37,6 +41,8 @@ const RecentSearch = () => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const employerId = user.profileId;
 
   useEffect(() => {
@@ -71,7 +77,7 @@ const RecentSearch = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 2 }} fullWidth>
       <Typography
         sx={{
           mb: 3,
@@ -79,6 +85,7 @@ const RecentSearch = () => {
           fontWeight: 700,
           fontSize: 20,
           color: primaryColor,
+          textAlign: isMobile ? "center" : "left",
         }}
       >
         {`Recent Search "${job?.jobTitle || "No searches"}"`}
@@ -92,13 +99,14 @@ const RecentSearch = () => {
             fontWeight: 700,
             fontSize: 16,
             color: primaryColor,
+            textAlign: isMobile ? "center" : "left",
           }}
         >
           Top Candidates
         </Typography>
       )}
 
-      <Stack spacing={2}>
+      <Grid container direction="column" spacing={2}>
         {candidates.length > 0 ? (
           candidates.map((candidate) => {
             const { firstName, lastName } = candidate?.personalInfo || {};
@@ -106,6 +114,7 @@ const RecentSearch = () => {
               <Box
                 key={candidate._id}
                 sx={{
+                  width: "100%",
                   borderRadius: 2,
                   boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
                   p: 3,
@@ -140,14 +149,11 @@ const RecentSearch = () => {
                         alignItems: "center",
                         gap: 2,
                         mb: 1,
+                        flexWrap: "wrap",
                       }}
                     >
                       <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                        }}
+                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                       >
                         <LocationOn
                           sx={{ fontSize: 16, color: primaryColor }}
@@ -163,11 +169,7 @@ const RecentSearch = () => {
                         </Typography>
                       </Box>
                       <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                        }}
+                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                       >
                         <AttachMoney
                           sx={{ fontSize: 16, color: primaryColor }}
@@ -185,7 +187,7 @@ const RecentSearch = () => {
                           } - ${job.salaryRange?.max || ""}${
                             job.salaryRange?.perHour ? "CAD" : "K CAD"
                           } ${
-                            job.salaryRange?.perHour ? "Per Hour" : "Per Year."
+                            job.salaryRange?.perHour ? "Per Hour" : "Per Year"
                           }`}
                         </Typography>
                       </Box>
@@ -218,6 +220,7 @@ const RecentSearch = () => {
                     flexDirection: "column",
                     alignItems: "flex-end",
                     gap: 1,
+                    mt: { xs: 2, md: 0 },
                   }}
                 >
                   <Button
@@ -234,106 +237,108 @@ const RecentSearch = () => {
                     More Details
                   </Button>
                 </Box>
-
-                <Dialog
-                  open={openModal}
-                  onClose={handleCloseModal}
-                  maxWidth="sm"
-                  fullWidth
-                >
-                  <DialogTitle>
-                    Candidate Basic Info
-                    <IconButton
-                      aria-label="close"
-                      onClick={handleCloseModal}
-                      sx={{ position: "absolute", right: 8, top: 8 }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </DialogTitle>
-
-                  <DialogContent dividers>
-                    {selectedCandidate && (
-                      <Box>
-                        <Typography variant="body2" gutterBottom>
-                          <strong>Name:</strong>{" "}
-                          {censorName(
-                            selectedCandidate?.personalInfo?.firstName,
-                            selectedCandidate?.personalInfo?.lastName
-                          )}
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                          <strong>Main role:</strong>{" "}
-                          {`${selectedCandidate?.basicInfo?.bio || "No info"}`}
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                          <strong>Email:</strong> Hidden
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                          <strong>Phone Number:</strong> Hidden
-                        </Typography>
-                      </Box>
-                    )}
-                  </DialogContent>
-                </Dialog>
               </Box>
             );
           })
         ) : (
-          <Paper
-            elevation={3}
-            sx={{
-              borderRadius: 3,
-              backgroundColor: "#fff",
-              padding: 4,
-              textAlign: "center",
-              maxWidth: 500,
-              margin: "0 auto",
-              alignSelf: "center",
-            }}
-          >
-            <Typography
-              variant="h6"
+          <Grid item xs={12}>
+            <Paper
+              elevation={3}
               sx={{
-                fontFamily: "Montserrat, sans-serif",
-                fontWeight: 700,
-                color: primaryColor,
-                mb: 1,
-              }}
-            >
-              Welcome to your dashboard!
-            </Typography>
-            <Typography
-              sx={{
-                fontFamily: "Figtree, sans-serif",
-                color: "#666",
-                fontSize: 14,
-                mb: 3,
-              }}
-            >
-              You haven't started searching for candidates yet. Start exploring
-              now and find the best talent for your team.
-            </Typography>
-            <Button
-              variant="contained"
-              onClick={() => navigate("/employer/search")}
-              sx={{
-                backgroundColor: primaryColor,
-                fontFamily: "Figtree, sans-serif",
                 borderRadius: 3,
-                textTransform: "none",
-                px: 3,
-                py: 1.5,
-                "&:hover": {
-                  backgroundColor: "#041f39",
-                },
+                backgroundColor: "#fff",
+                padding: 4,
+                textAlign: "center",
+                maxWidth: 500,
+                margin: "0 auto",
               }}
             >
-              Start Searching
-            </Button>
-          </Paper>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "Montserrat, sans-serif",
+                  fontWeight: 700,
+                  color: primaryColor,
+                  mb: 1,
+                }}
+              >
+                Welcome to your dashboard!
+              </Typography>
+              <Typography
+                sx={{
+                  fontFamily: "Figtree, sans-serif",
+                  color: "#666",
+                  fontSize: 14,
+                  mb: 3,
+                }}
+              >
+                You haven't started searching for candidates yet. Start
+                exploring now and find the best talent for your team.
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => navigate("/employer/search")}
+                sx={{
+                  backgroundColor: primaryColor,
+                  fontFamily: "Figtree, sans-serif",
+                  borderRadius: 3,
+                  textTransform: "none",
+                  px: 3,
+                  py: 1.5,
+                  "&:hover": {
+                    backgroundColor: "#041f39",
+                  },
+                }}
+              >
+                Start Searching
+              </Button>
+            </Paper>
+          </Grid>
         )}
-      </Stack>
+      </Grid>
+
+      {/* Modal */}
+      <Dialog
+        open={openModal}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Candidate Basic Info
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {selectedCandidate && (
+            <Box>
+              <Typography variant="body2" gutterBottom>
+                <strong>Name:</strong>{" "}
+                {censorName(
+                  selectedCandidate?.personalInfo?.firstName,
+                  selectedCandidate?.personalInfo?.lastName
+                )}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Main role:</strong>{" "}
+                {`${selectedCandidate?.basicInfo?.bio || "No info"}`}
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Email:</strong> Hidden
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                <strong>Phone Number:</strong> Hidden
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

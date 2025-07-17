@@ -1,50 +1,48 @@
 import { useState } from "react";
 import { AppInfoContext } from "../contexts/AppInfoContext";
 import { Outlet } from "react-router-dom";
-import { Box } from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Footer from "./Footer";
+import MobileBottomNav from "./MobileBottomNav";
 
 const MainLayout = () => {
   const [appGeneralInfo, setAppGeneralInfo] = useState({});
+  const isMobile = useMediaQuery("(max-width: 899px)");
 
   return (
     <AppInfoContext.Provider value={{ appGeneralInfo, setAppGeneralInfo }}>
       <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-        {/* Fixed Sidebar */}
-        <Box
-          sx={{
-            width: { md: "250px" },
-            flexShrink: 0,
-            bgcolor: "#062F54",
-            minHeight: "100vh",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            overflow: "auto",
-          }}
-        >
-          <Sidebar />
-        </Box>
+        {!isMobile && (
+          <Box
+            sx={{
+              width: "250px",
+              flexShrink: 0,
+              bgcolor: "#062F54",
+              minHeight: "100vh",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              overflow: "auto",
+            }}
+          >
+            <Sidebar />
+          </Box>
+        )}
 
-        {/* Main Area */}
         <Box
           sx={{
             marginLeft: { md: "250px" },
+            width: "100%",
             display: "flex",
             flexDirection: "column",
-            width: "100%",
             height: "100vh",
           }}
         >
-          {/* Sticky Header */}
-          <Box sx={{ position: "sticky", top: 0, zIndex: 1000 }}>
-            <Header />
-          </Box>
+          <Header />
 
-          {/* Scrollable Content + Footer */}
           <Box
             sx={{
               flexGrow: 1,
@@ -53,14 +51,22 @@ const MainLayout = () => {
               flexDirection: "column",
             }}
           >
-            <Box sx={{ flexGrow: 1, p: 2 }}>
+            <Box
+              sx={{
+                flexGrow: 1,
+                p: 2,
+                pb: isMobile ? 8 : 2, // reserve space for bottom nav
+              }}
+            >
               <Outlet />
             </Box>
 
-            <Box sx={{ borderTop: "1px solid #eee" }}>
+            <Box sx={{ borderTop: "1px solid #eee", pb: isMobile ? 8 : 2 }}>
               <Footer />
             </Box>
           </Box>
+
+          {isMobile && <MobileBottomNav />}
         </Box>
       </Box>
     </AppInfoContext.Provider>

@@ -302,7 +302,14 @@ const Search = () => {
           </div>
           <FormControl className="">
             <div className="flex flex-row">
-              <FormControl className="col-md-6" sx={{ mb: 2, pr: 1 }}>
+              <FormControl
+                className="col-md-6"
+                sx={{
+                  mb: 2,
+                  pr: { xs: 0, md: 1 },
+                  width: { xs: "100%", md: "50%" },
+                }}
+              >
                 <InputLabel id="demo-simple-select-label">Job Type</InputLabel>
                 <Select
                   labelId="jobType"
@@ -319,7 +326,12 @@ const Search = () => {
                   <MenuItem value={"internship"}>Internship</MenuItem>
                 </Select>
               </FormControl>
-              <FormControl className="col-md-6">
+              <FormControl
+                sx={{
+                  width: { xs: "100%", md: "50%" },
+                  mb: 2,
+                }}
+              >
                 <InputLabel id="demo-simple-select-label">
                   Work Status
                 </InputLabel>
@@ -327,7 +339,7 @@ const Search = () => {
                   labelId="workStatus"
                   id="workStatus"
                   value={searchQuery?.workStatus}
-                  label="workStatus"
+                  label="Work Status"
                   onChange={(e) => {
                     onChangeInputFiels(e.target.value, "workStatus");
                   }}

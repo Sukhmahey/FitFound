@@ -146,7 +146,7 @@ const Sidebar = () => {
           <>
             <ListItemButton
               onClick={() => goTo("insights")}
-              sx={menuItemStyle("ingsights")}
+              sx={menuItemStyle("insights")}
             >
               <ListItemIcon>
                 <InsightsIcon />

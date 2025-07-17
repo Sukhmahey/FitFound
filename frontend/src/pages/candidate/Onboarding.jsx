@@ -34,7 +34,6 @@ const ProfileSetupOption = ({ onManualClick, onUploadClick, errors }) => {
       sx={{
         height: "100vh",
         width: "100vw",
-        backgroundColor: "#EDF9FF",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -179,16 +178,16 @@ export default function CandidateOnboarding() {
   const handleManual = () => setStepIndex(1);
   const handleUpload = () => setStepIndex(14);
   useEffect(() => {
-  if (userEmail && !formData.personalInfo.email) {
-    setFormData((prev) => ({
-      ...prev,
-      personalInfo: {
-        ...prev.personalInfo,
-        email: userEmail,
-      },
-    }));
-  }
-}, [userEmail]);
+    if (userEmail && !formData.personalInfo.email) {
+      setFormData((prev) => ({
+        ...prev,
+        personalInfo: {
+          ...prev.personalInfo,
+          email: userEmail,
+        },
+      }));
+    }
+  }, [userEmail]);
 
   const convertMonthFormat = (value) => {
     if (!value || typeof value !== "string") return "";
@@ -227,16 +226,16 @@ export default function CandidateOnboarding() {
       });
     }
     if (stepIndex === 6) {
-    formData.education.forEach((edu, i) => {
-      if (!edu.instituteName?.trim())
-        errors[`instituteName_${i}`] = "Institute name is required";
-      if (!edu.credentials?.trim())
-        errors[`credentials_${i}`] = "Credentials are required";
-      if (!edu.startDate)
-        errors[`eduStartDate_${i}`] = "Start date is required";
-      if (!edu.endDate) errors[`eduEndDate_${i}`] = "End date is required";
-    });
-  }
+      formData.education.forEach((edu, i) => {
+        if (!edu.instituteName?.trim())
+          errors[`instituteName_${i}`] = "Institute name is required";
+        if (!edu.credentials?.trim())
+          errors[`credentials_${i}`] = "Credentials are required";
+        if (!edu.startDate)
+          errors[`eduStartDate_${i}`] = "Start date is required";
+        if (!edu.endDate) errors[`eduEndDate_${i}`] = "End date is required";
+      });
+    }
     if (stepIndex === 7) {
       const desired = formData.jobPreference.desiredJobTitle;
       const jobType = formData.jobPreference.jobType;
@@ -428,7 +427,7 @@ export default function CandidateOnboarding() {
   };
 
   return (
-    <Container sx={{ m: 0 }}>
+    <Container sx={{ p: 4, m: 0 }}>
       <Snackbar
         open={snackOpen}
         autoHideDuration={4000}
@@ -444,7 +443,7 @@ export default function CandidateOnboarding() {
         </MuiAlert>
       </Snackbar>
       {stepIndex > 0 && stepIndex < 90 && stepIndex !== 14 && (
-        <Box sx={{ width: "100%" }}>
+        <Box sx={{ width: "100%", mb: 8 }}>
           <Stepper activeStep={stepIndex - 1} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>
