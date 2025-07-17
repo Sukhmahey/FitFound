@@ -1,222 +1,253 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from "react";
 import {
-    Box,
-    Button,
-    Container,
-    Typography,
-    CardContent,
-    Card,
-    CardActions,
-    CardMedia,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    DialogContentText
-
-} from '@mui/material';
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { candidateApi, employerApi } from '../../services/api';
-import { auth } from '../../services/firebase';
-import { reauthenticateWithCredential, EmailAuthProvider, updatePassword } from 'firebase/auth';
-import SubscriptionSelector from './settingsComponents/SubscriptionSelector';
-import NotificationPermission from './settingsComponents/NotificationPermission';
+  Box,
+  Button,
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  DialogContentText,
+  Avatar,
+  useMediaQuery,
+} from "@mui/material";
+import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import { useTheme } from "@mui/material/styles";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { candidateApi, employerApi } from "../../services/api";
+import { auth } from "../../services/firebase";
+import {
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  updatePassword,
+} from "firebase/auth";
+import SubscriptionSelector from "./settingsComponents/SubscriptionSelector";
+import NotificationPermission from "./settingsComponents/NotificationPermission";
 
 export default function SettingsPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const { user } = useAuth();
-    const userId = user?.userId;
-    const { logout } = useAuth();
-    const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const userId = user?.userId;
+  const navigate = useNavigate();
 
-    const [role, setRole] = React.useState(user?.role);
-    const [candidateName, setCandidateName] = React.useState('');
-    const [employerName, setEmployerName] = React.useState('');
-    const [currentUserEmail, setCurrentUserEmail] = React.useState('');
-    const [open, setOpen] = React.useState(false);
-    const [oldPassword, setOldPassword] = React.useState('');
-    const [newPassword, setNewPassword] = React.useState('');
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+  const [role, setRole] = useState(user?.role);
+  const [candidateName, setCandidateName] = useState("");
+  const [employerName, setEmployerName] = useState("");
+  const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [open, setOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+  useEffect(() => {
+    setRole(user?.role);
+    setCurrentUserEmail(user?.email);
 
-    const handleSubmit = async (event) => {
-
-        event.preventDefault();
-        await resetPassword();
-
-        handleClose();
-    };
-
-
-    //     useEffect(() => {
-
-
-    //         if (role === 'candidate' && userId) {
-    //      setCandidateEmail(user?.email);
-    //     candidateApi.getProfileByUserId(userId).then((response) => {
-    //       setCandidateName(response.data.personalInfo.firstName);
-    //     }).catch((error) => {
-    //       console.error("Error fetching candidate profile:", error);
-    //     });
-    //   }
-
-
-    //     }, [userId]);
-    useEffect(() => {
-        setRole(user?.role)
-        setCurrentUserEmail(user?.email);
-        if (user?.role === 'candidate' && userId) {
-            console.log('Candidate')
-            candidateApi.getProfileByUserId(userId)
-                .then((response) => {
-                    setCandidateName(response.data.personalInfo.firstName);
-                })
-                .catch((error) => {
-                    console.error("Error fetching candidate profile:", error);
-                });
-        }
-        else if (user?.role === 'employer') {
-            employerApi.getEmployerProfile(userId)
-                .then((response) =>
-                    setEmployerName(response.data.companyName)
-                )
-                .catch((error) =>
-                    console.error("Error fetching employer profile:", error)
-                );
-        }
-    }, [userId]);
-
-    const resetPassword = () => {
-        const user = auth.currentUser;
-        const credential = EmailAuthProvider.credential(user.email, oldPassword);
-
-        reauthenticateWithCredential(user, credential)
-            .then(() => {
-
-                return updatePassword(user, newPassword);
-            })
-            .then(() => {
-                console.log("Password updated successfully");
-            })
-            .catch((error) => {
-                console.error("Re-authentication or update failed:", error.message);
-            });
-
+    if (user?.role === "candidate" && userId) {
+      candidateApi
+        .getProfileByUserId(userId)
+        .then((res) => setCandidateName(res.data.personalInfo.firstName))
+        .catch((err) => console.error("Candidate fetch error:", err));
+    } else if (user?.role === "employer") {
+      employerApi
+        .getEmployerProfile(userId)
+        .then((res) => setEmployerName(res.data.companyName))
+        .catch((err) => console.error("Employer fetch error:", err));
     }
+  }, [userId]);
 
-    const handleLogout = () =>{
-        logout();
-        navigate("/login");
+  const handlePasswordReset = async () => {
+    const currentUser = auth.currentUser;
+    const credential = EmailAuthProvider.credential(
+      currentUser.email,
+      oldPassword
+    );
+    try {
+      await reauthenticateWithCredential(currentUser, credential);
+      await updatePassword(currentUser, newPassword);
+      console.log("Password updated");
+      handleClose();
+    } catch (error) {
+      console.error("Password update failed:", error.message);
     }
+  };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
-    return (
-        <Container>
-            {
-                user && (<Box maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-                    <Typography variant="h5" component="h5" gutterBottom className=' text-center'>Settings</Typography>
-                    <Card sx={{ maxWidth: 345, display: 'flex', mb: 5 }}>
-                        <CardMedia>
-                            <AccountCircleRoundedIcon sx={{ fontSize: '5rem' }}></AccountCircleRoundedIcon>
-                        </CardMedia>
-                        <CardContent>
-                            {employerName && <Typography variant='h6'>{employerName}</Typography>}
-                            {candidateName && <Typography variant='h6'>{candidateName}</Typography>}
-                        </CardContent>
-                    </Card>
-                    <Box>
-                        <Typography variant='h6' component={"h6"} className=' border-bottom'>Account Security</Typography>
-                        <Box>
-                            <Box>
-                                <Typography component={"p"} sx={{ fontSize: '1rem' }}>Username</Typography>
-                                <TextField size='small' value={currentUserEmail || ''}></TextField>
-                            </Box>
-                            <Box>
-                                <Typography component={"p"} sx={{ fontSize: '1rem' }}>Password</Typography>
-                                <TextField size='small' value={currentUserEmail || ''} disabled={true} type="password"
-                                    autoComplete="current-password"></TextField>
-                                <Button onClick={handleClickOpen}>Reset</Button>
-                                <Dialog open={open} onClose={handleClose}>
-                                    <DialogTitle>Reset Password</DialogTitle>
-                                    <DialogContent sx={{ paddingBottom: 0 }}>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handlePasswordReset();
+  };
 
-                                        <form onSubmit={handleSubmit}>
-                                            <DialogContentText>
-                                                Enter Your Old Password
-                                            </DialogContentText>
-                                            <TextField
-                                                autoFocus
-                                                required
-                                                margin="dense"
-                                                id="old-password"
-                                                name="old-password"
-                                                label="Old Password"
-                                                type="password"
-                                                value={oldPassword}
-                                                onChange={(e) => setOldPassword(e.target.value)}
-                                                fullWidth
+  const handleClose = () => setOpen(false);
 
-                                            />
-                                            <DialogContentText>
-                                                Enter Your New Password
-                                            </DialogContentText>
-                                            <TextField
-                                                autoFocus
-                                                required
-                                                margin="dense"
-                                                id="new-password"
-                                                name="new-password"
-                                                label="New Password"
-                                                type="password"
-                                                value={newPassword}
-                                                onChange={(e) => setNewPassword(e.target.value)}
-                                                fullWidth
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Typography
+        variant="h4"
+        align="center"
+        fontWeight={700}
+        sx={{ mb: 4, fontFamily: "Montserrat, sans-serif" }}
+      >
+        Settings
+      </Typography>
 
-                                            />
+      <Card
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: 4,
+          p: 2,
+          borderRadius: 3,
+        }}
+      >
+        <Avatar
+          sx={{
+            width: 64,
+            height: 64,
+            bgcolor: "#062F54",
+            mr: 2,
+          }}
+        >
+          <AccountCircleRoundedIcon fontSize="large" />
+        </Avatar>
+        <CardContent>
+          <Typography variant="h6" fontWeight={600}>
+            {role === "employer" ? employerName : candidateName}
+          </Typography>
+          <Typography variant="body2">{currentUserEmail}</Typography>
+        </CardContent>
+      </Card>
 
-                                            <DialogActions>
-                                                <Button onClick={handleClose}>Cancel</Button>
-                                                <Button type="submit">Confirm</Button>
-                                            </DialogActions>
-                                        </form>
-                                    </DialogContent>
-                                </Dialog>
-                            </Box>
-                        </Box>
-                    </Box>
-                    {role === 'candidate' && (<Box>
-                        <Typography variant='h6' component={"h6"} className=' border-bottom'>Subscriptions</Typography>
-                        <Box>
-                            <SubscriptionSelector />
-                        </Box>
-                    </Box>)}
-                    <Box>
-                        <Typography variant='h6' component={"h6"} className=' border-bottom'>Notifications</Typography>
-                        <Box>
-                            <NotificationPermission />
-                        </Box>
-                    </Box>
-                    <Box>
-                        <Typography variant='h6' component={"h6"} className=' border-bottom'>Help</Typography>
-                        <Card sx={{ maxWidth: 345, display: 'flex', mb: 5, mt: 5, justifyContent: 'center', alignItems: 'center', borderRadius: 5 }}>
-                            <CardContent sx={{ display: 'flex', flexDirection: "column", justifyContent: 'center', alignItems: 'center', gap: 2 }}>
-                                <Typography variant='h6' sx={{ fontStyle: "bold", fontWeight: "800" }}>Get the help you need</Typography>
-                                <Typography variant='p'>Reach got and get the help you need</Typography>
-                                <Button variant='outlined'>Contact Us</Button>
-                            </CardContent>
-                        </Card>
-                    </Box>
-                </Box>)
-            }
-            <Button variant='standard' sx={{backgroundColor: "red", color:"white"}} onClick={handleLogout}>Logout</Button>
-        </Container>
-    )
+      <Box mb={4}>
+        <Typography variant="h6" fontWeight={600} gutterBottom>
+          Account Security
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Username"
+              fullWidth
+              size="small"
+              value={currentUserEmail || ""}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Password"
+              fullWidth
+              size="small"
+              value="********"
+              type="password"
+              disabled
+            />
+            <Button onClick={() => setOpen(true)} sx={{ mt: 1 }}>
+              Reset Password
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {role === "candidate" && (
+        <Box mb={4}>
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            Subscriptions
+          </Typography>
+          <SubscriptionSelector />
+        </Box>
+      )}
+
+      <Box mb={4}>
+        <Typography variant="h6" fontWeight={600} gutterBottom>
+          Notifications
+        </Typography>
+        <NotificationPermission />
+      </Box>
+
+      <Box mb={6}>
+        <Typography variant="h6" fontWeight={600} gutterBottom>
+          Help
+        </Typography>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 4,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+            Need help?
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Reach out to us and get the support you need.
+          </Typography>
+          <Button variant="contained" sx={{ backgroundColor: "#062F54" }}>
+            Contact Us
+          </Button>
+        </Card>
+      </Box>
+
+      <Box textAlign="center" mt={3}>
+        <Button
+          variant="contained"
+          color="error"
+          sx={{
+            px: 4,
+            py: 1.5,
+            fontWeight: 600,
+            borderRadius: 3,
+            textTransform: "none",
+          }}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </Box>
+
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle fontWeight={700}>Reset Password</DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit}>
+            <DialogContentText sx={{ mb: 2 }}>
+              Enter your old and new password to reset.
+            </DialogContentText>
+            <TextField
+              fullWidth
+              margin="dense"
+              label="Old Password"
+              type="password"
+              required
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              margin="dense"
+              label="New Password"
+              type="password"
+              required
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <DialogActions sx={{ mt: 1 }}>
+              <Button onClick={handleClose}>Cancel</Button>
+              <Button type="submit" variant="contained">
+                Confirm
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Container>
+  );
 }
