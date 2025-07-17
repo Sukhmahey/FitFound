@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
 import {
-  AppBar,
   Tabs,
   Tab,
   Box,
@@ -32,130 +31,6 @@ const primaryColor = "#0E3A62";
 const TabPanel = ({ children, value, index }) =>
   value === index ? <Box pt={2}>{children}</Box> : null;
 
-const TaskCard = ({ task, getCurrentEmployees, userId, onViewDetails }) => {
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  const handleVerifyClick = () => setConfirmOpen(true);
-  const handleConfirm = async () => {
-    await employerApi.verifyTask(task?._id);
-    getCurrentEmployees(userId);
-    setConfirmOpen(false);
-  };
-  const handleCancel = () => setConfirmOpen(false);
-  const personal = task?.candidateId?.personalInfo || {};
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  return (
-    <Card
-      variant="outlined"
-      sx={{ mb: 3, p: 2, fontFamily: "Montserrat, sans-serif" }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          alignItems: isMobile ? "flex-start" : "center",
-          backgroundColor: "#F0F4F8",
-          borderRadius: 2,
-          p: 2,
-          gap: 2,
-        }}
-      >
-        <Avatar sx={{ width: 64, height: 64 }} />
-        <Box>
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 600, color: primaryColor }}
-          >
-            {personal.firstName} {personal.lastName}
-          </Typography>
-          <Typography variant="body2">
-            Email: {personal.email || "N/A"}
-          </Typography>
-          <Typography variant="body2">
-            Role: {task?.position || "N/A"}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box sx={{ mt: 2 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{ fontWeight: 600, color: primaryColor }}
-        >
-          Work Authorization Badge
-        </Typography>
-        <Box sx={{ border: "1px dashed #ccc", borderRadius: 2, p: 2 }}>
-          <Typography>
-            From {task?.employmentDates?.startDate} To{" "}
-            {task?.employmentDates?.endDate || "Current"}
-          </Typography>
-          <Stack
-            direction={isMobile ? "column" : "row"}
-            spacing={1}
-            mt={2}
-            alignItems={isMobile ? "center" : "flex-start"}
-          >
-            <Button
-              onClick={handleVerifyClick}
-              variant="contained"
-              sx={{
-                backgroundColor: primaryColor,
-                color: "#fff",
-                fontFamily: "Montserrat, sans-serif",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "#041f39",
-                },
-              }}
-            >
-              Verify
-            </Button>
-            <Button
-              onClick={() => onViewDetails(task)}
-              variant="contained"
-              sx={{
-                backgroundColor: primaryColor,
-                color: "#fff",
-                fontFamily: "Montserrat, sans-serif",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "#041f39",
-                },
-              }}
-            >
-              View Details
-            </Button>
-          </Stack>
-        </Box>
-      </Box>
-
-      <Dialog open={confirmOpen} onClose={handleCancel}>
-        <DialogTitle sx={{ fontFamily: "Montserrat, sans-serif" }}>
-          Confirm Verification
-        </DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontFamily: "Montserrat, sans-serif" }}>
-            Are you sure you want to verify this candidate?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancel}>Cancel</Button>
-          <Button
-            onClick={handleConfirm}
-            variant="contained"
-            sx={{ backgroundColor: primaryColor }}
-          >
-            Yes, Verify
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Card>
-  );
-};
-
 const Connections = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [search, setSearch] = useState("");
@@ -164,10 +39,11 @@ const Connections = () => {
   const [acceptedCandidates, setAcceptedCandidates] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [modalSource, setModalSource] = useState("");
+  const [showHireConfirm, setShowHireConfirm] = useState(false);
   const { user } = useAuth();
   const { setAppGeneralInfo } = useContext(AppInfoContext);
   const userId = user?.profileId;
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -177,10 +53,13 @@ const Connections = () => {
   }, []);
 
   const handleTabChange = (e, newValue) => setTabIndex(newValue);
-  const handleViewDetails = (candidate) => {
+
+  const handleViewDetails = (candidate, source = "") => {
     setSelectedCandidate(candidate);
+    setModalSource(source);
     setOpenModal(true);
   };
+
   const handleCloseModal = () => {
     setOpenModal(false);
     setSelectedCandidate(null);
@@ -190,7 +69,6 @@ const Connections = () => {
     const employeeData = await employerApi.fetchCurrentEmployees(userId);
     const accepted = await employerApi.fetchAcceptedCandidates(userId);
     const tasks = await employerApi.fetchEmployerTasks(userId);
-
     setCurrentEmployee(employeeData?.data || []);
     setAcceptedCandidates(
       (accepted?.data || []).filter((emp) => emp.finalStatus !== "hired")
@@ -200,8 +78,9 @@ const Connections = () => {
     );
   };
 
-  const hireCandidate = async (id) => {
-    await employerApi.setCandidateToHired(id);
+  const hireCandidate = async () => {
+    await employerApi.setCandidateToHired(selectedCandidate?._id);
+    setShowHireConfirm(false);
     getCurrentEmployees(userId);
   };
 
@@ -209,6 +88,14 @@ const Connections = () => {
     candidate?.candidateProfile?.personalInfo ||
     candidate?.candidateId?.personalInfo ||
     {};
+
+  const getBasicInfo = (candidate) =>
+    candidate?.candidateProfile?.basicInfo || {};
+
+  const getJobPref = (candidate) =>
+    candidate?.candidateProfile?.jobPreference || {};
+
+  const getSkills = (candidate) => candidate?.candidateProfile?.skills || [];
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -284,7 +171,7 @@ const Connections = () => {
                   fontWeight={600}
                   color={primaryColor}
                 >
-                  {info.firstName || emp.username}
+                  {info.firstName} {info.lastName}
                 </Typography>
                 <Typography variant="body2">
                   Designation: {emp?.jobId?.jobTitle}
@@ -298,7 +185,7 @@ const Connections = () => {
                   fontFamily: "Montserrat, sans-serif",
                   textTransform: "none",
                 }}
-                onClick={() => handleViewDetails(emp)}
+                onClick={() => handleViewDetails(emp, "current")}
               >
                 View Details
               </Button>
@@ -322,7 +209,7 @@ const Connections = () => {
                   fontWeight={600}
                   color={primaryColor}
                 >
-                  {info.firstName || emp.username}
+                  {info.firstName} {info.lastName}
                 </Typography>
                 <Typography variant="body2">
                   Designation: {emp?.jobId?.jobTitle}
@@ -339,7 +226,10 @@ const Connections = () => {
                     color: "#fff",
                     fontFamily: "Montserrat, sans-serif",
                   }}
-                  onClick={() => hireCandidate(emp?._id)}
+                  onClick={() => {
+                    setSelectedCandidate(emp);
+                    setShowHireConfirm(true);
+                  }}
                 >
                   Hire
                 </Button>
@@ -350,7 +240,7 @@ const Connections = () => {
                     color: "#fff",
                     fontFamily: "Montserrat, sans-serif",
                   }}
-                  onClick={() => handleViewDetails(emp)}
+                  onClick={() => handleViewDetails(emp, "accepted")}
                 >
                   View Details
                 </Button>
@@ -363,15 +253,53 @@ const Connections = () => {
       <TabPanel value={tabIndex} index={2}>
         <Box sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
           <Stack spacing={3}>
-            {pendingTasks.map((emp, index) => (
-              <TaskCard
-                key={index}
-                task={emp}
-                userId={userId}
-                getCurrentEmployees={getCurrentEmployees}
-                onViewDetails={handleViewDetails}
-              />
-            ))}
+            {pendingTasks.map((task, index) => {
+              const info = getPersonalInfo(task);
+              return (
+                <Card key={index} sx={{ p: 2 }}>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Avatar sx={{ width: 56, height: 56 }} />
+                    <Box>
+                      <Typography fontWeight={600} color={primaryColor}>
+                        {info.firstName} {info.lastName}
+                      </Typography>
+                      <Typography variant="body2">
+                        Email: {info.email}
+                      </Typography>
+                      <Typography variant="body2">
+                        Role: {task?.position}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box mt={2}>
+                    <Typography variant="body2">
+                      From: {task?.employmentDates?.startDate} To:{" "}
+                      {task?.employmentDates?.endDate}
+                    </Typography>
+                    <Stack direction="row" spacing={1} mt={2}>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          employerApi
+                            .verifyTask(task._id)
+                            .then(() => getCurrentEmployees(userId));
+                        }}
+                        sx={{ backgroundColor: primaryColor, color: "#fff" }}
+                      >
+                        Verify
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleViewDetails(task, "task")}
+                        sx={{ backgroundColor: primaryColor, color: "#fff" }}
+                      >
+                        View Details
+                      </Button>
+                    </Stack>
+                  </Box>
+                </Card>
+              );
+            })}
           </Stack>
         </Box>
       </TabPanel>
@@ -415,32 +343,92 @@ const Connections = () => {
                     {getPersonalInfo(selectedCandidate).lastName}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {selectedCandidate?.jobId?.jobTitle || "N/A"}
+                    {selectedCandidate?.jobId?.jobTitle ||
+                      selectedCandidate?.position ||
+                      "N/A"}
                   </Typography>
                 </Box>
               </Stack>
-              <Box>
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontFamily: "Montserrat, sans-serif",
-                    color: primaryColor,
-                  }}
-                >
-                  📞 Contact Info
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Email:</strong>{" "}
-                  {getPersonalInfo(selectedCandidate).email || "N/A"}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Status:</strong>{" "}
-                  {getPersonalInfo(selectedCandidate).currentStatus || "Hired"}
-                </Typography>
-              </Box>
+
+              {modalSource === "accepted" && (
+                <>
+                  <Typography variant="body2">
+                    <strong>Email:</strong>{" "}
+                    {getPersonalInfo(selectedCandidate).email}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Status:</strong>{" "}
+                    {getPersonalInfo(selectedCandidate).currentStatus}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Phone:</strong>{" "}
+                    {getBasicInfo(selectedCandidate).phoneNumber}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Work Status:</strong>{" "}
+                    {getBasicInfo(selectedCandidate).workStatus}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Desired Title:</strong>{" "}
+                    {getJobPref(selectedCandidate).desiredJobTitle?.join(", ")}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Job Type:</strong>{" "}
+                    {getJobPref(selectedCandidate).jobType}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Skills:</strong>{" "}
+                    {getSkills(selectedCandidate)
+                      .map((s) => s.skill)
+                      .join(", ")}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Bio:</strong> {getBasicInfo(selectedCandidate).bio}
+                  </Typography>
+                </>
+              )}
+
+              {modalSource === "task" && (
+                <>
+                  <Typography variant="body2">
+                    <strong>Email:</strong>{" "}
+                    {getPersonalInfo(selectedCandidate).email}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Role:</strong> {selectedCandidate?.position}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Employment:</strong>{" "}
+                    {selectedCandidate?.employmentDates?.startDate} -{" "}
+                    {selectedCandidate?.employmentDates?.endDate}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Status:</strong> {selectedCandidate?.status}
+                  </Typography>
+                </>
+              )}
             </Stack>
           )}
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={showHireConfirm} onClose={() => setShowHireConfirm(false)}>
+        <DialogTitle>Confirm Hiring</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to mark this candidate as hired?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowHireConfirm(false)}>Cancel</Button>
+          <Button
+            onClick={hireCandidate}
+            variant="contained"
+            sx={{ backgroundColor: primaryColor }}
+          >
+            Yes, Hire
+          </Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );
