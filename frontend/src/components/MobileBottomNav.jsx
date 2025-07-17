@@ -55,6 +55,12 @@ const MobileBottomNav = () => {
         value: "insights",
         icon: <InsightsIcon />,
       });
+
+      items.push({
+        label: "Verification",
+        value: "badge-verification",
+        icon: <VerifiedUserIcon />,
+      });
     } else if (user?.role === "employer") {
       items.splice(2, 0, {
         label: "Search",

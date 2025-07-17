@@ -33,7 +33,7 @@ const ProfileSetupOption = ({ onManualClick, onUploadClick, errors }) => {
     <Box
       sx={{
         height: "100vh",
-        width: "100vw",
+        width: "100%",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -427,7 +427,7 @@ export default function CandidateOnboarding() {
   };
 
   return (
-    <Container sx={{ p: 4, m: 0 }}>
+    <Container sx={{ p: 4, ml: 0, margin: "auto" }}>
       <Snackbar
         open={snackOpen}
         autoHideDuration={4000}
@@ -453,7 +453,7 @@ export default function CandidateOnboarding() {
           </Stepper>
         </Box>
       )}
-      {renderStep()}
+      <div sx={{ width: "100%" }}>{renderStep()}</div>
       {stepIndex < 90 && stepIndex > 0 && stepIndex !== 14 && (
         <Box className="d-flex justify-content-between mt-5 mb-5">
           <Button

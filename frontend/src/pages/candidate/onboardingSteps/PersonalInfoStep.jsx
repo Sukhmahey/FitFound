@@ -22,6 +22,7 @@ export default function PersonalInfoStep({
         alignItems: "center",
         justifyContent: "center",
         px: 2,
+        width: "100%",
       }}
     >
       <Box
