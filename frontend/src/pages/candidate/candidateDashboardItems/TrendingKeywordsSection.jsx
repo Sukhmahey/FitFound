@@ -1,21 +1,53 @@
-import React from "react";
+import React , {useState, useEffect} from "react";
 import { Box, Typography, Paper, Divider, Chip, Stack } from "@mui/material";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AddIcon from "@mui/icons-material/Add";
+import DoneIcon from "@mui/icons-material/Done";
+import MuiAlert from "@mui/material/Alert";
 
 const primaryColor = "#0E3A62";
 const newSkillColor = "#3B67F6";
 const existingSkillColor = "#A5CCF7";
 
-function TrendingKeywordsSection({ suggestedSkills = [], alreadySkills = [] }) {
-  const alreadySet = new Set(alreadySkills.map((s) => s.toLowerCase()));
+function TrendingKeywordsSection({
+  suggestedSkills = [],
+  alreadySkills = [],
+  onAddSkill = () => {},
+}) {
+   const [justAdded, setJustAdded] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [addedSkill, setAddedSkill] = useState("");
 
-  const newSkills = suggestedSkills.filter(
-    (skill) => !alreadySet.has(skill.toLowerCase())
+  const skillNamesSet = new Set(
+    (alreadySkills || []).map(s =>
+      typeof s === "string" ? s.toLowerCase() : s
+    )
   );
-  const existingSkills = suggestedSkills.filter((skill) =>
-    alreadySet.has(skill.toLowerCase())
+
+  
+  const newSkills = (suggestedSkills || []).filter(
+    (skill) =>
+      !skillNamesSet.has(skill.toLowerCase()) &&
+      !justAdded.includes(skill.toLowerCase())
   );
+   
+
+  const existingSkills = Array.from(
+    new Set([
+      ...(alreadySkills || []),
+      ...justAdded.filter(s => !skillNamesSet.has(s))
+    ])
+  );
+const handleAdd = (skill) => {
+    onAddSkill(skill);
+    setJustAdded((prev) => [...prev, skill.toLowerCase()]);
+    setAddedSkill(skill);
+    setSnackbarOpen(true);
+  };
+
+  console.log(alreadySkills)
+  
 
   return (
     <Box>
@@ -58,16 +90,22 @@ function TrendingKeywordsSection({ suggestedSkills = [], alreadySkills = [] }) {
               </Typography>
             </Box>
 
+            
             <Stack direction="row" flexWrap="wrap" gap={1}>
-              {newSkills.map((skill, index) => (
+              {newSkills.map((skill) => (
                 <Chip
-                  key={index}
+                  key={skill}
                   label={skill}
+                  clickable
+                  onClick={() => handleAdd(skill)}
+                  icon={<AddIcon sx={{ color: "white", background:"white" , borderRadius: 50 }} />}
                   sx={{
                     backgroundColor: newSkillColor,
                     color: "white",
                     fontFamily: "Figtree, sans-serif",
                     fontSize: 13,
+                    "&:hover": { backgroundColor: "#2751B8" },
+                    transition: "background 0.2s",
                   }}
                 />
               ))}
