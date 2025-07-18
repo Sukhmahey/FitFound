@@ -18,7 +18,7 @@ const RecommendedActions = () => {
 
   const { user } = useAuth();
   const [userRole, setUserRole] = useState("");
-  const [userSkills, setUserSkills] = useState("");
+  const [userSkills, setUserSkills] = useState([]);
   const [prompt, setPrompt] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [message, setMessage] = useState("");
@@ -26,20 +26,29 @@ const RecommendedActions = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   useEffect(() => {
+    // candidateApi
+    //   .getProfileById(user.profileId)
+    //   .then((result) => {
+    //     let skillsString = result.data.skills.map((s) => s.skill).join(", ");
+    //     setUserRole(result.data.basicInfo.bio);
+    //     setUserSkills(skillsString);
+    //   })
     candidateApi
-      .getProfileById(user.profileId)
-      .then((result) => {
-        let skillsString = result.data.skills.map((s) => s.skill).join(", ");
-        setUserRole(result.data.basicInfo.bio);
-        setUserSkills(skillsString);
-      })
-      .catch((error) => console.log(error));
+  .getProfileById(user.profileId)
+  .then((result) => {
+  
+    const skillsArray = result.data.skills.map((s) => s.skill);
+    setUserRole(result.data.basicInfo.bio);
+    setUserSkills(skillsArray); 
+   
+  })
+.catch((error) => console.log(error));
   }, [user.profileId]);
 
   useEffect(() => {
     if (userSkills && userRole) {
       setPrompt(
-        `I am a/an ${userRole}. Based on the current job market requirements, give me exactly three technologies or skills I should add to my profile to increase visibility on job platforms. Exclude the following technologies that I already know: ${userSkills}. Only return a simple list of names, with no extra explanation, in a single line, splitted by comma (,). Don't add anything else at the beginning or ending.`
+        `I am a/an ${userRole}. Based on the current job market requirements, give me exactly three technologies or skills I should add to my profile to increase visibility on job platforms. Exclude the following technologies that I already know: ${userSkills.join(", ")}. Only return a simple list of names, with no extra explanation, in a single line, splitted by comma (,). Don't add anything else at the beginning or ending.`
       );
     }
   }, [userSkills, userRole]);
@@ -65,21 +74,43 @@ const RecommendedActions = () => {
     }
   }, [prompt]);
 
+  // const handleAddClick = (skill) => {
+  //   candidateApi
+  //     .updateSkills(user.userId, { skills: [{ skill }] })
+  //     .then(() => {
+  //       setMessage(`The skill "${skill}" has been added to your profile.`);
+  //       setMessageSeverity("success");
+  //       setOpenSnackbar(true);
+  //       setRecommendations(recommendations.filter((item) => item !== skill));
+  //     })
+  //     .catch((err) => {
+  //       setMessage(err.response?.data?.details || "An error occurred.");
+  //       setMessageSeverity("error");
+  //       setOpenSnackbar(true);
+  //     });
+  // };
+
   const handleAddClick = (skill) => {
-    candidateApi
-      .updateSkills(user.userId, { skills: [{ skill }] })
-      .then(() => {
-        setMessage(`The skill "${skill}" has been added to your profile.`);
-        setMessageSeverity("success");
-        setOpenSnackbar(true);
-        setRecommendations(recommendations.filter((item) => item !== skill));
-      })
-      .catch((err) => {
-        setMessage(err.response?.data?.details || "An error occurred.");
-        setMessageSeverity("error");
-        setOpenSnackbar(true);
-      });
-  };
+ 
+  const updatedSkills = Array.from(new Set([...userSkills, skill]));
+
+  const skillsPayload = updatedSkills.map((s) => ({ skill: s }));
+
+  candidateApi
+    .updateSkills(user.userId, { skills: skillsPayload })
+    .then(() => {
+      setUserSkills(updatedSkills); 
+      setMessage(`The skill "${skill}" has been added to your profile.`);
+      setMessageSeverity("success");
+      setOpenSnackbar(true);
+      setRecommendations(recommendations.filter((item) => item !== skill));
+    })
+    .catch((err) => {
+      setMessage(err.response?.data?.details || "An error occurred.");
+      setMessageSeverity("error");
+      setOpenSnackbar(true);
+    });
+};
 
   return (
     <Box sx={{ mt: 4 }}>
