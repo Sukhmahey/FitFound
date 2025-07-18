@@ -283,6 +283,9 @@ export default function WorkExperienceStep({
                   <MenuItem value="junior">Junior</MenuItem>
                   <MenuItem value="middle">Middle</MenuItem>
                   <MenuItem value="senior">Senior</MenuItem>
+                  <MenuItem value="lead">Lead</MenuItem>
+                  <MenuItem value="supervisor">Supervisor</MenuItem>
+                  <MenuItem value="director">Director</MenuItem>
                 </Select>
               </FormControl>
 
