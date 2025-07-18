@@ -30,6 +30,8 @@ export default function NotificationPermission() {
         transform: 'translateX(22px)',
         color: '#fff',
         '& .MuiSwitch-thumb:before': {
+          width: '1.5rem',
+          marginLeft : '.25rem',
           backgroundImage: `url("data:image/svg+xml;utf8,${silentIcon}")`,
         },
         '& + .MuiSwitch-track': {
@@ -51,6 +53,8 @@ export default function NotificationPermission() {
         top: 0,
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
+        width: '1.5rem',
+          marginLeft : '.25rem',
         backgroundImage: `url("data:image/svg+xml;utf8,${soundOnIcon}")`,
       },
     },
