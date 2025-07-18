@@ -19,6 +19,7 @@ export default function WorkExperienceStep({
   onUpdate,
   verificationCompany = [],
   errors = {},
+  editMode
 }) {
   // const handleChange = (index, field, value) => {
   //   const updated = [...data];
@@ -206,11 +207,12 @@ export default function WorkExperienceStep({
               <TextField
                 label="Company Name"
                 variant="outlined"
+                
                 value={exp.companyName}
                 onChange={(e) =>
                   handleChange(index, "companyName", e.target.value)
                 }
-                disabled={isVerified}
+                disabled={isVerified || !editMode}
                 error={!!errors.companyName}
                 helperText={errors.companyName}
               />
@@ -230,7 +232,7 @@ export default function WorkExperienceStep({
                 variant="outlined"
                 value={exp.role}
                 onChange={(e) => handleChange(index, "role", e.target.value)}
-                disabled={isVerified}
+                disabled={isVerified || !editMode}
                 error={!!errors.jobTitle}
                 helperText={errors.jobTitle}
               />
@@ -250,7 +252,7 @@ export default function WorkExperienceStep({
                 onChange={(e) =>
                   handleChange(index, "startDate", e.target.value)
                 }
-                disabled={isVerified}
+                disabled={isVerified || !editMode}
                 error={!!errors.startDate}
                 helperText={errors.startDate}
               />
@@ -261,7 +263,7 @@ export default function WorkExperienceStep({
                 InputLabelProps={{ shrink: true }}
                 value={normalizeDate(exp.endDate) || ""}
                 onChange={(e) => handleChange(index, "endDate", e.target.value)}
-                disabled={isVerified}
+                disabled={isVerified || !editMode}
                 error={!!errors.endDate}
                 helperText={errors.endDate}
               />
@@ -272,7 +274,7 @@ export default function WorkExperienceStep({
                   labelId={`exp-level-input`}
                   value={exp.experienceLevel}
                   label="Experience Level"
-                  disabled={isVerified}
+                  disabled={isVerified || !editMode}
                   onChange={(e) =>
                     handleChange(index, "experienceLevel", e.target.value)
                   }
@@ -295,7 +297,7 @@ export default function WorkExperienceStep({
                   {exp.achievements.map((a, i) => (
                     <TextField
                       key={i}
-                      disabled={isVerified}
+                      disabled={isVerified || !editMode}
                       label={`Achievement ${i + 1}`}
                       variant="outlined"
                       value={a}
@@ -308,7 +310,7 @@ export default function WorkExperienceStep({
                 <Button
                   variant="outlined"
                   color="secondary"
-                  disabled={isVerified}
+                  disabled={isVerified || !editMode}
                   onClick={() => addAchievement(index)}
                   sx={{ mt: 2 }}
                 >
@@ -319,7 +321,7 @@ export default function WorkExperienceStep({
               <Button
                 variant="outlined"
                 color="error"
-                disabled={isVerified}
+                disabled={isVerified || !editMode}
                 onClick={() => removeExperience(index)}
                 sx={{ mt: 2 }}
               >
@@ -329,7 +331,7 @@ export default function WorkExperienceStep({
           );
         })}
 
-        <Button variant="contained" color="primary" onClick={addExperience}>
+        <Button variant="contained" disabled={!editMode} color="primary" onClick={addExperience}>
           + Add Work Experience
         </Button>
       </div>

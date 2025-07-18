@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Chip, Stack } from "@mui/material";
 
-export default function SkillsStep({ data = [], onUpdate, errors = {} }) {
+export default function SkillsStep({ data = [], onUpdate, errors = {} ,editMode}) {
   const [skill, setSkill] = useState("");
   console.log(data[1]);
 
@@ -25,6 +25,7 @@ export default function SkillsStep({ data = [], onUpdate, errors = {} }) {
           <TextField
             label="Enter a skill"
             variant="outlined"
+            disabled={!editMode}
             fullWidth
             value={skill}
             error={!!errors.skills}
@@ -37,7 +38,7 @@ export default function SkillsStep({ data = [], onUpdate, errors = {} }) {
               }
             }}
           />
-          <Button variant="contained" color="primary" onClick={addSkill}>
+          <Button variant="contained" disabled={!editMode} color="primary" onClick={addSkill}>
             Add
           </Button>
         </Box>
@@ -46,6 +47,7 @@ export default function SkillsStep({ data = [], onUpdate, errors = {} }) {
           {data.map((item, index) => (
             <Chip
               key={index}
+              disabled={!editMode}
               label={item.skill || item}
               onDelete={() => removeSkill(index)}
               color="primary"

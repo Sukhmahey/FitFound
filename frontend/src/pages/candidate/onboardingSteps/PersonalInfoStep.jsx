@@ -9,6 +9,7 @@ export default function PersonalInfoStep({
   errors = {},
   onNext,
   onBack,
+  editMode
 }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,6 +50,7 @@ export default function PersonalInfoStep({
           name="firstName"
           value={data.firstName}
           onChange={handleChange}
+          disabled={!editMode}
           error={!!errors.firstName}
           helperText={errors.firstName}
           fullWidth
@@ -57,6 +59,7 @@ export default function PersonalInfoStep({
           label="Middle Name"
           name="middleName"
           value={data.middleName}
+          disabled={!editMode}
           onChange={handleChange}
           fullWidth
         />
@@ -65,6 +68,7 @@ export default function PersonalInfoStep({
           name="lastName"
           value={data.lastName}
           onChange={handleChange}
+          disabled={!editMode}
           error={!!errors.lastName}
           helperText={errors.lastName}
           fullWidth
@@ -73,6 +77,7 @@ export default function PersonalInfoStep({
           label="Email"
           name="email"
           type="email"
+          disabled={!editMode}
           value={userEmail || data.email}
           onChange={handleChange}
           fullWidth
@@ -81,6 +86,7 @@ export default function PersonalInfoStep({
           label="Current Status"
           name="currentStatus"
           value={data.currentStatus}
+          disabled={!editMode}
           onChange={handleChange}
           placeholder="Student,Full-time"
           fullWidth
@@ -89,6 +95,7 @@ export default function PersonalInfoStep({
           label="Specialization"
           name="specialization"
           value={data.specialization}
+          disabled={!editMode}
           onChange={handleChange}
           fullWidth
         />

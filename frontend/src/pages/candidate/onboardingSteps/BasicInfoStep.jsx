@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 
-export default function BasicInfoStep({ data, onUpdate, errors = {} }) {
+export default function BasicInfoStep({ data, onUpdate, errors = {},editMode }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     onUpdate({ [name]: value });
@@ -27,6 +27,7 @@ export default function BasicInfoStep({ data, onUpdate, errors = {} }) {
           onChange={handleChange}
           error={!!errors.phoneNumber}
           helperText={errors.phoneNumber}
+          disabled={!editMode}
         />
         <TextField
           type="text"
@@ -36,6 +37,7 @@ export default function BasicInfoStep({ data, onUpdate, errors = {} }) {
           variant="outlined"
           value={data.workStatus}
           onChange={handleChange}
+          disabled={!editMode}
         />
         <TextField
           type="text"
@@ -45,6 +47,7 @@ export default function BasicInfoStep({ data, onUpdate, errors = {} }) {
           variant="outlined"
           value={data.language}
           onChange={handleChange}
+          disabled={!editMode}
         />
         <TextField
           name="bio"
@@ -54,6 +57,7 @@ export default function BasicInfoStep({ data, onUpdate, errors = {} }) {
           rows={4}
           value={data.bio}
           onChange={handleChange}
+          disabled={!editMode}
         />
         {/* <TextField
           name="additionalInfo"

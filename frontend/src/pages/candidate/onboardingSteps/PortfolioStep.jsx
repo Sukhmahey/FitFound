@@ -5,6 +5,7 @@ export default function PortfolioStep({
   data = { socialLinks: {} },
   onUpdate,
   errors = {},
+  editMode
 }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,14 +56,14 @@ export default function PortfolioStep({
           label="LinkedIn URL"
           name="linkedin"
           variant="outlined"
-          value={data.socialLinks?.linkedin || ""}
+          value={data.socialLinks?.linkedin || ""} disabled={!editMode}
           onChange={handleChange}
         />
         <TextField
           label="Personal Website"
           name="personalPortfolioWebsite"
           variant="outlined"
-          value={data.socialLinks?.personalPortfolioWebsite || ""}
+          value={data.socialLinks?.personalPortfolioWebsite || ""} disabled={!editMode}
           onChange={handleChange}
         />
 
@@ -75,20 +76,20 @@ export default function PortfolioStep({
                   fullWidth
                   label={`Link ${index + 1}`}
                   variant="outlined"
-                  value={link}
+                  value={link} disabled={!editMode}
                   onChange={(e) => handleLinkChange(index, e.target.value)}
                 />
                 <Button
                   variant="outlined"
                   color="error"
-                  onClick={() => removeLink(index)}
+                  onClick={() => removeLink(index)} disabled={!editMode}
                 >
                   Remove
                 </Button>
               </Box>
             ))}
           </Stack>
-          <Button variant="outlined" onClick={addLink} sx={{ mt: 2 }}>
+          <Button variant="outlined" disabled={!editMode} onClick={addLink} sx={{ mt: 2 }}>
             + Add Link
           </Button>
         </Box>

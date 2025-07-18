@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const CompanyInfo = ({errors}) => {
+const CompanyInfo = ({errors,editMode}) => {
   const { register, watch, setValue } = useFormContext();
   const [imageSrc, setImageSrc] = useState();
   const companyLogo = watch("companyLogo");
@@ -77,6 +77,7 @@ const CompanyInfo = ({errors}) => {
               // {...register("companyLogo")}
               name="companyLogo"
               id="companyLogo"
+              disabled={!editMode}
               onChange={(e) => {
                 handleImageChange(e); // Set preview
               }}
@@ -101,6 +102,7 @@ const CompanyInfo = ({errors}) => {
               {...register("companyName")}
               className="form-control form-control-sm"
               name="companyName"
+              disabled={!editMode}
               id="companyName"
               maxLength="60"
               minLength="5"
@@ -115,6 +117,7 @@ const CompanyInfo = ({errors}) => {
               type="number"
               {...register("establishedYear")}
               className="form-control form-control-sm"
+              disabled={!editMode}
               name="establishedYear"
               id="establishedYear"
               min="1000"
@@ -129,6 +132,7 @@ const CompanyInfo = ({errors}) => {
             <input
               type="text"
               {...register("businessRegisteredNumber")}
+              disabled={!editMode}
               className="form-control form-control-sm"
               name="businessRegisteredNumber"
               id="businessRegisteredNumber"
@@ -145,6 +149,7 @@ const CompanyInfo = ({errors}) => {
               {...register("industrySector")}
               id="industrySector"
               name="industrySector"
+              disabled={!editMode}
               className="form-control form-control-sm"
             >
               <option value="">-- Select Industry Sector --</option>
@@ -162,6 +167,7 @@ const CompanyInfo = ({errors}) => {
               {...register("companySize")}
               name="companySize"
               id="companySize"
+              disabled={!editMode}
               className="form-control form-control-sm"
             >
               <option value="">-- Select Company Size --</option>
@@ -185,6 +191,7 @@ const CompanyInfo = ({errors}) => {
             <input
               type="text"
               {...register("workLocation")}
+              disabled={!editMode}
               className="form-control form-control-sm"
               name="workLocation"
               id="workLocation"
@@ -200,6 +207,7 @@ const CompanyInfo = ({errors}) => {
               {...register("companyWebsite")}
               className="form-control form-control-sm"
               name="companyWebsite"
+              disabled={!editMode}
               id="companyWebsite"
               maxLength="60"
               minLength="5"
@@ -214,6 +222,7 @@ const CompanyInfo = ({errors}) => {
               {...register("companyDescription")}
               id="companyDescription"
               className="form-control"
+              disabled={!editMode}
               name="companyDescription"
               rows="4"
               cols="50"
