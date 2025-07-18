@@ -1,5 +1,3 @@
-// CandidateDashboard.jsx
-
 import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   Container,
@@ -86,7 +84,9 @@ export default function CandidateDashboard() {
       setCandidateName(data.personalInfo?.firstName || "Candidate");
       setWorkHistory(data.workHistory || []);
       setProfileScore(data.profileScore || 0);
-      setAlreadySkills(data.skills?.map((s) => s.skill) || []);
+      setAlreadySkills(
+        (data.skills || []).map(s => typeof s === "string" ? s : s.skill)
+      );
       if (data.jobPreference?.desiredJobTitle?.length)
         setDesiredJobRole(data.jobPreference.desiredJobTitle[0]);
     } catch (err) {
@@ -113,6 +113,33 @@ export default function CandidateDashboard() {
       });
     } catch (err) {
       console.error("Hiring Notification Error", err);
+    }
+  };
+
+  const handleAddSkill = async (skill) => {
+    if (alreadySkills.includes(skill)) return;
+
+    const updatedSkills = Array.from(new Set([...alreadySkills, skill]));
+
+    try {
+     
+      const skillsPayload = updatedSkills.map(s => ({ skill: s }));
+      const res = await candidateApi.updateSkills(userId, { skills: skillsPayload });
+
+      
+      setAlreadySkills(
+        (res.data.skills || skillsPayload).map(s =>
+          typeof s === "string" ? s : s.skill
+        )
+      );
+
+      notify.success(`The skill "${skill}" has been added to your profile.`);
+      
+      setSuggestedSkills((prev) => prev.filter((s) => s !== skill));
+    } catch (err) {
+      notify.error(
+        err.response?.data?.details || "An error occurred while adding the skill."
+      );
     }
   };
 
@@ -200,6 +227,8 @@ export default function CandidateDashboard() {
       <TrendingKeywordsSection
         suggestedSkills={suggestedSkills}
         alreadySkills={alreadySkills}
+        onAddSkill={handleAddSkill}
+
       />
 
       <Box sx={{ mt: 4 }}>
