@@ -53,7 +53,7 @@ const CandidateSchema = new Schema(
         role: { type: String, minLength: 2, maxLength: 60, trim: true },
         experienceLevel: {
           type: String,
-          enum: ["junior", "middle", "senior"],
+          enum: ["junior", "middle", "senior","lead", "supervisor", "director"],
           trim: true,
         },
         remarkFromEmployer: { type: String, maxLength: 500, trim: true },

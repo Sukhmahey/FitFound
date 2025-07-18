@@ -13,7 +13,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  TextField,
+  TextField, Radio, RadioGroup
 } from "@mui/material";
 
 const predefinedJobTitles = [
@@ -41,23 +41,36 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
 
   const handleSalaryChange = (e) => {
     const { name, value, checked, type } = e.target;
-    if (name === "perHour" || name === "perYear") {
-      onUpdate({
-        ...data,
-        salaryExpectation: {
-          ...data.salaryExpectation,
-          [name]: checked,
-        },
-      });
-    } else if (name === "min") {
-      onUpdate({
-        ...data,
-        salaryExpectation: {
-          ...data.salaryExpectation,
-          min: Number(value),
-        },
-      });
-    } else {
+    // if (name === "perHour" || name === "perYear") {
+    //   onUpdate({
+    //     ...data,
+    //     salaryExpectation: {
+    //       ...data.salaryExpectation,
+    //       [name]: checked,
+    //     },
+    //   });
+    // } 
+    if (name === "salaryType") {
+  onUpdate({
+    ...data,
+    salaryExpectation: {
+      ...data.salaryExpectation,
+      perHour: value === "perHour",
+      perYear: value === "perYear",
+    },
+  });
+}
+    else if (name === "min") {
+  const num = Number(value);
+  onUpdate({
+    ...data,
+    salaryExpectation: {
+      ...data.salaryExpectation,
+      min: num < 0 ? 0 : num, 
+    },
+  });
+}
+ else {
       onUpdate({ ...data, [name]: value });
     }
   };
@@ -119,9 +132,10 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
             value={data.salaryExpectation?.min || ""}
             onChange={handleSalaryChange}
             InputProps={{ startAdornment: <span>$</span> }}
+            inputProps={{ min: 0 }}
           />
           <Box className="d-flex gap-4">
-            <FormControlLabel
+            {/* <FormControlLabel
               control={
                 <Checkbox
                   name="perHour"
@@ -140,7 +154,25 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
                 />
               }
               label="Per Year"
-            />
+            /> */}
+            <FormControl component="fieldset">
+  <RadioGroup
+    row
+    name="salaryType"
+    value={
+      data.salaryExpectation?.perHour
+        ? "perHour"
+        : data.salaryExpectation?.perYear
+        ? "perYear"
+        : ""
+    }
+    onChange={handleSalaryChange}
+  >
+    <FormControlLabel value="perHour" control={<Radio />} label="Per Hour" />
+    <FormControlLabel value="perYear" control={<Radio />} label="Per Year" />
+  </RadioGroup>
+</FormControl>
+
           </Box>
         </Box>
       </div>
