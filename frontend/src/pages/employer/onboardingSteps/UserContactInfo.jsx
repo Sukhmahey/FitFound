@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const UserContactInfo = ({ errors }) => {
+const UserContactInfo = ({ errors,editMode }) => {
   const { register, watch, setValue } = useFormContext();
   const [imageSrc, setImageSrc] = useState(null);
   const profilePicture = watch("profilePicture");
@@ -70,6 +70,7 @@ const UserContactInfo = ({ errors }) => {
             <input
               type="file"
               accept="image/*"
+              disabled={!editMode}
               style={styles.input}
               name="profilePicture"
               id="profilePicture"
@@ -112,6 +113,7 @@ const UserContactInfo = ({ errors }) => {
               {...register("firstName")}
               className="form-control form-control-sm"
               name="firstName"
+              disabled={!editMode}
               id="firstName"
               maxLength="60"
               minLength="3"
@@ -127,6 +129,7 @@ const UserContactInfo = ({ errors }) => {
               {...register("middleName")}
               className="form-control form-control-sm"
               name="middleName"
+              disabled={!editMode}
               id="middleName"
               maxLength="60"
               minLength="5"
@@ -143,6 +146,7 @@ const UserContactInfo = ({ errors }) => {
               className="form-control form-control-sm"
               name="lastName"
               id="lastName"
+              disabled={!editMode}
               maxLength="60"
               minLength="3"
             />
@@ -157,6 +161,7 @@ const UserContactInfo = ({ errors }) => {
               {...register("phone")}
               className="form-control form-control-sm"
               name="phone"
+              disabled={!editMode}
               id="phone"
               maxLength="60"
               minLength="5"
@@ -172,6 +177,7 @@ const UserContactInfo = ({ errors }) => {
               {...register("email")}
               className="form-control form-control-sm"
               name="email"
+              disabled={!editMode}
               id="email"
               maxLength="60"
               minLength="5"
@@ -191,6 +197,7 @@ const UserContactInfo = ({ errors }) => {
               className="form-control form-control-sm"
               name="designation"
               id="designation"
+              disabled={!editMode}
               maxLength="60"
               minLength="5"
             />
@@ -206,6 +213,7 @@ const UserContactInfo = ({ errors }) => {
               className="form-control form-control-sm"
               name="linkedInProfile"
               id="linkedInProfile"
+              disabled={!editMode}
               maxLength="60"
               minLength="5"
             />
@@ -220,6 +228,7 @@ const UserContactInfo = ({ errors }) => {
               className="form-control"
               id="additionalDetails"
               name="additionalDetails"
+              disabled={!editMode}
               rows="4"
               cols="50"
               maxLength="600"

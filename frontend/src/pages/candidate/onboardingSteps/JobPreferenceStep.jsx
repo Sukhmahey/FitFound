@@ -24,7 +24,7 @@ const predefinedJobTitles = [
   "ui designer",
 ];
 
-export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
+export default function JobPreferenceStep({ data, onUpdate, errors = {} ,editMode}) {
   const [selectedRole, setSelectedRole] = useState(
     data.desiredJobTitle?.[0] || ""
   );
@@ -94,6 +94,7 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
             <ToggleButton
               key={role}
               value={role}
+              disabled={!editMode}
               sx={{ textTransform: "capitalize" }}
             >
               {role}
@@ -109,6 +110,7 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
             name="jobType"
             value={data.jobType}
             label="Job Type"
+            disabled={!editMode}
             onChange={handleSalaryChange}
           >
             <MenuItem value="">Select Job Type</MenuItem>
@@ -128,6 +130,7 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
           <TextField
             type="number"
             name="min"
+            disabled={!editMode}
             label="Minimum Salary"
             value={data.salaryExpectation?.min || ""}
             onChange={handleSalaryChange}
@@ -159,6 +162,7 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
   <RadioGroup
     row
     name="salaryType"
+    disabled={!editMode}
     value={
       data.salaryExpectation?.perHour
         ? "perHour"
@@ -168,8 +172,8 @@ export default function JobPreferenceStep({ data, onUpdate, errors = {} }) {
     }
     onChange={handleSalaryChange}
   >
-    <FormControlLabel value="perHour" control={<Radio />} label="Per Hour" />
-    <FormControlLabel value="perYear" control={<Radio />} label="Per Year" />
+    <FormControlLabel value="perHour" control={<Radio />} disabled={!editMode} label="Per Hour" />
+    <FormControlLabel value="perYear" control={<Radio />} disabled={!editMode} label="Per Year" />
   </RadioGroup>
 </FormControl>
 

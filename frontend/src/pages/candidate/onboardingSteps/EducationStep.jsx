@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, TextField, Button } from "@mui/material";
 
-export default function EducationStep({ data = [], onUpdate, errors = {} }) {
+export default function EducationStep({ data = [], onUpdate, errors = {},editMode }) {
   const handleChange = (index, field, value) => {
     const updated = [...data];
 
@@ -52,6 +52,7 @@ export default function EducationStep({ data = [], onUpdate, errors = {} }) {
             <TextField
               label="Institute Name"
               id="outlined-basic"
+              disabled={!editMode}
               variant="outlined"
               value={edu.instituteName}
               onChange={(e) =>
@@ -61,6 +62,7 @@ export default function EducationStep({ data = [], onUpdate, errors = {} }) {
             <TextField
               label="Credentials"
               variant="outlined"
+              disabled={!editMode}
               value={edu.credentials}
               onChange={(e) =>
                 handleChange(index, "credentials", e.target.value)
@@ -70,6 +72,7 @@ export default function EducationStep({ data = [], onUpdate, errors = {} }) {
             <TextField
               type="month"
               label="Start Date"
+              disabled={!editMode}
               InputLabelProps={{ shrink: true }}
               value={normalizeDate(edu.startDate) || ""}
               onChange={(e) => handleChange(index, "startDate", e.target.value)}
@@ -78,6 +81,7 @@ export default function EducationStep({ data = [], onUpdate, errors = {} }) {
             <TextField
               type="month"
               label="End Date"
+              disabled={!editMode}
               InputLabelProps={{ shrink: true }}
               value={normalizeDate(edu.endDate) || ""}
               onChange={(e) => handleChange(index, "endDate", e.target.value)}
@@ -85,13 +89,14 @@ export default function EducationStep({ data = [], onUpdate, errors = {} }) {
             <Button
               variant="outlined"
               color="error"
+              disabled={!editMode}
               onClick={() => removeEducation(index)}
             >
               Remove
             </Button>
           </Box>
         ))}
-        <Button variant="contained" color="primary" onClick={addEducation}>
+        <Button variant="contained" color="primary" disabled={!editMode} onClick={addEducation}>
           + Add Education
         </Button>
       </div>

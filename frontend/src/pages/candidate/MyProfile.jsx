@@ -10,6 +10,8 @@ import EducationStep from "./onboardingSteps/EducationStep";
 import JobPreferenceStep from "./onboardingSteps/JobPreferenceStep";
 import PortfolioStep from "./onboardingSteps/PortfolioStep";
 import useNotify from "../../utils/notificationService";
+import EditIcon from '@mui/icons-material/Edit';
+
 
 import {
   Box,
@@ -32,6 +34,8 @@ export default function MyProfile() {
   const profileId = user?.profileId;
 
   const [activeTab, setActiveTab] = useState("Personal");
+  const [editMode, setEditMode] = useState(false);
+  const [originalData, setOriginalData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [submitStatus, setSubmitStatus] = useState("");
   const [verificationCompany, setVerificationCompany] = useState([]);
@@ -53,6 +57,7 @@ export default function MyProfile() {
       try {
         const response = await candidateApi.getProfileByUserId(userId);
         setFormData(response.data);
+        setOriginalData(response.data)
         console.log("Candidate Profile:", response.data);
       } catch (err) {
         console.error("Failed to load profile:", err);
@@ -128,26 +133,26 @@ export default function MyProfile() {
         errors.skills = "Add at least one skill";
     }
 
-  if (activeTab === 'Work') {
-    (formData.workHistory || []).forEach((exp, i) => {
-      if (!exp.companyName) errors[`companyName_${i}`] = "Company name is required";
-      if (!exp.role) errors[`role_${i}`] = "Job Role is required";
-      if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
-      if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
-      if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
-    });
-  }
-  if (activeTab === "Education") {
-    formData.education.forEach((edu, i) => {
-      if (!edu.instituteName?.trim())
-        errors[`instituteName_${i}`] = "Institute name is required";
-      if (!edu.credentials?.trim())
-        errors[`credentials_${i}`] = "Credentials are required";
-      if (!edu.startDate)
-        errors[`eduStartDate_${i}`] = "Start date is required";
-      if (!edu.endDate) errors[`eduEndDate_${i}`] = "End date is required";
-    });
-  }
+    if (activeTab === 'Work') {
+      (formData.workHistory || []).forEach((exp, i) => {
+        if (!exp.companyName) errors[`companyName_${i}`] = "Company name is required";
+        if (!exp.role) errors[`role_${i}`] = "Job Role is required";
+        if (!exp.startDate) errors[`startDate_${i}`] = "Start Date is required";
+        if (!exp.endDate) errors[`endDate_${i}`] = "End Date is required";
+        if (!exp.experienceLevel) errors[`experienceLevel_${i}`] = "Experience Level is required";
+      });
+    }
+    if (activeTab === "Education") {
+      formData.education.forEach((edu, i) => {
+        if (!edu.instituteName?.trim())
+          errors[`instituteName_${i}`] = "Institute name is required";
+        if (!edu.credentials?.trim())
+          errors[`credentials_${i}`] = "Credentials are required";
+        if (!edu.startDate)
+          errors[`eduStartDate_${i}`] = "Start date is required";
+        if (!edu.endDate) errors[`eduEndDate_${i}`] = "End date is required";
+      });
+    }
 
     if (activeTab === "Job") {
       const desired = formData.jobPreference?.desiredJobTitle;
@@ -179,6 +184,7 @@ export default function MyProfile() {
     setFormErrors({});
     try {
       await candidateApi.updateProfile(userId, formData);
+      setOriginalData(formData);
       setSubmitStatus("success");
       await notify.success("Profile saved successfully!");
     } catch (err) {
@@ -219,6 +225,7 @@ export default function MyProfile() {
             data={formData.personalInfo}
             onUpdate={(data) => updateFormData("personalInfo", data)}
             errors={formErrors}
+            editMode={editMode}
           />
         );
       case "Basic":
@@ -227,6 +234,7 @@ export default function MyProfile() {
             data={formData.basicInfo}
             onUpdate={(data) => updateFormData("basicInfo", data)}
             errors={formErrors}
+            editMode={editMode}
           />
         );
       case "Skills":
@@ -235,6 +243,7 @@ export default function MyProfile() {
             data={formData.skills}
             onUpdate={(data) => updateFormData("skills", data)}
             errors={formErrors}
+            editMode={editMode}
           />
         );
       case "Work":
@@ -244,6 +253,7 @@ export default function MyProfile() {
             onUpdate={(data) => updateFormData("workHistory", data)}
             verificationCompany={verificationCompany}
             errors={formErrors}
+            editMode={editMode}
           />
         );
       case "Education":
@@ -252,6 +262,7 @@ export default function MyProfile() {
             data={formData.education}
             onUpdate={(data) => updateFormData("education", data)}
             errors={formErrors}
+            editMode={editMode}
           />
         );
       case "Job":
@@ -260,6 +271,7 @@ export default function MyProfile() {
             data={formData.jobPreference}
             onUpdate={(data) => updateFormData("jobPreference", data)}
             errors={formErrors}
+            editMode={editMode}
           />
         );
       case "Portfolio":
@@ -268,6 +280,7 @@ export default function MyProfile() {
             data={formData.portfolio}
             onUpdate={(data) => updateFormData("portfolio", data)}
             errors={formErrors}
+            editMode={editMode}
           />
         );
       default:
@@ -277,7 +290,7 @@ export default function MyProfile() {
 
   return (
     <Container maxWidth="md">
-      <Tabs
+      {/* <Tabs
         value={activeTab}
         onChange={(e, newValue) => setActiveTab(newValue)}
         variant="scrollable"
@@ -286,15 +299,50 @@ export default function MyProfile() {
         {tabList.map((tab) => (
           <Tab key={tab} value={tab} label={tab} />
         ))}
-      </Tabs>
+      </Tabs> */}
+      <Box display="flex" alignItems="center" justifyContent="space-between" mt={2} mb={1}>
+        <Box>
+          <Tabs
+            value={activeTab}
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            {tabList.map((tab) => (
+              <Tab key={tab} value={tab} label={tab} />
+            ))}
+          </Tabs>
+        </Box>
+        {!editMode && (
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<EditIcon />}
+            onClick={() => setEditMode(true)}
+          >
+            Edit
+          </Button>
+        )}
+      </Box>
 
       <Box mt={3}>{renderTab()}</Box>
 
-      <Box mt={4} display="flex" justifyContent="center">
+      {/* <Box mt={4} display="flex" justifyContent="center">
         <Button variant="contained" color="primary" onClick={handleUpdate}>
           Update Profile
         </Button>
-      </Box>
+      </Box> */}
+      {editMode && (
+        <Box mt={4} display="flex" justifyContent="center" gap={2}>
+          <Button variant="outlined" onClick={() => { setFormData(originalData); setEditMode(false); }}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="primary" onClick={handleUpdate}>
+            Update Profile
+          </Button>
+        </Box>
+      )}
+
 
       <Box>
         <Snackbar

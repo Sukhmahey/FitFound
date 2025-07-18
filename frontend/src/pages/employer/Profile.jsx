@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
+import EditIcon from '@mui/icons-material/Edit';
 import {
   Box,
   Button,
@@ -29,6 +30,11 @@ const EmployerProfile = () => {
   const [companyInfo, setCompanyInfo] = useState({});
   const [contactInfo, setContactInfo] = useState({});
   const [userProfile, setUserProfile] = useState({});
+  const [editMode, setEditMode] = useState(false);
+
+  const [originalCompanyInfo, setOriginalCompanyInfo] = useState({});
+  const [originalContactInfo, setOriginalContactInfo] = useState({});
+
   const [message, setMessage] = useState("");
   const [messageClass, setMessageClass] = useState("");
   const [formErrors, setFormErrors] = useState({});
@@ -61,7 +67,9 @@ const EmployerProfile = () => {
         setUserProfile(result.data);
         const { contactInfo, ...companyData } = result.data;
         setCompanyInfo(companyData);
+        setOriginalCompanyInfo(companyData);
         setContactInfo(contactInfo);
+        setOriginalContactInfo(contactInfo);
         methods.reset(companyData);
       })
       .catch((error) => {
@@ -196,6 +204,12 @@ const EmployerProfile = () => {
         setMessage("Success: Info saved.");
         setMessageClass("alert alert-success");
         setTimeout(() => setMessage(""), 5000);
+        if (formSection === "details") {
+          setOriginalCompanyInfo(data);
+        } else {
+          setOriginalContactInfo(data);
+        }
+        // setEditMode(false);
       })
       .catch(() => {
         setMessage("Error: Info not saved.");
@@ -269,7 +283,21 @@ const EmployerProfile = () => {
       )}
 
       <FormProvider {...methods}>
+
         <form onSubmit={methods.handleSubmit(onSubmit)}>
+          {!editMode && (
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setEditMode(true)}
+                startIcon={<EditIcon />}
+              >
+                Edit 
+              </Button>
+            </Box>
+          )}
+
           <Paper
             elevation={3}
             sx={{
@@ -281,7 +309,8 @@ const EmployerProfile = () => {
           >
             {formSection === "details" ? (
               <>
-                <CompanyInfo />
+
+                <CompanyInfo editMode={editMode} />
                 <Box
                   sx={{
                     mt: 3,
@@ -289,28 +318,50 @@ const EmployerProfile = () => {
                     justifyContent: { xs: "center", md: "flex-end" },
                   }}
                 >
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#062F54",
-                      fontFamily: "Poppins, sans-serif",
-                      textTransform: "none",
-                      borderRadius: 3,
-                      px: 3,
-                      py: 1.5,
-                      "&:hover": {
-                        backgroundColor: "#041f39",
-                      },
-                    }}
-                  >
-                    Save Changes
-                  </Button>
+                  <>
+                    {editMode && (
+                      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mb: 2 }}>
+                        <Button
+                          variant="outlined"
+                          onClick={() => {
+                            setEditMode(false);
+                            if (formSection === "details") {
+                              setCompanyInfo(originalCompanyInfo);
+                              methods.reset(originalCompanyInfo);
+                            } else {
+                              setContactInfo(originalContactInfo);
+                              methods.reset(originalContactInfo);
+                            }
+                            setFormErrors({});
+                          }}
+                          sx={{ minWidth: 120 }}
+                        >
+                          Cancel
+                        </Button>
+
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "#062F54",
+                            fontFamily: "Poppins, sans-serif",
+                            textTransform: "none",
+                            borderRadius: 3,
+                            px: 3,
+                            py: 1.5,
+                            "&:hover": {
+                              backgroundColor: "#041f39",
+                            },
+                          }}
+                        >
+                          Save Changes
+                        </Button></Box>)}
+                  </>
                 </Box>
               </>
             ) : (
               <>
-                <UserContactInfo />
+                <UserContactInfo editMode={editMode} />
                 <Box
                   sx={{
                     mt: 3,
@@ -318,23 +369,44 @@ const EmployerProfile = () => {
                     justifyContent: { xs: "center", md: "flex-end" },
                   }}
                 >
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#062F54",
-                      fontFamily: "Poppins, sans-serif",
-                      textTransform: "none",
-                      borderRadius: 3,
-                      px: 3,
-                      py: 1.5,
-                      "&:hover": {
-                        backgroundColor: "#041f39",
-                      },
-                    }}
-                  >
-                    Save Changes
-                  </Button>
+                  <>
+                    {editMode && (
+                      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mb: 2 }}>
+                        <Button
+                          variant="outlined"
+                          onClick={() => {
+                            setEditMode(false);
+                            if (formSection === "details") {
+                              setCompanyInfo(originalCompanyInfo);
+                              methods.reset(originalCompanyInfo);
+                            } else {
+                              setContactInfo(originalContactInfo);
+                              methods.reset(originalContactInfo);
+                            }
+                            setFormErrors({});
+                          }}
+                          sx={{ minWidth: 120 }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "#062F54",
+                            fontFamily: "Poppins, sans-serif",
+                            textTransform: "none",
+                            borderRadius: 3,
+                            px: 3,
+                            py: 1.5,
+                            "&:hover": {
+                              backgroundColor: "#041f39",
+                            },
+                          }}
+                        >
+                          Save Changes
+                        </Button></Box>)}
+                  </>
                 </Box>
               </>
             )}
