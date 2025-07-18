@@ -49,7 +49,7 @@ export default function SkillsStep({ data = [], onUpdate, errors = {} }) {
               label={item.skill || item}
               onDelete={() => removeSkill(index)}
               color="primary"
-              sx={{ marginBottom: 1 }}
+              sx={{ marginBottom: 1 , background:"#0E3A62"}}
             />
           ))}
         </Stack>

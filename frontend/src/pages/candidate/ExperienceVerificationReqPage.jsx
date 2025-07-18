@@ -41,6 +41,17 @@ export default function ExperienceVerificationReqPage() {
     setAppGeneralInfo({ pageTitle: "Verification" });
   }, []);
 
+  function isCurrentMonthYear(date) {
+    if (!date) return false;
+    const [month, year] = date.split("-");
+    const now = new Date();
+    return (
+      parseInt(month) === now.getMonth() + 1 &&
+      parseInt(year) === now.getFullYear()
+    );
+  }
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -159,7 +170,7 @@ export default function ExperienceVerificationReqPage() {
             }}
             sx={{ mb: 3 }}
           />
-          <TextField
+          {/* <TextField
             fullWidth
             type="month"
             label="End Date"
@@ -172,7 +183,44 @@ export default function ExperienceVerificationReqPage() {
               setEndDate(`${month}-${year}`);
             }}
             sx={{ mb: 4 }}
-          />
+          /> */}
+          {endDate && isCurrentMonthYear(endDate) ? (
+            <TextField
+              fullWidth
+              label="End Date"
+              value="Present"
+              InputLabelProps={{ shrink: true }}
+              InputProps={{
+                readOnly: true,
+              }}
+              sx={{ mb: 4 }}
+              onClick={() => {
+                setEndDate("");
+              }}
+            />
+          ) : (
+            <TextField
+              fullWidth
+              type="month"
+              label="End Date"
+              InputLabelProps={{ shrink: true }}
+              value={
+                endDate
+                  ? (() => {
+                    const [month, year] = endDate.split("-");
+                    return `${year}-${month.padStart(2, "0")}`;
+                  })()
+                  : ""
+              }
+              onChange={(e) => {
+                const [year, month] = e.target.value.split("-");
+                setEndDate(`${month}-${year}`);
+              }}
+              sx={{ mb: 4 }}
+            />
+          )}
+
+
           <Button variant="contained" fullWidth onClick={handleSubmit}>
             Submit Verification Request
           </Button>
