@@ -130,6 +130,10 @@ const Login = () => {
     navigate("/signup");
   };
 
+  const handleForgotPasswordClick = () => {
+    navigate("/recover-password");
+  }
+
   const handleOnclickRole = (e) => {
     setRole(e.target.id);
     console.log(e.target);
@@ -216,7 +220,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div className="text-end">
+              <div className="text-end" onClick={handleForgotPasswordClick}>
                 <span>I forgot my password</span>
               </div>
             </div>

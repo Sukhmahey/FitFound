@@ -3,6 +3,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import RecoverPassword from "./pages/auth/RecoverPassword";
 import CandidateOnboarding from "./pages/candidate/Onboarding";
 import CandidateDashboard from "./pages/candidate/Dashboard";
 import EmployerOnboarding from "./pages/employer/Onboarding";
@@ -30,6 +31,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+         <Route path="/recover-password" element={<RecoverPassword />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/notifications-list" element={<NotificationList></NotificationList>}></Route>
         <Route path="/candidate/onboarding" element={<CandidateOnboarding />} />
