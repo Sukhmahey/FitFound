@@ -19,6 +19,9 @@ import {
   FormControlLabel,
   Typography,
 } from "@mui/material";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
 
 import { employerApi } from "../../services/api";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
@@ -38,6 +41,10 @@ const predefinedJobTitles = [
 const Search = () => {
   const [loading, setLoading] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState("");
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
+  const [snackSeverity, setSnackSeverity] = useState("error");
+
   const [searchQuery, setSearchQuery] = useState({
     title: "",
     location: "",
@@ -91,7 +98,33 @@ const Search = () => {
     });
   };
 
+  const validateSearchForm = () => {
+    const errors = [];
+
+    if (!searchQuery.title?.trim()) errors.push("Job title is required");
+    if (!searchQuery.location?.trim()) errors.push("Location is required");
+    if (!searchQuery.jobType?.trim()) errors.push("Job type is required");
+    if (!searchQuery.locationType?.trim()) errors.push("Work environment is required");
+    if (!searchQuery.salaryFrom || !searchQuery.salaryTo) errors.push("Salary range is required");
+    if (!searchQuery.skills?.trim()) errors.push("At least one skill is required");
+    if (!searchQuery.workStatus?.trim()) errors.push("Work status is required");
+
+    const wordCount = searchQuery.jobDescription?.trim().split(/\s+/).length || 0;
+    if (wordCount < 100) errors.push("Job description must be at least 100 words");
+
+    return errors;
+  };
+
   const handleSubmit = async () => {
+    const errors = validateSearchForm();
+    if (errors.length > 0) {
+      setSnackMessage(errors.join(" | "));
+      setSnackSeverity("error");
+      setSnackOpen(true);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     // Ensure workEnvironment matches backend enum values
@@ -276,8 +309,8 @@ If you are looking for a challenging and rewarding career as a ${prev.title}, we
     setSearchQuery((prev) => ({
       ...prev,
       jobDescription: "",
-      }));
-      };
+    }));
+  };
 
 
 
@@ -567,6 +600,12 @@ If you are looking for a challenging and rewarding career as a ${prev.title}, we
           </Button>
         </div>
       </div>
+      <Snackbar open={snackOpen} autoHideDuration={5000} onClose={() => setSnackOpen(false)}>
+        <MuiAlert onClose={() => setSnackOpen(false)} severity={snackSeverity} elevation={6} variant="filled">
+          {snackMessage}
+        </MuiAlert>
+      </Snackbar>
+
     </>
   );
 };
