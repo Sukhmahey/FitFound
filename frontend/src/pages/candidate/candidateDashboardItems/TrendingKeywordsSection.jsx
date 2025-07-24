@@ -19,19 +19,48 @@ function TrendingKeywordsSection({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [addedSkill, setAddedSkill] = useState("");
 
-  const skillNamesSet = new Set(
-    (alreadySkills || []).map(s =>
-      typeof s === "string" ? s.toLowerCase() : s
-    )
-  );
+  const normalizeSkill = (skill) => {
+  if (!skill || typeof skill !== "string") return skill;
+
+  const lower = skill.toLowerCase().trim();
 
   
-  const newSkills = (suggestedSkills || []).filter(
-    (skill) =>
-      !skillNamesSet.has(skill.toLowerCase()) &&
-      !justAdded.includes(skill.toLowerCase())
-  );
-   
+  const cleaned = lower.replace(/\.(js|ts|jsx|tsx)$/, "");
+
+  
+  const aliases = {
+    "react.js": "react",
+    "vue": "vue",
+    "vue.js": "vue",
+    "node": "node",
+    "node.js": "node",
+    "javascript": "js",
+    "typescript": "ts"
+  };
+
+  return aliases[cleaned] || cleaned;
+};
+
+  // const skillNamesSet = new Set(
+  //   (alreadySkills || []).map(s =>
+  //     typeof s === "string" ? s.toLowerCase() : s
+  //   )
+  // );
+  const skillNamesSet = new Set(
+  (alreadySkills || []).map(normalizeSkill)
+);
+
+  
+  // const newSkills = (suggestedSkills || []).filter(
+  //   (skill) =>
+  //     !skillNamesSet.has(skill.toLowerCase()) &&
+  //     !justAdded.includes(skill.toLowerCase())
+  // );
+   const newSkills = (suggestedSkills || []).filter(
+  (skill) =>
+    !skillNamesSet.has(normalizeSkill(skill)) &&
+    !justAdded.includes(normalizeSkill(skill))
+);
 
   const existingSkills = Array.from(
     new Set([
@@ -39,14 +68,21 @@ function TrendingKeywordsSection({
       ...justAdded.filter(s => !skillNamesSet.has(s))
     ])
   );
-const handleAdd = (skill) => {
-    onAddSkill(skill);
-    setJustAdded((prev) => [...prev, skill.toLowerCase()]);
-    setAddedSkill(skill);
-    setSnackbarOpen(true);
-  };
+// const handleAdd = (skill) => {
+//     onAddSkill(skill);
+//     setJustAdded((prev) => [...prev, skill.toLowerCase()]);
+//     setAddedSkill(skill);
+//     setSnackbarOpen(true);
+//   };
 
-  console.log(alreadySkills)
+const handleAdd = (skill) => {
+  const normalized = normalizeSkill(skill);
+  onAddSkill(skill); // Send original for display/storage
+  setJustAdded((prev) => [...prev, normalized]);
+  setAddedSkill(skill);
+  setSnackbarOpen(true);
+};
+  // console.log(alreadySkills)
   
 
   return (
