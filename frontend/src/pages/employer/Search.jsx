@@ -159,7 +159,7 @@ const Search = () => {
       const searchParams = {
         title: searchQuery.title,
         skills: searchQuery.skills,
-        jobType: searchQuery.jobType,
+        // jobType: searchQuery.jobType,
         salaryFrom: searchQuery.salaryFrom,
         salaryTo: searchQuery.salaryTo,
       };

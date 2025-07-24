@@ -127,7 +127,7 @@ exports.getAllCandidateProfiles = async (req, res) => {
   console.log("  location:", location);
   console.log("  salaryFrom:", salaryFrom, "(Type:", typeof salaryFrom, ")");
   console.log("  salaryTo:", salaryTo, "(Type:", typeof salaryTo, ")");
-  // console.log("  jobDescriptionKeywords:", jobDescriptionKeywords); // Removed from log
+
   console.log("  workStatus:", workStatus);
   console.log("  skills:", skills);
   console.log("------------------------------------------");
@@ -157,7 +157,7 @@ exports.getAllCandidateProfiles = async (req, res) => {
     }
   }
 
-  // --- Removed this block as per your request ---
+
   // if (jobDescriptionKeywords) {
   //   filter["basicInfo.bio"] = { $regex: jobDescriptionKeywords, $options: "i" };
   // }

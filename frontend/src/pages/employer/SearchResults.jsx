@@ -342,8 +342,7 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
             align="center"
             width="100%"
           >
-            Profile Score: {candidate.profileScore}% • Matching Score:{" "}
-            {candidate.score}%
+            Matching Score: {candidate.score}%
           </Typography>
         </Stack>
 

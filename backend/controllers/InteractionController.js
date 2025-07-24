@@ -1,7 +1,7 @@
 // backend/controllers/InteractionController.js
 
 const Interaction = require("../models/InteractionModel");
-const Candidate = require("../models/CandidateModel"); // Keep this if used elsewhere or for populating Candidate data
+const Candidate = require("../models/CandidateModel");
 
 const handleError = (res, error, message, status = 500) => {
   console.error(
@@ -95,7 +95,7 @@ exports.getInteractionById = async (req, res) => {
   }
 };
 
-// NEW: Get all interactions with optional query filters (e.g., ?finalStatus=hired)
+
 exports.getAllInteractions = async (req, res) => {
   try {
     // Destructure all expected query parameters
