@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
+import { parseResumeWithGeminiAsync } from "../../../utils/geminiFallback";
 import {
   Box,
   Button,
@@ -150,63 +151,88 @@ function ResumeParsing({ setStep, setConfirmedData }) {
     };
   };
 
+  const timeout = (ms) =>
+  new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("OCR.space timeout exceeded")), ms)
+  );
+
+ 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setLoading(true);
-    setOutput("");
-    setUploadedFile(true);
+  const file = e.target.files[0];
+  if (!file) return;
+  setLoading(true);
+  setOutput("");
+  setUploadedFile(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("language", "eng");
-    formData.append("isOverlayRequired", "false");
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("language", "eng");
+  formData.append("isOverlayRequired", "false");
 
-    try {
-      const res = await fetch("https://api.ocr.space/parse/image", {
+  let text = "";
+
+  try {
+    console.log("🔍 Trying OCR.space...");
+    const res = await Promise.race([
+      fetch("https://api.ocr.space/parse/image", {
         method: "POST",
         headers: { apikey: ResumeParserKey },
         body: formData,
-      });
-      const data = await res.json();
-      const text = data.ParsedResults?.[0]?.ParsedText || "";
-      const nameParts = extractName(text).split(" ");
-      const structuredData = {
-        personalInfo: {
-          firstName: nameParts[0] || "",
-          middleName: "",
-          lastName: nameParts[1] || "",
-          email: extractEmail(text),
-          currentStatus: "",
-          specialization: "",
-        },
-        basicInfo: {
-          phoneNumber: extractPhone(text),
-          workStatus: "",
-          language: extractLanguages(text).join(", "),
-          bio: extractBioSummary(text),
-          additionalInfo: "",
-        },
-        skills: extractSkills(text),
-        workExperience: extractExperience(text),
-        education: extractEducation(text),
-        portfolio: { socialLinks: extractLinks(text) },
-        jobPreference: {
-          desiredJobTitle: [],
-          jobType: "",
-          salaryExpectation: { min: 0, perHour: false, perYear: false },
-        },
-      };
-      setOutput(JSON.stringify(structuredData, null, 2));
-      setFinalData(structuredData);
-    } catch (err) {
-      setOutput(`Error: ${err.message}`);
+      }),
+      timeout(15000),
+    ]);
+
+    const data = await res.json();
+    text = data.ParsedResults?.[0]?.ParsedText || "";
+    if (!text.trim()) throw new Error("OCR.space gave empty result.");
+  } catch (err) {
+    console.warn("⚠️ OCR.space failed or timed out. Using Gemini fallback...");
+    try {
+      text = await parseResumeWithGeminiAsync(file);
+      if (!text.trim()) throw new Error("Gemini gave empty response.");
+      console.log("✅ Gemini succeeded.");
+    } catch (gErr) {
+      console.error("❌ Gemini fallback failed:", gErr);
+      setOutput(`Error: ${gErr.message}`);
       setUploadedFile(false);
-    } finally {
       setLoading(false);
+      return;
     }
+  }
+
+ 
+  const nameParts = extractName(text).split(" ");
+  const structuredData = {
+    personalInfo: {
+      firstName: nameParts[0] || "",
+      middleName: "",
+      lastName: nameParts[1] || "",
+      email: extractEmail(text),
+      currentStatus: "",
+      specialization: "",
+    },
+    basicInfo: {
+      phoneNumber: extractPhone(text),
+      workStatus: "",
+      language: extractLanguages(text).join(", "),
+      bio: extractBioSummary(text),
+      additionalInfo: "",
+    },
+    skills: extractSkills(text),
+    workExperience: extractExperience(text),
+    education: extractEducation(text),
+    portfolio: { socialLinks: extractLinks(text) },
+    jobPreference: {
+      desiredJobTitle: [],
+      jobType: "",
+      salaryExpectation: { min: 0, perHour: false, perYear: false },
+    },
   };
 
+  setOutput(JSON.stringify(structuredData, null, 2));
+  setFinalData(structuredData);
+  setLoading(false);
+};
   const confirmNow = () => {
     setConfirmedData(finalData);
     setStep(99);
