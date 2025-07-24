@@ -428,7 +428,7 @@ export default function CandidateOnboarding() {
   };
 
   return (
-    <Container sx={{ p: 4, ml: 0, margin: "auto" }}>
+    <Container sx={{ ml: 0, margin: "auto" }}>
       <Snackbar
         open={snackOpen}
         autoHideDuration={4000}
@@ -444,7 +444,7 @@ export default function CandidateOnboarding() {
         </MuiAlert>
       </Snackbar>
       {stepIndex > 0 && stepIndex < 90 && stepIndex !== 14 && (
-        <Box sx={{ width: "100%", mb: 8 }}>
+        <Box sx={{ width: "100%", mb: 8, pt: 4 }}>
           <Stepper activeStep={stepIndex - 1} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>

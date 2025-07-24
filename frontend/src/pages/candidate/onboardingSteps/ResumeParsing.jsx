@@ -215,13 +215,16 @@ function ResumeParsing({ setStep, setConfirmedData }) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        width: "100vw",
+        height: "100vh",
+        width: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        px: 2,
-        backgroundColor: "#F9FBFC",
+        alignSelf: "center",
+        // px: 2,
+        // backgroundColor: "#F9FBFC",
+        margin: 0,
+        padding: 0,
       }}
     >
       <Container maxWidth="sm">
