@@ -6,7 +6,6 @@ import {
   Typography,
   Grid,
   Card,
-  CardContent,
   TextField,
   Dialog,
   DialogActions,
@@ -14,10 +13,12 @@ import {
   DialogTitle,
   DialogContentText,
   Avatar,
+  Divider,
   useMediaQuery,
+  Switch,
 } from "@mui/material";
-import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import { useTheme } from "@mui/material/styles";
+import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { candidateApi, employerApi } from "../../services/api";
@@ -28,12 +29,10 @@ import {
   updatePassword,
 } from "firebase/auth";
 import SubscriptionSelector from "./settingsComponents/SubscriptionSelector";
-import NotificationPermission from "./settingsComponents/NotificationPermission";
 
 export default function SettingsPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const { user, logout } = useAuth();
   const userId = user?.userId;
   const navigate = useNavigate();
@@ -45,6 +44,7 @@ export default function SettingsPage() {
   const [open, setOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   useEffect(() => {
     setRole(user?.role);
@@ -72,7 +72,6 @@ export default function SettingsPage() {
     try {
       await reauthenticateWithCredential(currentUser, credential);
       await updatePassword(currentUser, newPassword);
-      console.log("Password updated");
       handleClose();
     } catch (error) {
       console.error("Password update failed:", error.message);
@@ -91,123 +90,100 @@ export default function SettingsPage() {
 
   const handleClose = () => setOpen(false);
 
+  const handleToggleNotification = () => {
+    setNotificationsEnabled((prev) => !prev);
+  };
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography
-        variant="h4"
-        align="center"
-        fontWeight={700}
-        sx={{ mb: 4, fontFamily: "Montserrat, sans-serif" }}
-      >
-        Settings
-      </Typography>
-
-      <Card
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          mb: 4,
-          p: 2,
-          borderRadius: 3,
-        }}
-      >
-        <Avatar
-          sx={{
-            width: 64,
-            height: 64,
-            bgcolor: "#062F54",
-            mr: 2,
-          }}
-        >
-          <AccountCircleRoundedIcon fontSize="large" />
-        </Avatar>
-        <CardContent>
-          <Typography variant="h6" fontWeight={600}>
-            {role === "employer" ? employerName : candidateName}
-          </Typography>
-          <Typography variant="body2">{currentUserEmail}</Typography>
-        </CardContent>
-      </Card>
-
+    <Container maxWidth="sm" sx={{ py: 5 }}>
       <Box mb={4}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          Account Security
+        <Typography variant="h5" fontWeight={700} mb={1}>
+          Account Settings
         </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Manage your profile and security preferences
+        </Typography>
+      </Box>
+
+      <Card variant="outlined" sx={{ p: 3, borderRadius: 3, mb: 4 }}>
+        <Box display="flex" alignItems="center" gap={2} mb={2}>
+          <Avatar sx={{ bgcolor: "#0E3A62", width: 56, height: 56 }}>
+            <AccountCircleRoundedIcon fontSize="large" />
+          </Avatar>
+          <Box>
+            <Typography variant="subtitle1" fontWeight={600}>
+              {role === "employer" ? employerName : candidateName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {currentUserEmail}
+            </Typography>
+          </Box>
+        </Box>
+        <Divider sx={{ my: 2 }} />
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <TextField
-              label="Username"
               fullWidth
-              size="small"
+              label="Email"
               value={currentUserEmail || ""}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Password"
-              fullWidth
-              size="small"
-              value="********"
-              type="password"
               disabled
             />
-            <Button onClick={() => setOpen(true)} sx={{ mt: 1 }}>
-              Reset Password
-            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Box>
+              <TextField
+                fullWidth
+                label="Password"
+                type="password"
+                value="********"
+                disabled
+              />
+              <Button
+                onClick={() => setOpen(true)}
+                size="small"
+                sx={{ mt: 1, textTransform: "none", fontWeight: 500 }}
+              >
+                Change Password
+              </Button>
+            </Box>
           </Grid>
         </Grid>
-      </Box>
+      </Card>
 
       {role === "candidate" && (
         <Box mb={4}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Subscriptions
-          </Typography>
           <SubscriptionSelector />
         </Box>
       )}
 
       <Box mb={4}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
           Notifications
         </Typography>
-        <NotificationPermission />
-      </Box>
-
-      <Box mb={6}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          Help
-        </Typography>
         <Card
+          variant="outlined"
           sx={{
-            p: 3,
-            borderRadius: 4,
-            textAlign: "center",
+            p: 2,
+            borderRadius: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-            Need help?
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Reach out to us and get the support you need.
-          </Typography>
-          <Button variant="contained" sx={{ backgroundColor: "#062F54" }}>
-            Contact Us
-          </Button>
+          <Typography variant="body2">Receive updates and alerts</Typography>
+          <Switch
+            size="small"
+            checked={notificationsEnabled}
+            onChange={handleToggleNotification}
+          />
         </Card>
       </Box>
 
-      <Box textAlign="center" mt={3}>
+      <Box textAlign="center">
         <Button
-          variant="contained"
+          variant="outlined"
           color="error"
-          sx={{
-            px: 4,
-            py: 1.5,
-            fontWeight: 600,
-            borderRadius: 3,
-            textTransform: "none",
-          }}
+          sx={{ borderRadius: 2, px: 4, py: 1.2, fontWeight: 600 }}
           onClick={handleLogout}
         >
           Logout
@@ -239,7 +215,7 @@ export default function SettingsPage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
-            <DialogActions sx={{ mt: 1 }}>
+            <DialogActions sx={{ mt: 2 }}>
               <Button onClick={handleClose}>Cancel</Button>
               <Button type="submit" variant="contained">
                 Confirm

@@ -209,31 +209,6 @@ const Signup = () => {
               required
             />
 
-            {/* {role === "employer" && (
-              <>
-                <TextField
-                  label="Company Name"
-                  variant="outlined"
-                  fullWidth
-                  margin="dense"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  required
-                />
-                <TextField
-                  label="Company Description"
-                  variant="outlined"
-                  fullWidth
-                  margin="dense"
-                  multiline
-                  rows={3}
-                  value={companyDescription}
-                  onChange={(e) => setCompanyDescription(e.target.value)}
-                  required
-                />
-              </>
-            )} */}
-
             <Button
               type="submit"
               fullWidth

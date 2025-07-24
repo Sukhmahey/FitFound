@@ -35,9 +35,6 @@ const predefinedJobTitles = [
   "ui designer",
 ];
 
-// Removed dummyObj as it's unused
-// const dummyObj = { /* ... your dummy object ... */ };
-
 const Search = () => {
   const [loading, setLoading] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState("");
@@ -346,11 +343,25 @@ If you are looking for a challenging and rewarding career as a ${prev.title}, we
                     setSelectedTitle(e.target.value);
                   }}
                 >
-                  {predefinedJobTitles.map((title) => (
+                  const predefinedJobTitles = [ "frontend developer", "backend
+                  developer", "fullstack developer", "ux designer", "ui
+                  designer", ];
+                  <MenuItem value={"frontend developer"}>
+                    Frontend Developer
+                  </MenuItem>
+                  <MenuItem value={"backend developer"}>
+                    Backend Developer
+                  </MenuItem>
+                  <MenuItem value={"fullstack developer"}>
+                    FullStack Developer
+                  </MenuItem>
+                  <MenuItem value={"ux designe"}>UX Designer</MenuItem>
+                  <MenuItem value={"ui designer"}>UI Designer</MenuItem>
+                  {/* {predefinedJobTitles.map((title) => (
                     <MenuItem key={title} value={title}>
                       {title.charAt(0).toUpperCase() + title.slice(1)}
                     </MenuItem>
-                  ))}
+                  ))} */}
                 </Select>
               </FormControl>
             </div>

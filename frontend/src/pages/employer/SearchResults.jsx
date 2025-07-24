@@ -519,6 +519,7 @@ const SearchResults = () => {
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, minHeight: "100vh" }}>
       <TextField
+        sx={{ mb: 2 }}
         variant="outlined"
         size="small"
         fullWidth
@@ -533,7 +534,7 @@ const SearchResults = () => {
           ),
         }}
       />
-
+      {/* 
       <Box sx={{ maxHeight: "80vh", overflowY: "auto", pr: 1, mt: 2 }}>
         {candidates?.length > 0 ? (
           candidates
@@ -556,7 +557,58 @@ const SearchResults = () => {
         ) : (
           <Typography variant="body2">No candidates found.</Typography>
         )}
-      </Box>
+      </Box> */}
+
+      {candidates?.length > 0 ? (
+        candidates
+          .filter((c) =>
+            `${c.personalInfo?.firstName ?? ""} ${
+              c.personalInfo?.lastName ?? ""
+            }`
+              .toLowerCase()
+              .includes(searchField.toLowerCase())
+          )
+          .map((c, index) => (
+            <CandidateCard
+              key={index}
+              data={c}
+              onViewDetails={handleViewDetails}
+              onInviteClick={handleInvite}
+              isInvited={invitedIds.includes(c._id)}
+            />
+          ))
+      ) : (
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            textAlign: "center",
+            borderRadius: 4,
+            mt: 4,
+            backgroundColor: "#fefefe",
+            border: "1px dashed #ccc",
+          }}
+        >
+          <Typography variant="h6" gutterBottom sx={{ color: PRIMARY_COLOR }}>
+            No candidate found with these credentials.
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => window.history.back()}
+            sx={{
+              mt: 2,
+              backgroundColor: PRIMARY_COLOR,
+              textTransform: "none",
+              fontWeight: 500,
+              "&:hover": {
+                backgroundColor: "#041f39",
+              },
+            }}
+          >
+            Go Back to Search
+          </Button>
+        </Paper>
+      )}
 
       <CandidateDetailsModal
         open={modalOpen}

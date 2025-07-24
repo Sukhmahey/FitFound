@@ -71,7 +71,9 @@ const Sidebar = () => {
   const displayName =
     user?.role === "candidate"
       ? userProfile?.personalInfo?.firstName || "Candidate"
-      : `${userProfile?.contactInfo?.firstName || ""} ${userProfile?.contactInfo?.lastName || ""}`;
+      : `${userProfile?.contactInfo?.firstName || ""} ${
+          userProfile?.contactInfo?.lastName || ""
+        }`;
 
   const menuItemStyle = (tab) => ({
     borderRadius: "8px",
@@ -187,7 +189,7 @@ const Sidebar = () => {
         </ListItemButton>
       </List>
 
-      <Box sx={{ display: "flex", alignItems: "center", mt: "auto", pt: 2 }}>
+      {/* <Box sx={{ display: "flex", alignItems: "center", mt: "auto", pt: 2 }}>
         <Avatar src={avatarUrl} sx={{ width: 45, height: 45, mr: 1 }} />
         <Box>
           <Typography sx={{ fontSize: 13, color: "#ddd" }}>
@@ -204,7 +206,7 @@ const Sidebar = () => {
             {displayName}
           </Typography>
         </Box>
-      </Box>
+      </Box> */}
     </Box>
   );
 };
