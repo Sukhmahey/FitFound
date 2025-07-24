@@ -31,16 +31,13 @@ export const getUlrFile = (filePath) => {
 export const updateFileByUrl = (fileUrl, newFile) => {
     
     // updating the file
-    const filePath = fileUrl.split('/object/public/')[1];
-    const fileElements = filePath.split('/');
+  const fullPath = fileUrl.split('/object/public/')[1];
+const [bucketName, ...pathParts] = fullPath.split('/');
+const filePath = pathParts.join('/');
 
-    console.log(fileElements[0]);
-    console.log(fileElements[1]);
-    console.log(fileElements[2]);
-
-    return supabase.storage
-    .from(fileElements[0]) // bucket
-    .upload( `${fileElements[1]}/${fileElements[2]}`, newFile, { upsert: true });
+return supabase.storage
+  .from(bucketName)
+  .upload(filePath, newFile, { upsert: true });
     
 };
 
