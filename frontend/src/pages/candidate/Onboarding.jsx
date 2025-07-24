@@ -428,7 +428,7 @@ export default function CandidateOnboarding() {
   };
 
   return (
-    <Container sx={{ p: 4, ml: 0, margin: "auto" }}>
+    <Container sx={{ ml: 0, margin: "auto" }}>
       <Snackbar
         open={snackOpen}
         autoHideDuration={4000}
