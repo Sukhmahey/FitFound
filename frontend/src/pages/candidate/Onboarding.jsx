@@ -444,7 +444,7 @@ export default function CandidateOnboarding() {
         </MuiAlert>
       </Snackbar>
       {stepIndex > 0 && stepIndex < 90 && stepIndex !== 14 && (
-        <Box sx={{ width: "100%", mb: 8 }}>
+        <Box sx={{ width: "100%", mb: 8, mt: 5 }}>
           <Stepper activeStep={stepIndex - 1} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>
