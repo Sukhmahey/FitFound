@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 
-export default function BasicInfoStep({ data, onUpdate, errors = {},editMode }) {
+export default function BasicInfoStep({ data, onUpdate, errors = {},editMode=true }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     onUpdate({ [name]: value });

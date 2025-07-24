@@ -24,7 +24,7 @@ const predefinedJobTitles = [
   "ui designer",
 ];
 
-export default function JobPreferenceStep({ data, onUpdate, errors = {} ,editMode}) {
+export default function JobPreferenceStep({ data, onUpdate, errors = {} ,editMode=true}) {
   const [selectedRole, setSelectedRole] = useState(
     data.desiredJobTitle?.[0] || ""
   );

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, TextField, Button } from "@mui/material";
 
-export default function EducationStep({ data = [], onUpdate, errors = {},editMode }) {
+export default function EducationStep({ data = [], onUpdate, errors = {},editMode=true }) {
   const handleChange = (index, field, value) => {
     const updated = [...data];
 

@@ -5,7 +5,7 @@ export default function PortfolioStep({
   data = { socialLinks: {} },
   onUpdate,
   errors = {},
-  editMode
+  editMode=true
 }) {
   const handleChange = (e) => {
     const { name, value } = e.target;

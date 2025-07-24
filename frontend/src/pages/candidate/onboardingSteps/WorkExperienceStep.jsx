@@ -19,7 +19,7 @@ export default function WorkExperienceStep({
   onUpdate,
   verificationCompany = [],
   errors = {},
-  editMode
+  editMode=true
 }) {
   // const handleChange = (index, field, value) => {
   //   const updated = [...data];
