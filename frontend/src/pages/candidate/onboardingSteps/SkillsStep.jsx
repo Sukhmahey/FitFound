@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Chip, Stack } from "@mui/material";
 
-export default function SkillsStep({ data = [], onUpdate, errors = {} ,editMode}) {
+export default function SkillsStep({ data = [], onUpdate, errors = {} ,editMode=true}) {
   const [skill, setSkill] = useState("");
   console.log(data[1]);
 

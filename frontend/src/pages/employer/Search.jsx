@@ -5,6 +5,8 @@ import { setCandidates, setSearchForm } from "../../redux/reducers/searchSlice";
 import { useAuth } from "../../contexts/AuthContext";
 import { CircularProgress, Backdrop, Button } from "@mui/material";
 import { scoreCandidates } from "./GenerateCandidateScore";
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
+import InputAdornment from "@mui/material/InputAdornment";
 
 import {
   InputLabel,
@@ -20,6 +22,7 @@ import {
 
 import { employerApi } from "../../services/api";
 import { AppInfoContext } from "../../contexts/AppInfoContext";
+import Allroles from "../../ScoringUtil/skillsFromJob";
 
 const predefinedJobTitles = [
   "frontend developer",
@@ -34,6 +37,7 @@ const predefinedJobTitles = [
 
 const Search = () => {
   const [loading, setLoading] = useState(false);
+  const [selectedTitle, setSelectedTitle] = useState("");
   const [searchQuery, setSearchQuery] = useState({
     title: "",
     location: "",
@@ -99,8 +103,8 @@ const Search = () => {
       jobDescription: searchQuery.jobDescription,
       requiredSkills: searchQuery.skills
         ? searchQuery.skills.split(",").map((skill) => ({
-            skill: skill.trim().charAt(0).toUpperCase() + skill.trim().slice(1),
-          }))
+          skill: skill.trim().charAt(0).toUpperCase() + skill.trim().slice(1),
+        }))
         : [],
       mustHaveCriteria: "NA",
       salaryRange: {
@@ -189,6 +193,94 @@ const Search = () => {
     }
   };
 
+  // const getSkills = ()=>{
+
+  //   console.log(selectedTitle)
+
+  //   const skillsByRole = Object.entries(Allroles).map(([role, data]) => ({
+  //   role,
+  //   requiredSkills: data.requiredSkills,
+  // }));
+
+  // console.log(skillsByRole);
+
+  // skillsByRole.forEach((obj)=>{
+  //   if(obj.role === selectedTitle){
+  //     console.log(obj.requiredSkills)
+  //     setRequiredSkillSet(obj.requiredSkills)
+  //   }
+  // })
+
+
+
+
+  // }
+
+  // useEffect(() => {
+  //   getSkills()
+
+
+  // }, [selectedTitle])
+
+  useEffect(() => {
+    const roleObj = Allroles[selectedTitle];
+    if (roleObj) {
+      setSearchQuery((prev) => ({
+        ...prev,
+        skills: roleObj.requiredSkills.join(", "),
+      }));
+    } else {
+      setSearchQuery((prev) => ({
+        ...prev,
+        skills: "",
+      }));
+    }
+  }, [selectedTitle]);
+
+  // useEffect(()=>{
+  //   const { title, salaryFrom, salaryTo, skills, workStatus } = searchQuery;
+  //   if(title && salaryFrom && salaryTo && skills && workStatus){
+  //     setSearchQuery((prev)=>({
+  //       ...prev,
+  //       jobDescription: `Job Title: ${title}\nSalary: ${salaryFrom} - ${salaryTo}\nSkills: ${skills}\nStatus: ${workStatus}`
+  //     }))
+  //   } else {
+  //     setSearchQuery((prev)=>({
+  //       ...prev,
+  //       jobDescription: ""
+  //     }))
+  //   }
+  // }, [searchQuery.title, searchQuery.salaryFrom, searchQuery.salaryTo, searchQuery.skills, searchQuery.workStatus])
+
+  const allFieldsFilled =
+    searchQuery.title &&
+    searchQuery.salaryFrom &&
+    searchQuery.salaryTo &&
+    searchQuery.skills &&
+    searchQuery.workStatus;
+
+  const handleAutoFillJobDescription = () => {
+    setSearchQuery((prev) => ({
+      ...prev,
+      jobDescription: (
+        `We are seeking a passionate and skilled ${prev.title} to join our team. In this role, you will be responsible for delivering high-quality work and collaborating closely with other team members to achieve project goals. Your primary duties will include using your expertise in the following skills: ${prev.skills}. We value problem-solving abilities, strong communication, and a proactive attitude.
+
+This is a ${prev.jobType || "full-time"} position, located at our office or remote or flexible, with a competitive salary range of $${prev.salaryFrom || "N/A"} to $${prev.salaryTo || "N/A"} per hour, based on experience and qualifications. Candidates must have valid work authorization (${prev.workStatus || "as per requirements"}).
+
+If you are looking for a challenging and rewarding career as a ${prev.title}, we encourage you to apply and become an important part of our growing organization.`
+      ),
+    }));
+  };
+
+  const handleJDClear = () => {
+    setSearchQuery((prev) => ({
+      ...prev,
+      jobDescription: "",
+      }));
+      };
+
+
+
   return (
     <>
       <Backdrop
@@ -218,6 +310,7 @@ const Search = () => {
                   label="Title"
                   onChange={(e) => {
                     onChangeInputFiels(e.target.value, "title");
+                    setSelectedTitle(e.target.value);
                   }}
                 >
                   {predefinedJobTitles.map((title) => (
@@ -374,8 +467,7 @@ const Search = () => {
                 type="number"
                 variant="outlined"
                 value={searchQuery.salaryFrom}
-                onChange={(e) =>
-                  onChangeInputFiels(e.target.value, "salaryFrom")
+                onChange={(e) => onChangeInputFiels(e.target.value, "salaryFrom")
                 }
               />
               <TextField
@@ -384,7 +476,9 @@ const Search = () => {
                 type="number"
                 variant="outlined"
                 value={searchQuery.salaryTo}
-                onChange={(e) => onChangeInputFiels(e.target.value, "salaryTo")}
+                onChange={(e) => { onChangeInputFiels(e.target.value, "salaryTo") }
+
+                }
               />
             </FormControl>
             <div className="mb-3"></div>
@@ -411,6 +505,18 @@ const Search = () => {
                 label="Job Description"
                 multiline
                 maxRows={20}
+                InputProps={{
+                  endAdornment: allFieldsFilled && (
+                    <InputAdornment position="end">
+                      <TipsAndUpdatesIcon
+                        sx={{ cursor: "pointer", color: "#fbc02d" }}
+                        titleAccess="Auto-fill Job Description"
+                        onClick={handleAutoFillJobDescription}
+                        onDoubleClick={handleJDClear}
+                      />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </div>
           </FormControl>

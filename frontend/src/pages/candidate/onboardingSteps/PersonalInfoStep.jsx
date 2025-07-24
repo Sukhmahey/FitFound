@@ -9,7 +9,7 @@ export default function PersonalInfoStep({
   errors = {},
   onNext,
   onBack,
-  editMode
+  editMode=true
 }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
