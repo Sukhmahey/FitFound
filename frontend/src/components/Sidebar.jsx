@@ -132,7 +132,7 @@ const Sidebar = () => {
           <ListItemText primary="Dashboard" />
         </ListItemButton>
 
-        <ListItemButton
+        {/* <ListItemButton
           onClick={() => goTo("profile")}
           sx={menuItemStyle("profile")}
         >
@@ -140,7 +140,7 @@ const Sidebar = () => {
             <AccountCircleIcon />
           </ListItemIcon>
           <ListItemText primary="My Profile" />
-        </ListItemButton>
+        </ListItemButton> */}
 
         {user?.role === "candidate" && (
           <>
@@ -187,7 +187,17 @@ const Sidebar = () => {
           </ListItemIcon>
           <ListItemText primary="Connections" />
         </ListItemButton>
+        <ListItemButton
+          onClick={() => goTo("profile")}
+          sx={menuItemStyle("profile")}
+        >
+          <ListItemIcon>
+            <AccountCircleIcon />
+          </ListItemIcon>
+          <ListItemText primary="My Profile" />
+        </ListItemButton>
       </List>
+
 
       {/* <Box sx={{ display: "flex", alignItems: "center", mt: "auto", pt: 2 }}>
         <Avatar src={avatarUrl} sx={{ width: 45, height: 45, mr: 1 }} />

@@ -114,9 +114,7 @@ export default function SettingsPage() {
             <Typography variant="subtitle1" fontWeight={600}>
               {role === "employer" ? employerName : candidateName}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {currentUserEmail}
-            </Typography>
+            
           </Box>
         </Box>
         <Divider sx={{ my: 2 }} />

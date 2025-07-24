@@ -15,6 +15,7 @@ import {
   ListItemText,
   useMediaQuery,
 } from "@mui/material";
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -94,7 +95,7 @@ const Header = () => {
               <Link to={settingsPath} style={{ textDecoration: "none" }}>
                 <IconButton>
                   <Avatar sx={{ bgcolor: primaryColor, width: 32, height: 32 }}>
-                    <AccountCircleIcon sx={{ color: "#fff", fontSize: 20 }} />
+                    <ManageAccountsIcon sx={{ color: "#fff", fontSize: 20 }} />
                   </Avatar>
                 </IconButton>
               </Link>
