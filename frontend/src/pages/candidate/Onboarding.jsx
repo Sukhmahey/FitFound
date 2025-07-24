@@ -68,11 +68,12 @@ const ProfileSetupOption = ({ onManualClick, onUploadClick, errors }) => {
           justifyContent="center"
           alignItems="center"
         >
-          <Box textAlign="center">
+          <Box textAlign="center" mb={2}>
             <Button
               onClick={onManualClick}
+              variant="contained"
               sx={{
-                backgroundColor: "#3B67F6",
+                backgroundColor: "#0E3A62",
                 color: "white",
                 fontWeight: 600,
                 px: 4,
@@ -83,7 +84,7 @@ const ProfileSetupOption = ({ onManualClick, onUploadClick, errors }) => {
                 fontFamily: "Poppins, sans-serif",
                 boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.1)",
                 "&:hover": {
-                  backgroundColor: "#0E3A62",
+                  backgroundColor: "#3B67F6",
                 },
               }}
             >
@@ -97,8 +98,9 @@ const ProfileSetupOption = ({ onManualClick, onUploadClick, errors }) => {
           <Box textAlign="center">
             <Button
               onClick={onUploadClick}
+              variant="outlined"
               sx={{
-                backgroundColor: "#F0AD4E",
+                borderColor: "#0E3A62",
                 color: "#0E3A62",
                 fontWeight: 600,
                 px: 4,
@@ -107,10 +109,9 @@ const ProfileSetupOption = ({ onManualClick, onUploadClick, errors }) => {
                 textTransform: "none",
                 fontSize: "1rem",
                 fontFamily: "Poppins, sans-serif",
-                boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.1)",
                 "&:hover": {
-                  backgroundColor: "#EF5350",
-                  color: "white",
+                  backgroundColor: "#EDF9FF",
+                  borderColor: "#0E3A62",
                 },
               }}
             >

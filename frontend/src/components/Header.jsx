@@ -18,7 +18,7 @@ import {
 
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import logo from "../assets/logo.svg";
+import logo from "../assets/logo-blue.svg";
 import DashboardBell from "../pages/DashboardBell";
 
 const Header = () => {
@@ -53,18 +53,25 @@ const Header = () => {
         {isMobile ? (
           <>
             {/* Left: Hamburger */}
-            <IconButton onClick={() => setDrawerOpen(true)}>
+            {/* <IconButton onClick={() => setDrawerOpen(true)}>
               <MenuIcon sx={{ color: primaryColor }} />
-            </IconButton>
+            </IconButton> */}
 
             {/* Center: Logo */}
-            <Box sx={{ flexGrow: 1, textAlign: "center" }}>
+            <Box sx={{ flexGrow: 1, textAlign: "left" }}>
               <img src={logo} alt="FitFound Logo" style={{ height: 34 }} />
             </Box>
 
             {/* Right: Notifications */}
-            <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <DashboardBell />
+              <Link to={settingsPath} style={{ textDecoration: "none" }}>
+                <IconButton>
+                  <Avatar sx={{ bgcolor: primaryColor, width: 32, height: 32 }}>
+                    <AccountCircleIcon sx={{ color: "#fff", fontSize: 20 }} />
+                  </Avatar>
+                </IconButton>
+              </Link>
             </Box>
           </>
         ) : (

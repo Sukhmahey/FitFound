@@ -1,37 +1,42 @@
 import { useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  useMediaQuery,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import {
   signInWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence,
+  signInWithPopup,
 } from "firebase/auth";
-import { auth, provider, signInWithPopup } from "../../services/firebase";
+import { auth, provider } from "../../services/firebase";
 import { userApi, loginApi, employerApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 
+import logo from "../../assets/logo-blue.svg";
+
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [role, setRole] = useState("candidate");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
-  const { login } = useAuth();
 
-  // Navigate base on the role, and if user has employer profile
   const handleNavigate = (role, userId) => {
     if (role === "employer") {
-      employerApi.getEmployerProfile(userId)
-      .then(result => {
-        console.log(result);
-        navigate("/employer/dashboard");
-      })
-      .catch(error => {
-        // employer profile not found
-        navigate("/employer/onboarding"); 
-      })
-    }
-    else {
+      employerApi
+        .getEmployerProfile(userId)
+        .then(() => navigate("/employer/dashboard"))
+        .catch(() => navigate("/employer/onboarding"));
+    } else {
       navigate("/candidate/dashboard");
     }
   };
@@ -42,41 +47,25 @@ const Login = () => {
     setPersistence(auth, browserLocalPersistence).then(() => {
       signInWithEmailAndPassword(auth, email, password)
         .then((result) => result.user.getIdToken())
-        .then((idToken) => {
+        .then((idToken) =>
           loginApi
             .loginUser({ idToken })
-            .then((res) => {
-              return userApi.getUserByEmail({
-                email: res.data.decodedidToken.email,
-              });
-            })
-            .then((result) => {
-              if (result.data.userId) {
-                login(result.data);
-                localStorage.setItem("userId", result?.data?.userId);
-                console.log("login function", result.data);
-                setResponseMessage("User logged in successful");
-                console.log(responseMessage);
-                console.log("User logged in successful");
-
-                // handeling navigation
-                handleNavigate(result?.data?.role, result?.data?.userId);
-
-                // navigate(
-                //   result.data.role === "candidate"
-                //     ? "/candidate/dashboard"
-                //     : "/employer/dashboard"
-                // );
-              } else {
-                setResponseMessage("User login failed");
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-            });
+            .then((res) =>
+              userApi.getUserByEmail({ email: res.data.decodedidToken.email })
+            )
+        )
+        .then((res) => {
+          if (res.data.userId) {
+            login(res.data);
+            localStorage.setItem("userId", res.data.userId);
+            handleNavigate(res.data.role, res.data.userId);
+          } else {
+            setResponseMessage("User login failed");
+          }
         })
-        .catch((error) => {
-          console.error("Error in login", error.message);
+        .catch((err) => {
+          console.error("Login error:", err);
+          setResponseMessage("Incorrect credentials or user not found");
         });
     });
   };
@@ -85,31 +74,27 @@ const Login = () => {
     signInWithPopup(auth, provider)
       .then((result) => result.user.getIdToken())
       .then((idToken) => loginApi.loginUser({ idToken }))
-      .then((res) => {
+      .then((res) =>
         userApi
           .getUserByEmail({ email: res.data.decodedidToken.email })
           .then((result) => {
             if (!result.data.userId) {
               const newUser = {
-                role: role,
+                role,
                 email: res.data.decodedidToken.email,
                 idFirebaseUser: res.data.decodedidToken.uid,
               };
 
-              userApi.addUser(newUser).then((resultNewUser) => {
-                login(resultNewUser.data);
-                setResponseMessage("User registered successful");
-                console.log("User registered successful", resultNewUser.data);
+              return userApi.addUser(newUser).then((newRes) => {
+                login(newRes.data);
                 navigate(
-                  resultNewUser.data.role === "candidate"
+                  newRes.data.role === "candidate"
                     ? "/candidate/dashboard"
                     : "/employer/dashboard"
                 );
               });
             } else {
               login(result.data);
-              setResponseMessage("User logged in successful");
-              console.log("User logged in successful", result.data);
               navigate(
                 result.data.role === "candidate"
                   ? "/candidate/dashboard"
@@ -117,145 +102,218 @@ const Login = () => {
               );
             }
           })
-          .catch((error) => {
-            console.error(error);
-          });
-      })
-      .catch((error) => {
-        console.error(error);
+      )
+      .catch((err) => {
+        console.error("Google login error:", err);
       });
   };
 
-  const handleSignupClick = () => {
-    navigate("/signup");
-  };
-
-  const handleForgotPasswordClick = () => {
-    navigate("/recover-password");
-  }
-
-  const handleOnclickRole = (e) => {
-    setRole(e.target.id);
-    console.log(e.target);
-  };
-
   return (
-    <div className="container bg-light mt-3">
-      <div className="row p-3">
-        {/* FitFount texts */}
-        <div className="col-md-6 d-flex justify-content-center align-items-center">
-          <div className="text-center">
-            <h1>FitFound</h1>
-            <p>The Smarter Way to Get Hired – Let the Jobs Find You</p>
-          </div>
-        </div>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        flexDirection: isMobile ? "column" : "row",
+        fontFamily: "Figtree, sans-serif",
+      }}
+    >
+      {/* Logo */}
+      <Box
+        sx={{
+          position: isMobile ? "static" : "absolute",
+          top: 20,
+          left: 20,
+          display: isMobile ? "none" : "block",
+        }}
+      >
+        <Box sx={{ width: 120 }}>
+          <img src={logo} alt="FitFound Logo" style={{ height: 40 }} />
+        </Box>
+      </Box>
 
-        {/* Login Form */}
-        <div className="col-md-6">
-          <div className="text-center">
-            <span className="text-muted">Login as</span>
-          </div>
+      {/* Form Section */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#fff",
+          py: isMobile ? 4 : 8,
+          px: isMobile ? 2 : 4,
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{ width: "100%", maxWidth: 400, p: isMobile ? 2 : 4 }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              fontFamily: "Montserrat, sans-serif",
+              fontWeight: 600,
+              mb: 2,
+              textAlign: isMobile ? "center" : "left",
+            }}
+          >
+            Login to your account
+          </Typography>
 
-          <div className="d-flex gap-3 mt-2 mb-2">
-            <button
-              onClick={(e) => handleOnclickRole(e)}
-              type="button"
-              id="candidate"
-              className="btn btn-primary w-50"
+          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            <Button
+              fullWidth
+              variant={role === "candidate" ? "contained" : "outlined"}
+              onClick={() => setRole("candidate")}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                bgcolor: role === "candidate" ? "#0E3A62" : "white",
+                color: role === "candidate" ? "white" : "#0E3A62",
+              }}
             >
               Candidate
-            </button>
-            <button
-              onClick={(e) => handleOnclickRole(e)}
-              type="button"
-              className="btn btn-secondary w-50"
-              id="employer"
+            </Button>
+            <Button
+              fullWidth
+              variant={role === "employer" ? "contained" : "outlined"}
+              onClick={() => setRole("employer")}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                bgcolor: role === "employer" ? "#0E3A62" : "white",
+                color: role === "employer" ? "white" : "#0E3A62",
+              }}
             >
               Employer
-            </button>
-          </div>
-
-          {/* <div className="btn-group gap-4 text-center" >
-            <input type="radio" className="btn-check" name="btnradio" id="btnradio1" autocomplete="off" 
-            onChange={(e) => setRole(e.target.value)}
-            value="candidate" /> 
-            <label className="btn btn-outline-primary" for="btnradio1">Candidate</label>
-
-            <input type="radio" className="btn-check" name="btnradio" id="btnradio2" autocomplete="off"
-            onChange={(e) => setRole(e.target.value)}
-            value="employer" />
-            <label className="btn btn-outline-primary" for="btnradio2">Employeer</label>
-          </div> */}
+            </Button>
+          </Box>
 
           <form onSubmit={handleEmailLogin}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                className="form-control"
-                name="email"
-                id="email"
-                placeholder="Email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            <TextField
+              type="email"
+              label="Email"
+              fullWidth
+              variant="outlined"
+              margin="dense"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <TextField
+              type="password"
+              label="Password"
+              fullWidth
+              variant="outlined"
+              margin="dense"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                className="form-control"
-                id="password"
-                placeholder="Password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <div className="text-end" onClick={handleForgotPasswordClick}>
-                <span>I forgot my password</span>
-              </div>
-            </div>
-
-            <div>
-              <input type="submit" className="form-control" value="Login" />
-            </div>
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              sx={{
+                mt: 2,
+                bgcolor: "#0E3A62",
+                borderRadius: "12px",
+                textTransform: "none",
+                py: 1.2,
+              }}
+            >
+              Login
+            </Button>
           </form>
 
-          {/* -----or------------ */}
-          <div className="d-flex align-items-center my-4">
-            <hr className="flex-grow-1" />
-            <span className="mx-3 text-muted">or</span>
-            <hr className="flex-grow-1" />
-          </div>
+          <Typography
+            variant="body2"
+            onClick={() => navigate("/recover-password")}
+            sx={{
+              mt: 1.5,
+              textAlign: "right",
+              color: "#0E3A62",
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            Forgot your password?
+          </Typography>
 
-          <div>
-            {/* <button>Continue with LinkedIn</button> */}
-            <button onClick={handleGoogleLogin} className="form-control">
-              Continue with Google
-            </button>
-          </div>
-          <div className="text-center" onClick={handleSignupClick}>
-            <a href="#">Are you new? Create an Account</a>
-          </div>
-        </div>
-      </div>
-    </div>
+          <Box sx={{ my: 2, textAlign: "center", color: "#888" }}>or</Box>
+
+          <Button
+            fullWidth
+            onClick={handleGoogleLogin}
+            variant="outlined"
+            sx={{
+              borderRadius: "12px",
+              textTransform: "none",
+              fontWeight: 500,
+            }}
+          >
+            Continue with Google
+          </Button>
+
+          {responseMessage && (
+            <Typography
+              variant="body2"
+              sx={{ mt: 2, color: "red", textAlign: "center" }}
+            >
+              {responseMessage}
+            </Typography>
+          )}
+
+          <Typography
+            variant="body2"
+            sx={{ mt: 3, textAlign: "center", cursor: "pointer" }}
+            onClick={() => navigate("/signup")}
+          >
+            New here?{" "}
+            <span style={{ color: "#0E3A62", fontWeight: 600 }}>
+              Create an account
+            </span>
+          </Typography>
+        </Paper>
+      </Box>
+
+      {/* Right Panel */}
+      <Box
+        sx={{
+          flex: 1,
+          bgcolor: "#0E3A62",
+          color: "white",
+          display: isMobile ? "none" : "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 4,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 500,
+            textAlign: "center",
+          }}
+        >
+          Welcome to FitFound
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            maxWidth: 400,
+            textAlign: "center",
+            fontFamily: "Figtree, sans-serif",
+          }}
+        >
+          Your smarter path to finding opportunities and the right candidates.
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 
 export default Login;
-
-/*
-TODO: 
-1. Redirect to the fill profile page
-
-*/

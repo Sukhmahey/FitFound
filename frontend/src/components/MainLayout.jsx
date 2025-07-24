@@ -62,7 +62,7 @@ const MainLayout = () => {
             </Box>
 
             <Box sx={{ borderTop: "1px solid #eee", pb: isMobile ? 8 : 2 }}>
-              <Footer />
+              {/* <Footer /> */}
             </Box>
           </Box>
 

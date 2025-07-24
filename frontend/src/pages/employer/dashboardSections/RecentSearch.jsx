@@ -51,19 +51,14 @@ const RecentSearch = () => {
       .then((result) => {
         const candidateIds = result.data.topMatchedCandidates;
         setJob(result.data);
-
         return Promise.all(
           candidateIds.map((id) =>
             candidateApi.getProfileById(id).then((result) => result.data)
           )
         );
       })
-      .then((result) => {
-        setCandidates(result);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      .then(setCandidates)
+      .catch(console.error);
   }, []);
 
   const handleViewDetails = (candidate) => {
@@ -110,6 +105,7 @@ const RecentSearch = () => {
         {candidates.length > 0 ? (
           candidates.map((candidate) => {
             const { firstName, lastName } = candidate?.personalInfo || {};
+
             return (
               <Box
                 key={candidate._id}
@@ -119,110 +115,78 @@ const RecentSearch = () => {
                   boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
                   p: 3,
                   bgcolor: secondaryColor,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <Avatar
-                    src="https://via.placeholder.com/40"
-                    sx={{ width: 56, height: 56 }}
-                  />
-
-                  <Box>
-                    <Typography
-                      sx={{
-                        fontFamily: "Montserrat, sans-serif",
-                        fontWeight: 600,
-                        fontSize: 16,
-                        color: primaryColor,
-                      }}
-                    >
-                      {censorName(firstName, lastName)}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 2,
-                        mb: 1,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="flex-start"
+                  flexWrap="wrap"
+                  mb={2}
+                >
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Avatar
+                      src="https://via.placeholder.com/40"
+                      sx={{ width: 56, height: 56 }}
+                    />
+                    <Box>
+                      <Typography
+                        sx={{
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: 600,
+                          fontSize: 16,
+                          color: primaryColor,
+                        }}
                       >
-                        <LocationOn
-                          sx={{ fontSize: 16, color: primaryColor }}
-                        />
-                        <Typography
-                          sx={{
-                            fontFamily: "Figtree, sans-serif",
-                            fontSize: 13,
-                            color: "#555",
-                          }}
-                        >
-                          {job.location}
-                        </Typography>
-                      </Box>
+                        {censorName(firstName, lastName)}
+                      </Typography>
                       <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                          flexWrap: "wrap",
+                        }}
                       >
-                        <AttachMoney
-                          sx={{ fontSize: 16, color: primaryColor }}
-                        />
-                        <Typography
-                          sx={{
-                            fontFamily: "Figtree, sans-serif",
-                            fontSize: 13,
-                            color: "#555",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {`${job.salaryRange?.min || ""}${
-                            job.salaryRange?.perHour ? "CAD" : "K CAD"
-                          } - ${job.salaryRange?.max || ""}${
-                            job.salaryRange?.perHour ? "CAD" : "K CAD"
-                          } ${
-                            job.salaryRange?.perHour ? "Per Hour" : "Per Year"
-                          }`}
-                        </Typography>
+                        <Box display="flex" alignItems="center" gap={0.5}>
+                          <LocationOn
+                            sx={{ fontSize: 16, color: primaryColor }}
+                          />
+                          <Typography
+                            sx={{
+                              fontFamily: "Figtree, sans-serif",
+                              fontSize: 13,
+                              color: "#555",
+                            }}
+                          >
+                            {job.location}
+                          </Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center" gap={0}>
+                          <AttachMoney
+                            sx={{ fontSize: 16, color: primaryColor }}
+                          />
+                          <Typography
+                            sx={{
+                              fontFamily: "Figtree, sans-serif",
+                              fontSize: 13,
+                              color: "#555",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {`${job.salaryRange?.min || ""}${
+                              job.salaryRange?.perHour ? "CAD" : "K CAD"
+                            } - ${job.salaryRange?.max || ""}${
+                              job.salaryRange?.perHour ? "CAD" : "K CAD"
+                            } ${
+                              job.salaryRange?.perHour ? "Per Hour" : "Per Year"
+                            }`}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-
-                    <Box
-                      sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}
-                    >
-                      {candidate.skills && candidate.skills.length > 0
-                        ? candidate.skills.map((skill, idx) => (
-                            <Chip
-                              key={skill._id}
-                              label={skill.skill}
-                              size="small"
-                              sx={{
-                                fontFamily: "Figtree, sans-serif",
-                                bgcolor: skillColors[idx % skillColors.length],
-                                color: primaryColor,
-                              }}
-                            />
-                          ))
-                        : "No skills"}
                     </Box>
                   </Box>
-                </Box>
 
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                    gap: 1,
-                    mt: { xs: 2, md: 0 },
-                  }}
-                >
                   <Button
                     size="small"
                     variant="text"
@@ -230,12 +194,35 @@ const RecentSearch = () => {
                     sx={{
                       fontFamily: "Figtree, sans-serif",
                       textTransform: "none",
-                      fontSize: 12,
+                      fontSize: 13,
                       color: primaryColor,
+                      mt: { xs: 2, sm: 0 },
+                      alignSelf: "flex-start",
+                      "&:hover": {
+                        textDecoration: "underline",
+                        backgroundColor: "transparent",
+                      },
                     }}
                   >
                     More Details
                   </Button>
+                </Box>
+
+                <Box mt={1} display="flex" flexWrap="wrap" gap={1}>
+                  {candidate.skills?.length > 0
+                    ? candidate.skills.map((skill, idx) => (
+                        <Chip
+                          key={skill._id}
+                          label={skill.skill}
+                          size="small"
+                          sx={{
+                            fontFamily: "Figtree, sans-serif",
+                            bgcolor: skillColors[idx % skillColors.length],
+                            color: primaryColor,
+                          }}
+                        />
+                      ))
+                    : "No skills"}
                 </Box>
               </Box>
             );

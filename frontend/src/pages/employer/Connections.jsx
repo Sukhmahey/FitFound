@@ -116,27 +116,34 @@ const Connections = () => {
         onChange={handleTabChange}
         variant="scrollable"
         scrollButtons="auto"
-        orientation={isMobile ? "vertical" : "horizontal"}
+        orientation="horizontal"
+        allowScrollButtonsMobile
         sx={{
           mb: 2,
-          ".MuiTab-root": {
+          maxWidth: "100%",
+          overflowX: "auto",
+          "& .MuiTabs-flexContainer": {
+            flexWrap: "nowrap",
+          },
+          "& .MuiTab-root": {
             fontFamily: "Montserrat, sans-serif",
             fontWeight: 600,
             textTransform: "none",
             color: "#333",
-            minWidth: isMobile ? "100%" : "auto",
+            whiteSpace: "nowrap",
+            minWidth: 120,
           },
-          ".Mui-selected": {
+          "& .Mui-selected": {
             color: primaryColor + " !important",
           },
-          ".MuiTabs-indicator": {
+          "& .MuiTabs-indicator": {
             backgroundColor: primaryColor,
           },
         }}
       >
-        <Tab label="Current Employees" />
-        <Tab label="Accepted Invitations" />
-        <Tab label="Tasks / Requests" />
+        <Tab label={isMobile ? "Employees" : "Current Employees"} />
+        <Tab label={isMobile ? "Invites" : "Accepted Invitations"} />
+        <Tab label={isMobile ? "Tasks" : "Tasks / Requests"} />
       </Tabs>
 
       <TextField

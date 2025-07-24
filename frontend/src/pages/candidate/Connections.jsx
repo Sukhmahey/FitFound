@@ -16,9 +16,11 @@ import {
   Tabs,
   Tab,
   InputAdornment,
+  useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
+import { useTheme } from "@mui/material/styles";
 
 import { candidateApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
@@ -41,6 +43,9 @@ const Connections = () => {
   const { user } = useAuth();
   const userId = user?.profileId;
   const { setAppGeneralInfo } = useContext(AppInfoContext);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     setAppGeneralInfo({ pageTitle: "Connections" });
@@ -230,25 +235,34 @@ const Connections = () => {
         onChange={handleTabChange}
         variant="scrollable"
         scrollButtons="auto"
+        allowScrollButtonsMobile
+        orientation="horizontal"
         sx={{
           mb: 2,
-          ".MuiTab-root": {
+          maxWidth: "100%",
+          overflowX: "auto",
+          "& .MuiTabs-flexContainer": {
+            flexWrap: "nowrap",
+          },
+          "& .MuiTab-root": {
             fontFamily: "Montserrat, sans-serif",
             fontWeight: 600,
             textTransform: "none",
             color: "#333",
+            whiteSpace: "nowrap",
+            minWidth: 100,
           },
-          ".Mui-selected": {
+          "& .Mui-selected": {
             color: primaryColor + " !important",
           },
-          ".MuiTabs-indicator": {
+          "& .MuiTabs-indicator": {
             backgroundColor: primaryColor,
           },
         }}
       >
-        <Tab label="Pending" />
-        <Tab label="Accepted" />
-        <Tab label="Archived" />
+        <Tab label={isMobile ? "Pending" : "Pending Invitations"} />
+        <Tab label={isMobile ? "Accepted" : "Accepted Connections"} />
+        <Tab label={isMobile ? "Archived" : "Archived Records"} />
       </Tabs>
 
       <Box mb={2}>
@@ -279,7 +293,6 @@ const Connections = () => {
         {renderCards(archived)}
       </TabPanel>
 
-      {/* Shared Modal */}
       <Dialog
         open={openModal}
         onClose={handleCloseModal}
@@ -308,7 +321,6 @@ const Connections = () => {
         <DialogContent dividers sx={{ fontFamily: "Figtree, sans-serif" }}>
           {selectedEmployer && (
             <Stack spacing={3}>
-              {/* Header */}
               <Stack direction="row" spacing={2} alignItems="center">
                 <Avatar
                   src={selectedEmployer?.contactInfo?.profilePicture}
@@ -331,7 +343,6 @@ const Connections = () => {
                 </Box>
               </Stack>
 
-              {/* Contact Info */}
               <Box>
                 <Typography
                   variant="subtitle2"
@@ -360,7 +371,6 @@ const Connections = () => {
                 </Stack>
               </Box>
 
-              {/* Company Info */}
               <Box>
                 <Typography
                   variant="subtitle2"
