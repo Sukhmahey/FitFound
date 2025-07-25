@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
-import { auth } from "../../services/firebase";
-import { userApi } from "../../services/api";
+import { auth, provider, signInWithPopup } from "../../services/firebase";
+import { userApi, loginApi } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   Button,
@@ -27,6 +27,44 @@ const Signup = () => {
   const { login } = useAuth();
 
   const isMobile = useMediaQuery("(max-width:600px)");
+
+  const handleGoogleLogin = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => result.user.getIdToken())
+      .then((idToken) => loginApi.loginUser({ idToken }))
+      .then((res) =>
+        userApi
+          .getUserByEmail({ email: res.data.decodedidToken.email })
+          .then((result) => {
+            if (!result.data.userId) {
+              const newUser = {
+                role,
+                email: res.data.decodedidToken.email,
+                idFirebaseUser: res.data.decodedidToken.uid,
+              };
+
+              return userApi.addUser(newUser).then((newRes) => {
+                login(newRes.data);
+                navigate(
+                  newRes.data.role === "candidate"
+                    ? "/candidate/onboarding"
+                    : "/employer/dashboard"
+                );
+              });
+            } else {
+              login(result.data);
+              navigate(
+                result.data.role === "candidate"
+                  ? "/candidate/dashboard"
+                  : "/employer/dashboard"
+              );
+            }
+          })
+      )
+      .catch((err) => {
+        console.error("Google login error:", err);
+      });
+  };
 
   const handleSignUpClick = (e) => {
     e.preventDefault();
@@ -224,6 +262,25 @@ const Signup = () => {
               Sign up
             </Button>
           </form>
+
+          {role === 'candidate' && (
+            <>
+              <Box sx={{ my: 2, textAlign: "center", color: "#888" }}>or</Box>
+
+              <Button
+                fullWidth
+                onClick={handleGoogleLogin}
+                variant="outlined"
+                sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontWeight: 500,
+                }}
+              >
+                Continue with Google
+              </Button>
+            </>
+           )}
 
           {responseMessage && (
             <Typography
