@@ -240,21 +240,23 @@ const Login = () => {
             Forgot your password?
           </Typography>
 
-          <Box sx={{ my: 2, textAlign: "center", color: "#888" }}>or</Box>
-
-          <Button
-            fullWidth
-            onClick={handleGoogleLogin}
-            variant="outlined"
-            sx={{
-              borderRadius: "12px",
-              textTransform: "none",
-              fontWeight: 500,
-            }}
-          >
-            Continue with Google
-          </Button>
-
+          {role === 'candidate' && (
+            <>
+              <Box sx={{ my: 2, textAlign: "center", color: "#888" }}>or</Box>
+              <Button
+                fullWidth
+                onClick={handleGoogleLogin}
+                variant="outlined"
+                sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontWeight: 500,
+                }}
+              >
+                Continue with Google
+              </Button>
+            </>
+           )}
           {responseMessage && (
             <Typography
               variant="body2"
