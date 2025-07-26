@@ -110,11 +110,11 @@ function ContactSection() {
                     >
                         <div className="envelope">
                             <div className="paper">
-                                <img src={qrSrc} alt="QR Code" />
+                                <a href="https://linktr.ee/FitFound" target='_blank' style={{display:'contents'}}><img src={qrSrc} alt="QR Code" /></a>
                             </div>
                         </div>
                         <Typography mt={2} fontWeight="bold" textAlign="center">
-                            Scan to explore more
+                            All our links in one place
                         </Typography>
                     </Box>
 
