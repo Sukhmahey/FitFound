@@ -5,6 +5,9 @@ import TextareaAutosize from '@mui/material/TextareaAutosize';
 import Button from '@mui/material/Button';
 import { Box, Typography } from '@mui/material';
 import qrSrc from '../../assets/qr-code.png'
+import Snackbar from "@mui/material/Snackbar";
+
+
 
 
 function ContactSection() {
@@ -13,6 +16,9 @@ function ContactSection() {
         subject: '',
         message: '',
     });
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
 
 
     const GOOGLE_FORM_ENTRY_IDS = {
@@ -50,8 +56,9 @@ function ContactSection() {
                 mode: 'no-cors',
                 body: dataToSend,
             });
+            setSnackbarMessage('Message sent successfully!');
+            setSnackbarOpen(true);
 
-            alert('Message sent successfully!');
             setFormData({
                 email: '',
                 subject: '',
@@ -60,13 +67,15 @@ function ContactSection() {
 
         } catch (error) {
             console.error('Error submitting form:', error);
-            alert('Failed to send message. Please try again.');
+            setSnackbarMessage('Failed to send message. Please try again.');
+            setSnackbarOpen(true);
         }
     };
 
 
     return (
         <>
+
 
             <Box
                 id="contact"
@@ -75,7 +84,7 @@ function ContactSection() {
                     margin: '5rem auto',
                     px: { xs: 2, md: 4 },
                     py: { xs: 4, md: 6 },
-                    
+
                 }}
             >
                 <Box
@@ -187,6 +196,12 @@ function ContactSection() {
 
                 </Box>
             </Box>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                message={snackbarMessage}
+            />
 
         </>
     );

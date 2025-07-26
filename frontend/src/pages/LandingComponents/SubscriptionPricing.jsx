@@ -63,8 +63,8 @@ const candidatePlans = [
     description: 'Accelerate your job search.',
     features: [
       'Receive & Respond to Invitations',
-      'Premium Profile Badge',
-      'AI Resume/Profile Review'
+      'Job Verification Badge',
+      'AI Insights & Recommendations'
     ]
   }
 ];

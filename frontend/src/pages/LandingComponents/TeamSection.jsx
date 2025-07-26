@@ -16,7 +16,7 @@ function TeamSection() {
       name: 'Sukhbir Singh',
       position: 'Project Manager',
       image: member1Img,
-      linkedin: 'https://www.linkedin.com/in/sukhbir-singh-7a3a3',
+      linkedin: 'https://www.linkedin.com/in/sukhbir-singh-482539191/',
       github: 'https://github.com/Sukhmahey'
     },
     {
@@ -51,6 +51,7 @@ function TeamSection() {
 
   return (
     <div className="container py-5 my-5" id="team">
+      
       <div className="text-center mb-5">
         <h2 className="fw-bold">Meet the Brains</h2>
         <p className="text-muted">We’re not just building a product, we’re solving a problem we’ve faced ourselves.</p>

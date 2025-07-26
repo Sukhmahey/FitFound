@@ -13,7 +13,9 @@ export default function HeroSection() {
             <p className="hero-subtitle">
               FitFound is a job-matching web application designed to flip the traditional hiring model, enabling employers to find candidates, not the other way around. This platform empowers both employers and job seekers with a more transparent, efficient, and effective hiring experience.
             </p>
-            <Button className='btn btn-primary' variant='contained' sx={{alignSelf:"center", backgroundColor:"#0E3A62" , color:"white"}}>Download Proposal</Button>
+            <Button className='btn btn-primary' variant='contained' sx={{alignSelf:"center", backgroundColor:"#0E3A62" , color:"white"}} onClick={()=>{
+              window.open("https://drive.google.com/drive/folders/1r33pVJzY5Ey2TyJz5B1LvZusSJNRCPIQ?usp=drive_link","_blank")
+            }}>Download Proposal</Button>
           </div>
 
           
