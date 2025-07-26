@@ -29,6 +29,8 @@ import {
   updatePassword,
 } from "firebase/auth";
 import SubscriptionSelector from "./settingsComponents/SubscriptionSelector";
+import NotificationPermission from './settingsComponents/NotificationPermission';
+
 
 export default function SettingsPage() {
   const theme = useTheme();
@@ -95,7 +97,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 5 }}>
+    <Container maxWidth="md" sx={{ py: 5 }}>
       <Box mb={4}>
         <Typography variant="h5" fontWeight={700} mb={1}>
           Account Settings
@@ -155,26 +157,7 @@ export default function SettingsPage() {
       )}
 
       <Box mb={4}>
-        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-          Notifications
-        </Typography>
-        <Card
-          variant="outlined"
-          sx={{
-            p: 2,
-            borderRadius: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography variant="body2">Receive updates and alerts</Typography>
-          <Switch
-            size="small"
-            checked={notificationsEnabled}
-            onChange={handleToggleNotification}
-          />
-        </Card>
+        <NotificationPermission/>
       </Box>
 
       <Box textAlign="center">
