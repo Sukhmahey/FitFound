@@ -110,7 +110,7 @@ function ContactSection() {
                     >
                         <div className="envelope">
                             <div className="paper">
-                                <a href="https://linktr.ee/FitFound" target='_blank' style={{display:'contents'}}><img src={qrSrc} alt="QR Code" /></a>
+                                <a href="https://hitinsachdeva161.github.io/FitFoundLinks/" target='_blank' style={{display:'contents'}}><img src={qrSrc} alt="QR Code" /></a>
                             </div>
                         </div>
                         <Typography mt={2} fontWeight="bold" textAlign="center">
