@@ -210,18 +210,26 @@ const RecentSearch = () => {
 
                 <Box mt={1} display="flex" flexWrap="wrap" gap={1}>
                   {candidate.skills?.length > 0
-                    ? candidate.skills.map((skill, idx) => (
-                        <Chip
-                          key={skill._id}
-                          label={skill.skill}
-                          size="small"
-                          sx={{
-                            fontFamily: "Figtree, sans-serif",
-                            bgcolor: skillColors[idx % skillColors.length],
-                            color: primaryColor,
-                          }}
-                        />
-                      ))
+                    ? candidate.skills.map((skill, idx) => {
+                        const label =
+                          typeof skill === "string" ? skill : skill.skill;
+                        const key =
+                          typeof skill === "string"
+                            ? `${label}-${idx}`
+                            : skill._id || `${label}-${idx}`;
+                        return (
+                          <Chip
+                            key={key}
+                            label={label}
+                            size="small"
+                            sx={{
+                              fontFamily: "Figtree, sans-serif",
+                              bgcolor: skillColors[idx % skillColors.length],
+                              color: primaryColor,
+                            }}
+                          />
+                        );
+                      })
                     : "No skills"}
                 </Box>
               </Box>

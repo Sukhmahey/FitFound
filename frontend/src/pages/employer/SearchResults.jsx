@@ -352,14 +352,21 @@ const CandidateDetailsModal = ({ open, handleClose, candidate }) => {
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, my: 1 }}>
           {candidate.skills?.length > 0 ? (
-            candidate.skills.map((s) => (
-              <Chip
-                key={s._id}
-                label={s.skill}
-                sx={{ color: PRIMARY_COLOR, borderColor: PRIMARY_COLOR }}
-                variant="outlined"
-              />
-            ))
+            candidate.skills.map((s, idx) => {
+              const label = typeof s === "string" ? s : s.skill;
+              const key =
+                typeof s === "string"
+                  ? `${label}-${idx}`
+                  : s._id || `${label}-${idx}`;
+              return (
+                <Chip
+                  key={key}
+                  label={label}
+                  sx={{ color: PRIMARY_COLOR, borderColor: PRIMARY_COLOR }}
+                  variant="outlined"
+                />
+              );
+            })
           ) : (
             <Typography variant="body2">No skills listed.</Typography>
           )}

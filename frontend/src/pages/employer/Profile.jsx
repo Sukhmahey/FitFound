@@ -163,6 +163,12 @@ const EmployerProfile = () => {
 
 
       if (data.companyLogo instanceof File) {
+        if (!supabase) {
+          setSnackMessage("Supabase is not configured. Please add REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY to your .env file");
+          setSnackSeverity("error");
+          setSnackOpen(true);
+          return;
+        }
         const safeName = `${userId}-${Date.now()}-${data.companyLogo.name}`;
         const filePath = `logo/${safeName}`;
 
@@ -211,6 +217,12 @@ const EmployerProfile = () => {
 
      
       if (data.profilePicture instanceof File) {
+        if (!supabase) {
+          setSnackMessage("Supabase is not configured. Please add REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY to your .env file");
+          setSnackSeverity("error");
+          setSnackOpen(true);
+          return;
+        }
         const safeName = `${userId}-profile-${Date.now()}-${data.profilePicture.name}`;
         const filePath = `profile-picture/${safeName}`;
 

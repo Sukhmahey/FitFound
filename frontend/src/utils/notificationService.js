@@ -3,12 +3,14 @@ import { useNotification } from '../contexts/NotificationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { notificationApi } from '../services/notificationApi';
 
+const DUMMY_MODE = process.env.REACT_APP_DUMMY_MODE === "true";
+
 const useNotify = () => {
   const { isMuted } = useNotification();
   const { user } = useAuth();
 
   const sendToDB = async (type, msg) => {
-    if (!user?.userId) return;
+    if (!user?.userId || DUMMY_MODE) return;
     try {
        await notificationApi.create({
         userId: user.userId,

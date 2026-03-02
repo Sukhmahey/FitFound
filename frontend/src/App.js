@@ -23,14 +23,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NotificationList from "./pages/NotificationList";
 import Insights from "./pages/candidate/Insights";
-import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
     <>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
          <Route path="/recover-password" element={<RecoverPassword />} />

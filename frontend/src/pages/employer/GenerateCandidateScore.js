@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = "AIzaSyCTGrxYxiZVDtbLMpBoE_S36Ca15pBF6vI"; // Your Gemini API key
+// For a pure demo/dummy experience you can leave API_KEY empty to skip Gemini calls
+const API_KEY = ""; // Put your Gemini API key here only if you want real AI scoring
 
 // Initialize Gemini Model
 const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
@@ -35,11 +36,15 @@ const formatEducation = (education) => {
 
 export const scoreCandidates = async (candidateArray, jobDescription) => {
   if (!model) {
-    console.error("Gemini API model not initialized. Check API key.");
+    console.warn(
+      "Gemini API model not initialized. Using existing candidate scores for demo."
+    );
     return candidateArray.map((candidate) => ({
       ...candidate,
-      matchingScore: null,
-      reasoning: "Gemini API not initialized due to missing API key.",
+      // Keep any existing score (for dummy/mock mode) and just add a generic note
+      score: candidate.score ?? 0,
+      reasoning:
+        "Demo scoring only: Gemini API not initialized, using predefined scores.",
     }));
   }
 
@@ -178,15 +183,13 @@ Reasoning: [Your Reasoning Here]
       );
       scoredCandidates.push({
         ...candidate,
-        matchingScore: null,
-        reasoning: `Error processing candidate: ${error.message}`,
+        score: candidate.score ?? 0,
+        reasoning: `Error processing candidate: ${error.message}. Using predefined score instead.`,
       });
     }
   }
 
-  scoredCandidates.sort(
-    (a, b) => (b.matchingScore || 0) - (a.matchingScore || 0)
-  );
+  scoredCandidates.sort((a, b) => (b.score || 0) - (a.score || 0));
 
   return scoredCandidates;
 };

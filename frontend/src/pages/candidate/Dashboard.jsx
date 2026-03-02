@@ -224,11 +224,60 @@ export default function CandidateDashboard() {
         />
       </Box>
 
+      {/* Career Snapshot */}
+      <Paper
+        elevation={2}
+        sx={{
+          p: 3,
+          mb: 4,
+          borderRadius: 3,
+        }}
+      >
+        <Typography
+          sx={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 600,
+            mb: 1,
+            color: primaryColor,
+          }}
+        >
+          Career snapshot
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            fontFamily: "Figtree, sans-serif",
+            mb: 2,
+            color: "#555",
+          }}
+        >
+          Here’s a quick view of your current profile and target role based on
+          your latest data.
+        </Typography>
+
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          {desiredJobRole && (
+            <Chip
+              label={`Target role: ${desiredJobRole}`}
+              color="primary"
+              sx={{ mb: 1 }}
+            />
+          )}
+          {alreadySkills.slice(0, 5).map((skill) => (
+            <Chip
+              key={skill}
+              label={skill}
+              variant="outlined"
+              sx={{ mb: 1 }}
+            />
+          ))}
+        </Stack>
+      </Paper>
+
       <TrendingKeywordsSection
         suggestedSkills={suggestedSkills}
         alreadySkills={alreadySkills}
         onAddSkill={handleAddSkill}
-
       />
 
       <Box sx={{ mt: 4 }}>

@@ -22,7 +22,7 @@ import logo from "../../assets/logo-blue.svg";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loginAsGuest } = useAuth();
 
   const isMobile = useMediaQuery("(max-width:600px)");
   const [role, setRole] = useState("candidate");
@@ -106,6 +106,12 @@ const Login = () => {
       .catch((err) => {
         console.error("Google login error:", err);
       });
+  };
+
+  const handleGuestLogin = () => {
+    // Simple guest flow: mark as guest and go to employer dashboard
+    loginAsGuest();
+    navigate("/employer/dashboard");
   };
 
   return (
@@ -257,6 +263,19 @@ const Login = () => {
               </Button>
             </>
            )}
+          <Box sx={{ my: 2, textAlign: "center", color: "#888" }}>or</Box>
+          <Button
+            fullWidth
+            onClick={handleGuestLogin}
+            variant="text"
+            sx={{
+              textTransform: "none",
+              fontWeight: 500,
+              color: "#0E3A62",
+            }}
+          >
+            Continue as Guest
+          </Button>
           {responseMessage && (
             <Typography
               variant="body2"

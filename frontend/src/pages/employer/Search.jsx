@@ -43,15 +43,16 @@ const Search = () => {
   const [snackSeverity, setSnackSeverity] = useState("error");
 
   const [searchQuery, setSearchQuery] = useState({
-    title: "",
-    location: "",
-    jobDescription: "",
-    jobType: "",
-    salaryFrom: "",
-    salaryTo: "", // Keep this for the UI and the jobToSave object
-    workStatus: "",
-    skills: "",
-    locationType: "", // This will hold the single selected work environment type
+    title: "Frontend Developer",
+    location: "Toronto, Canada",
+    jobDescription:
+      "We are seeking a passionate and skilled Frontend Developer to join our team. In this role, you will build and maintain modern React-based user interfaces, collaborate with designers and backend engineers, and ensure our products are fast, accessible, and delightful to use. You will work with technologies like React, JavaScript, TypeScript, HTML, CSS, and related tooling. The ideal candidate has strong problem-solving skills, attention to detail, and experience working in agile product teams. You will be responsible for translating design mockups into reusable components, optimizing front-end performance, and maintaining high code quality standards through testing and reviews. This is a demo description used to showcase how FitFound presents candidate matches for a typical frontend role.",
+    jobType: "full-time",
+    salaryFrom: "50",
+    salaryTo: "80", // Keep this for the UI and the jobToSave object
+    workStatus: "workPermit",
+    skills: "React, JavaScript, TypeScript, HTML, CSS",
+    locationType: "remote", // This will hold the single selected work environment type
   });
 
   const { setAppGeneralInfo } = useContext(AppInfoContext);
@@ -343,9 +344,6 @@ If you are looking for a challenging and rewarding career as a ${prev.title}, we
                     setSelectedTitle(e.target.value);
                   }}
                 >
-                  const predefinedJobTitles = [ "frontend developer", "backend
-                  developer", "fullstack developer", "ux designer", "ui
-                  designer", ];
                   <MenuItem value={"frontend developer"}>
                     Frontend Developer
                   </MenuItem>

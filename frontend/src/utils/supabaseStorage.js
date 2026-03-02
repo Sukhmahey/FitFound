@@ -8,7 +8,11 @@ export const genericFiles = {
 
 // saving file in Supabase
 export const addFile = (filePath, file) => {
-    supabase.storage
+    if (!supabase) {
+        console.warn("Supabase is not configured. File upload skipped.");
+        return Promise.resolve({ error: new Error("Supabase not configured") });
+    }
+    return supabase.storage
     .from(bucket)
     .upload(filePath, file)
     .then(result => {
@@ -21,6 +25,10 @@ export const addFile = (filePath, file) => {
 
 // getting the file ulr
 export const getUlrFile = (filePath) => {
+    if (!supabase) {
+        console.warn("Supabase is not configured. Returning empty URL.");
+        return "";
+    }
     return supabase.storage
         .from(bucket)
         .getPublicUrl(filePath)
@@ -29,6 +37,10 @@ export const getUlrFile = (filePath) => {
 
 // updating the file
 export const updateFileByUrl = (fileUrl, newFile) => {
+    if (!supabase) {
+        console.warn("Supabase is not configured. File update skipped.");
+        return Promise.resolve({ error: new Error("Supabase not configured") });
+    }
     
     // updating the file
   const fullPath = fileUrl.split('/object/public/')[1];
